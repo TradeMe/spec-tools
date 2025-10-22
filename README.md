@@ -1,7 +1,7 @@
 # spec-tools
 
 [![CI](https://github.com/calvingiles/spec-tools/workflows/CI/badge.svg)](https://github.com/calvingiles/spec-tools/actions)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
 Tools for spec-driven development - a toolkit for managing and validating project specifications and files.
 
@@ -29,6 +29,28 @@ Key features:
 - Supports private URL patterns that are skipped during validation
 - Concurrent external URL checking for performance
 - Respects `.gitignore` patterns by default
+
+### Spec Coverage Validator
+
+The `check-coverage` tool ensures 100% traceability between specification requirements and tests.
+
+Key features:
+- Extracts requirement IDs from spec files (e.g., REQ-001, NFR-001)
+- Validates every requirement has at least one corresponding test
+- Reports coverage percentage and uncovered requirements
+- Uses pytest markers for machine-readable test-to-requirement linking
+- Identifies tests without requirement markers
+
+### Structure Validator
+
+The `check-structure` tool enforces consistent spec-to-test structure alignment.
+
+Key features:
+- Verifies each spec file has a corresponding test file or directory
+- Supports flexible naming conventions (kebab-case to snake_case)
+- Allows unit tests without corresponding specs
+- Reports specs without tests
+- Ensures consistent project organization
 
 ## Installation
 
@@ -171,6 +193,81 @@ http://127.0.0.1:
   run: spec-tools check-links --no-external  # Skip external URLs in CI
 ```
 
+### Check Coverage Command
+
+Ensure all spec requirements have corresponding tests:
+
+```bash
+# Check coverage in current directory
+spec-tools check-coverage
+
+# Check coverage in a specific directory
+spec-tools check-coverage /path/to/project
+
+# Use custom specs and tests directories
+spec-tools check-coverage --specs-dir my-specs --tests-dir my-tests
+```
+
+#### Marking Tests with Requirements
+
+Use pytest markers to link tests to requirements:
+
+```python
+import pytest
+
+@pytest.mark.req("REQ-001")
+def test_inline_link_parsing():
+    """Test that inline links are parsed correctly."""
+    # Test implementation
+    assert True
+
+# For tests covering multiple requirements:
+@pytest.mark.req("REQ-002", "REQ-003")
+def test_reference_style_links():
+    """Test reference-style link parsing."""
+    # Test implementation
+    assert True
+```
+
+#### CI/CD Integration
+
+```yaml
+# .github/workflows/ci.yml
+- name: Validate spec coverage
+  run: spec-tools check-coverage
+```
+
+### Check Structure Command
+
+Validate spec-to-test structure alignment:
+
+```bash
+# Check structure in current directory
+spec-tools check-structure
+
+# Check structure in a specific directory
+spec-tools check-structure /path/to/project
+
+# Use custom specs and tests directories
+spec-tools check-structure --specs-dir my-specs --tests-dir my-tests
+```
+
+#### Structure Conventions
+
+For a spec file `specs/feature-name.md`, the tool expects either:
+- `tests/test_feature_name.py` (single test file)
+- `tests/feature_name/` (test directory)
+
+This allows unit tests without corresponding specs while ensuring all specs have requirement tests.
+
+#### CI/CD Integration
+
+```yaml
+# .github/workflows/ci.yml
+- name: Validate spec structure
+  run: spec-tools check-structure
+```
+
 ## Pattern Syntax
 
 The allowlist uses gitignore-style glob patterns:
@@ -209,6 +306,9 @@ docs/design-*.md
 3. **CI/CD validation**: Automatically check that no unexpected files are committed
 4. **Documentation enforcement**: Ensure all code files have matching documentation
 5. **Naming convention enforcement**: Validate files follow naming standards
+6. **Test-to-requirement traceability**: Guarantee 100% requirement coverage with automated validation
+7. **Spec-driven development**: Enforce consistent spec-to-test structure for better maintainability
+8. **Documentation quality**: Ensure all links in documentation are valid and up-to-date
 
 ## Example: Research Paper Repository
 
@@ -266,9 +366,9 @@ flit build
 Future tools planned for spec-tools:
 
 - **spec-graph**: Visualize dependencies between spec files
-- **spec-check**: Validate spec file contents and structure
 - **spec-init**: Initialize new spec-driven projects
 - **spec-sync**: Keep specs in sync with implementation
+- **spec-extract**: Extract requirements from code comments into spec files
 
 ## Contributing
 

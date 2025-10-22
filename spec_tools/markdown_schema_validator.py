@@ -11,7 +11,6 @@ This module validates markdown files against a defined schema, checking:
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import pathspec
 
@@ -23,8 +22,8 @@ class HeadingNode:
     level: int
     text: str
     line_number: int
-    children: List["HeadingNode"] = field(default_factory=list)
-    body_lines: List[Tuple[int, str]] = field(default_factory=list)
+    children: list["HeadingNode"] = field(default_factory=list)
+    body_lines: list[tuple[int, str]] = field(default_factory=list)
 
 
 @dataclass
@@ -47,7 +46,7 @@ class SchemaValidationResult:
     total_files: int
     valid_files: int
     invalid_files: int
-    violations: List[SchemaViolation]
+    violations: list[SchemaViolation]
     markdown_files_checked: int
 
     @property
@@ -79,7 +78,7 @@ class MarkdownParser:
     METADATA_PATTERN = re.compile(r"^\*\*([^*]+)\*\*:\s*(.+)$")
 
     @staticmethod
-    def parse_file(file_path: Path) -> Tuple[Dict[str, str], List[HeadingNode]]:
+    def parse_file(file_path: Path) -> tuple[dict[str, str], list[HeadingNode]]:
         """Parse a markdown file into metadata and heading tree.
 
         Args:
@@ -90,7 +89,7 @@ class MarkdownParser:
         """
         metadata = {}
         headings = []
-        current_stack: List[HeadingNode] = []
+        current_stack: list[HeadingNode] = []
         metadata_section = False  # Track if we're in the metadata section after H1
         in_code_block = False  # Track if we're inside a code block
 
@@ -174,7 +173,7 @@ class MarkdownParser:
         return metadata, headings
 
     @staticmethod
-    def flatten_headings(headings: List[HeadingNode]) -> List[HeadingNode]:
+    def flatten_headings(headings: list[HeadingNode]) -> list[HeadingNode]:
         """Flatten heading tree into a list."""
         result = []
         for heading in headings:
@@ -224,7 +223,7 @@ class EARSValidator:
         return False
 
     @staticmethod
-    def validate_requirement(line_num: int, line: str, file_path: str) -> Optional[SchemaViolation]:
+    def validate_requirement(line_num: int, line: str, file_path: str) -> SchemaViolation | None:
         """Validate a requirement line follows EARS format.
 
         Args:
@@ -262,7 +261,7 @@ class MarkdownSchemaValidator:
     def __init__(
         self,
         root_dir: str = ".",
-        config_file: Optional[str] = None,
+        config_file: str | None = None,
         respect_gitignore: bool = True,
     ):
         """Initialize the markdown schema validator.
@@ -278,7 +277,7 @@ class MarkdownSchemaValidator:
         self.schema = self._load_schema()
         self.gitignore_spec = self._load_gitignore() if respect_gitignore else None
 
-    def _load_schema(self) -> Dict:
+    def _load_schema(self) -> dict:
         """Load schema configuration from file.
 
         Returns:
@@ -320,7 +319,7 @@ class MarkdownSchemaValidator:
         # TODO: Load from YAML file when implemented
         raise NotImplementedError("Custom schema config file loading not yet implemented")
 
-    def _load_gitignore(self) -> Optional[pathspec.PathSpec]:
+    def _load_gitignore(self) -> pathspec.PathSpec | None:
         """Load .gitignore patterns.
 
         Returns:
@@ -337,7 +336,7 @@ class MarkdownSchemaValidator:
         except Exception:
             return None
 
-    def get_markdown_files(self) -> List[Path]:
+    def get_markdown_files(self) -> list[Path]:
         """Get all markdown files matching the schema file patterns.
 
         Returns:
@@ -374,7 +373,7 @@ class MarkdownSchemaValidator:
 
         return sorted(matched_files)
 
-    def validate_metadata(self, metadata: Dict[str, str], file_path: Path) -> List[SchemaViolation]:
+    def validate_metadata(self, metadata: dict[str, str], file_path: Path) -> list[SchemaViolation]:
         """Validate metadata fields against schema.
 
         Args:
@@ -402,8 +401,8 @@ class MarkdownSchemaValidator:
         return violations
 
     def validate_headings(
-        self, headings: List[HeadingNode], file_path: Path
-    ) -> List[SchemaViolation]:
+        self, headings: list[HeadingNode], file_path: Path
+    ) -> list[SchemaViolation]:
         """Validate heading structure against schema.
 
         Args:
@@ -450,8 +449,8 @@ class MarkdownSchemaValidator:
         return violations
 
     def validate_ears_format(
-        self, headings: List[HeadingNode], file_path: Path
-    ) -> List[SchemaViolation]:
+        self, headings: list[HeadingNode], file_path: Path
+    ) -> list[SchemaViolation]:
         """Validate EARS format requirements in relevant sections.
 
         Args:
@@ -514,7 +513,7 @@ class MarkdownSchemaValidator:
 
         return violations
 
-    def validate_file(self, file_path: Path) -> List[SchemaViolation]:
+    def validate_file(self, file_path: Path) -> list[SchemaViolation]:
         """Validate a single markdown file against the schema.
 
         Args:
