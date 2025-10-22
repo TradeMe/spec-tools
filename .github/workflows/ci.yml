@@ -72,3 +72,8 @@ jobs:
       run: |
         source .venv/bin/activate
         ruff format --check spec_tools/ tests/
+
+    - name: Validate file allowlist
+      run: |
+        source .venv/bin/activate
+        spec-tools lint --verbose
