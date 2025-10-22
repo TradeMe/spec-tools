@@ -78,6 +78,58 @@ uv venv
 uv pip install -e ".[dev]"
 ```
 
+## Configuration
+
+spec-tools can be configured via `pyproject.toml` for seamless integration with Python projects. This allows you to set default options without needing to pass command-line arguments every time.
+
+### pyproject.toml Configuration
+
+Add a `[tool.spec-tools]` section to your `pyproject.toml`:
+
+```toml
+[tool.spec-tools.lint]
+allowlist = ".specallowlist"
+use_gitignore = true
+
+[tool.spec-tools.check-links]
+config = ".speclinkconfig"
+timeout = 15
+max_concurrent = 5
+check_external = true
+use_gitignore = true
+
+[tool.spec-tools.check-schema]
+config = ".specschemaconfig"
+use_gitignore = true
+```
+
+### Configuration Options
+
+#### Lint Command (`[tool.spec-tools.lint]`)
+- `allowlist` (string): Path to allowlist file (default: `.specallowlist`)
+- `use_gitignore` (boolean): Respect .gitignore patterns (default: `true`)
+
+#### Check Links Command (`[tool.spec-tools.check-links]`)
+- `config` (string): Path to config file for private URLs (default: `.speclinkconfig`)
+- `timeout` (integer): Timeout for external URL requests in seconds (default: `10`)
+- `max_concurrent` (integer): Maximum concurrent external URL requests (default: `10`)
+- `check_external` (boolean): Validate external URLs (default: `true`)
+- `use_gitignore` (boolean): Respect .gitignore patterns (default: `true`)
+
+#### Check Schema Command (`[tool.spec-tools.check-schema]`)
+- `config` (string): Path to schema config file (default: `.specschemaconfig`)
+- `use_gitignore` (boolean): Respect .gitignore patterns (default: `true`)
+
+### Configuration Precedence
+
+Configuration values are resolved in the following order (highest to lowest precedence):
+
+1. **Command-line arguments** (e.g., `--timeout 30`)
+2. **pyproject.toml configuration** (e.g., `timeout = 15` in `[tool.spec-tools.check-links]`)
+3. **Built-in defaults**
+
+This means you can set project defaults in `pyproject.toml` and override them on the command line when needed.
+
 ## Usage
 
 ### Lint Command

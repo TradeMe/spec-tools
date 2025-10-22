@@ -4,6 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from .config import load_config, merge_config_with_args
 from .linter import SpecLinter
 from .markdown_link_validator import MarkdownLinkValidator
 from .markdown_schema_validator import MarkdownSchemaValidator
@@ -21,10 +22,14 @@ def cmd_lint(args) -> int:
         Exit code (0 for success, 1 for failure).
     """
     try:
+        # Load config from pyproject.toml and merge with CLI args
+        config = load_config(Path(args.directory))
+        merged_config = merge_config_with_args(config, args, "lint")
+
         linter = SpecLinter(
             root_dir=Path(args.directory),
-            allowlist_file=args.allowlist,
-            use_gitignore=not args.no_gitignore,
+            allowlist_file=merged_config["allowlist_file"],
+            use_gitignore=merged_config["use_gitignore"],
         )
 
         # Run lint
@@ -62,13 +67,17 @@ def cmd_check_links(args) -> int:
         Exit code (0 for success, 1 for failure).
     """
     try:
+        # Load config from pyproject.toml and merge with CLI args
+        config = load_config(Path(args.directory))
+        merged_config = merge_config_with_args(config, args, "check-links")
+
         validator = MarkdownLinkValidator(
             root_dir=Path(args.directory),
-            config_file=args.config,
-            timeout=args.timeout,
-            max_concurrent=args.max_concurrent,
-            check_external=not args.no_external,
-            use_gitignore=not args.no_gitignore,
+            config_file=merged_config["config_file"],
+            timeout=merged_config["timeout"],
+            max_concurrent=merged_config["max_concurrent"],
+            check_external=merged_config["check_external"],
+            use_gitignore=merged_config["use_gitignore"],
         )
 
         # Run validation
@@ -167,10 +176,14 @@ def cmd_check_schema(args) -> int:
         Exit code (0 for success, 1 for failure).
     """
     try:
+        # Load config from pyproject.toml and merge with CLI args
+        config = load_config(Path(args.directory))
+        merged_config = merge_config_with_args(config, args, "check-schema")
+
         validator = MarkdownSchemaValidator(
             root_dir=Path(args.directory),
-            config_file=args.config,
-            respect_gitignore=not args.no_gitignore,
+            config_file=merged_config["config_file"],
+            respect_gitignore=merged_config["respect_gitignore"],
         )
 
         # Run validation
@@ -348,7 +361,7 @@ Link validation rules:
         "--timeout",
         "-t",
         type=int,
-        default=10,
+        default=None,
         help="Timeout for external URL requests in seconds (default: 10)",
     )
 
@@ -356,7 +369,7 @@ Link validation rules:
         "--max-concurrent",
         "-m",
         type=int,
-        default=10,
+        default=None,
         help="Maximum concurrent external URL requests (default: 10)",
     )
 

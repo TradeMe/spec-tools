@@ -14,6 +14,7 @@ authors = [
 ]
 dependencies = [
     "pathspec>=0.11.0",
+    "tomli>=2.0.0; python_version < '3.11'",
 ]
 
 [project.optional-dependencies]
@@ -27,6 +28,7 @@ dev = [
 spec-tools = "spec_tools.cli:main"
 spec-lint = "spec_tools.cli:main"
 
+# Ruff linter configuration
 [tool.ruff]
 line-length = 100
 target-version = "py310"
@@ -46,6 +48,7 @@ ignore = []
 [tool.ruff.lint.isort]
 known-first-party = ["spec_tools"]
 
+# Pytest configuration
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
@@ -54,3 +57,26 @@ python_functions = ["test_*"]
 markers = [
     "req: marks tests as linked to specific requirements (e.g., @pytest.mark.req('REQ-001'))"
 ]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["spec_tools"]
+omit = ["*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+# spec-tools configuration (dogfooding our own tool!)
+[tool.spec-tools.lint]
+allowlist = ".specallowlist"
+use_gitignore = true
+
+[tool.spec-tools.check-schema]
+use_gitignore = true
