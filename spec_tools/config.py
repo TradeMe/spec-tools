@@ -2,7 +2,7 @@
 
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Use tomllib for Python 3.11+, tomli for older versions
 if sys.version_info >= (3, 11):
@@ -17,7 +17,7 @@ else:
 class Config:
     """Configuration container for spec-tools settings."""
 
-    def __init__(self, config_dict: Optional[Dict[str, Any]] = None):
+    def __init__(self, config_dict: dict[str, Any] | None = None):
         """Initialize configuration.
 
         Args:
@@ -46,7 +46,7 @@ class Config:
                 return default
         return value
 
-    def get_lint_config(self) -> Dict[str, Any]:
+    def get_lint_config(self) -> dict[str, Any]:
         """Get lint-specific configuration.
 
         Returns:
@@ -54,7 +54,7 @@ class Config:
         """
         return self.get("lint", {})
 
-    def get_check_links_config(self) -> Dict[str, Any]:
+    def get_check_links_config(self) -> dict[str, Any]:
         """Get check-links-specific configuration.
 
         Returns:
@@ -62,7 +62,7 @@ class Config:
         """
         return self.get("check-links", {})
 
-    def get_check_schema_config(self) -> Dict[str, Any]:
+    def get_check_schema_config(self) -> dict[str, Any]:
         """Get check-schema-specific configuration.
 
         Returns:
@@ -71,7 +71,7 @@ class Config:
         return self.get("check-schema", {})
 
 
-def find_pyproject_toml(start_path: Optional[Path] = None) -> Optional[Path]:
+def find_pyproject_toml(start_path: Path | None = None) -> Path | None:
     """Find pyproject.toml by walking up the directory tree.
 
     Args:
@@ -101,7 +101,7 @@ def find_pyproject_toml(start_path: Optional[Path] = None) -> Optional[Path]:
     return None
 
 
-def load_config(root_dir: Optional[Path] = None) -> Config:
+def load_config(root_dir: Path | None = None) -> Config:
     """Load configuration from pyproject.toml.
 
     Args:
@@ -130,7 +130,7 @@ def load_config(root_dir: Optional[Path] = None) -> Config:
         return Config()
 
 
-def merge_config_with_args(config: Config, args: Any, command: str) -> Dict[str, Any]:
+def merge_config_with_args(config: Config, args: Any, command: str) -> dict[str, Any]:
     """Merge configuration from pyproject.toml with command-line arguments.
 
     Command-line arguments take precedence over pyproject.toml configuration.

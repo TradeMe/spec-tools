@@ -7,7 +7,7 @@ name = "spec-tools"
 version = "0.1.0"
 description = "Tools for spec-driven development"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "spec-tools contributors"}
@@ -31,7 +31,7 @@ spec-lint = "spec_tools.cli:main"
 # Ruff linter configuration
 [tool.ruff]
 line-length = 100
-target-version = "py38"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = [
@@ -54,6 +54,9 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+markers = [
+    "req: marks tests as linked to specific requirements (e.g., @pytest.mark.req('REQ-001'))"
+]
 
 # Coverage configuration
 [tool.coverage.run]
