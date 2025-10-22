@@ -1,7 +1,5 @@
 """Tests for the spec coverage linter."""
 
-
-
 from spec_tools.spec_coverage_linter import SpecCoverageLinter
 
 
@@ -114,7 +112,7 @@ class TestFeature:
         tests_dir = tmp_path / "tests"
         tests_dir.mkdir()
         (tests_dir / "test_feature.py").write_text(
-            '''import pytest
+            """import pytest
 
 @pytest.mark.req("REQ-001")
 def test_req_001():
@@ -123,7 +121,7 @@ def test_req_001():
 @pytest.mark.req("REQ-002")
 def test_req_002():
     assert True
-'''
+"""
         )
 
         linter = SpecCoverageLinter(root_dir=tmp_path)
@@ -152,12 +150,12 @@ def test_req_002():
         tests_dir = tmp_path / "tests"
         tests_dir.mkdir()
         (tests_dir / "test_feature.py").write_text(
-            '''import pytest
+            """import pytest
 
 @pytest.mark.req("REQ-001")
 def test_req_001():
     assert True
-'''
+"""
         )
 
         linter = SpecCoverageLinter(root_dir=tmp_path)
@@ -182,7 +180,7 @@ def test_req_001():
         tests_dir = tmp_path / "tests"
         tests_dir.mkdir()
         (tests_dir / "test_feature.py").write_text(
-            '''import pytest
+            """import pytest
 
 @pytest.mark.req("REQ-001")
 def test_marked():
@@ -190,7 +188,7 @@ def test_marked():
 
 def test_unmarked():
     assert True
-'''
+"""
         )
 
         linter = SpecCoverageLinter(root_dir=tmp_path)
@@ -213,12 +211,12 @@ def test_unmarked():
         tests_dir = tmp_path / "tests"
         tests_dir.mkdir()
         (tests_dir / "test_features.py").write_text(
-            '''import pytest
+            """import pytest
 
 @pytest.mark.req("REQ-001", "REQ-002")
 def test_both():
     assert True
-'''
+"""
         )
 
         linter = SpecCoverageLinter(root_dir=tmp_path)
@@ -239,7 +237,7 @@ def test_both():
         tests_dir = tmp_path / "tests"
         tests_dir.mkdir()
         (tests_dir / "test_feature.py").write_text(
-            '''import pytest
+            """import pytest
 
 @pytest.mark.req("REQ-001")
 def test_req_001_a():
@@ -248,7 +246,7 @@ def test_req_001_a():
 @pytest.mark.req("REQ-001")
 def test_req_001_b():
     assert True
-'''
+"""
         )
 
         linter = SpecCoverageLinter(root_dir=tmp_path)

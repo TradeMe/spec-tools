@@ -25,8 +25,7 @@ class StructureValidationResult:
         lines.append("=" * 60)
         lines.append(f"Specs with tests: {self.specs_with_tests}/{self.total_specs}")
         lines.append(
-            f"Test dirs/files with specs: {self.test_dirs_with_specs}/"
-            f"{self.total_test_dirs}"
+            f"Test dirs/files with specs: {self.test_dirs_with_specs}/{self.total_test_dirs}"
         )
         lines.append("")
 

@@ -28,12 +28,9 @@ class SpecCoverageResult:
         lines.append("SPEC COVERAGE REPORT")
         lines.append("=" * 60)
         lines.append(f"Coverage: {self.coverage_percentage:.1f}%")
+        lines.append(f"Requirements: {self.covered_requirements}/{self.total_requirements} covered")
         lines.append(
-            f"Requirements: {self.covered_requirements}/{self.total_requirements} covered"
-        )
-        lines.append(
-            f"Tests: {self.tests_with_requirements}/{self.total_tests} "
-            f"linked to requirements"
+            f"Tests: {self.tests_with_requirements}/{self.total_tests} linked to requirements"
         )
         lines.append("")
 
@@ -62,7 +59,7 @@ class SpecCoverageLinter:
     """Linter to validate that all spec requirements have corresponding tests."""
 
     # Pattern to match requirement IDs in spec files
-    REQ_PATTERN = re.compile(r'\*\*([A-Z]+-\d{3})\*\*:')
+    REQ_PATTERN = re.compile(r"\*\*([A-Z]+-\d{3})\*\*:")
 
     def __init__(
         self,
@@ -99,9 +96,7 @@ class SpecCoverageLinter:
 
         return requirements
 
-    def extract_requirements_from_tests(
-        self, test_file: Path
-    ) -> dict[str, list[str]]:
+    def extract_requirements_from_tests(self, test_file: Path) -> dict[str, list[str]]:
         """Extract requirement markers from test functions.
 
         Args:
@@ -252,9 +247,7 @@ class SpecCoverageLinter:
 
         # Find tests without requirement markers
         all_tests = self.get_all_tests()
-        tests_without_requirements = sorted(
-            set(all_tests) - set(test_to_requirements.keys())
-        )
+        tests_without_requirements = sorted(set(all_tests) - set(test_to_requirements.keys()))
 
         # Calculate coverage
         total_requirements = len(all_requirements)
