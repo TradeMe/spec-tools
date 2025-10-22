@@ -7,7 +7,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import pathspec
 
@@ -56,8 +56,7 @@ class LinkValidationResult:
             lines.append("\nInvalid links:")
             for detail in self.invalid_link_details:
                 lines.append(
-                    f"  - {detail['file']}:{detail['line']}: "
-                    f"{detail['url']} ({detail['reason']})"
+                    f"  - {detail['file']}:{detail['line']}: {detail['url']} ({detail['reason']})"
                 )
 
         return "\n".join(lines)
@@ -77,17 +76,13 @@ class MarkdownLinkValidator:
 
     # Regex patterns for finding markdown links
     # Matches: [text](url) and [text](url "title")
-    INLINE_LINK_PATTERN = re.compile(
-        r'\[([^\]]+)\]\(([^)"\s]+)(?:\s+"[^"]*")?\)', re.MULTILINE
-    )
+    INLINE_LINK_PATTERN = re.compile(r'\[([^\]]+)\]\(([^)"\s]+)(?:\s+"[^"]*")?\)', re.MULTILINE)
 
     # Matches reference-style links: [text][ref] or [text]
-    REFERENCE_LINK_PATTERN = re.compile(r'\[([^\]]+)\](?:\[([^\]]*)\])?', re.MULTILINE)
+    REFERENCE_LINK_PATTERN = re.compile(r"\[([^\]]+)\](?:\[([^\]]*)\])?", re.MULTILINE)
 
     # Matches reference definitions: [ref]: url
-    REFERENCE_DEF_PATTERN = re.compile(
-        r'^\[([^\]]+)\]:\s+(\S+)', re.MULTILINE
-    )
+    REFERENCE_DEF_PATTERN = re.compile(r"^\[([^\]]+)\]:\s+(\S+)", re.MULTILINE)
 
     def __init__(
         self,
@@ -152,9 +147,7 @@ class MarkdownLinkValidator:
 
         with open(gitignore_path) as f:
             patterns = [
-                line.strip()
-                for line in f
-                if line.strip() and not line.strip().startswith("#")
+                line.strip() for line in f if line.strip() and not line.strip().startswith("#")
             ]
 
         # Always ignore .git directory
@@ -219,8 +212,7 @@ class MarkdownLinkValidator:
         try:
             with open(full_path, encoding="utf-8") as f:
                 content = f.read()
-                lines = content.split("\n")
-        except (OSError, UnicodeDecodeError) as e:
+        except (OSError, UnicodeDecodeError):
             # Skip files that can't be read
             return links
 
@@ -237,7 +229,7 @@ class MarkdownLinkValidator:
             url = match.group(2)
 
             # Find line number
-            line_num = content[:match.start()].count("\n") + 1
+            line_num = content[: match.start()].count("\n") + 1
 
             # Parse URL and anchor
             parsed_url, anchor = self._parse_url_and_anchor(url)
@@ -416,9 +408,7 @@ class MarkdownLinkValidator:
 
         return heading
 
-    def validate_external_link(
-        self, link: Link, retries: int = 2
-    ) -> Tuple[bool, str]:
+    def validate_external_link(self, link: Link, retries: int = 2) -> Tuple[bool, str]:
         """Validate an external URL.
 
         Args:
@@ -494,18 +484,17 @@ class MarkdownLinkValidator:
                 valid_count += 1
             else:
                 invalid_count += 1
-                invalid_details.append({
-                    "file": link.file_path,
-                    "line": str(link.line_number),
-                    "url": link.url + (f"#{link.anchor}" if link.anchor else ""),
-                    "reason": reason,
-                })
+                invalid_details.append(
+                    {
+                        "file": link.file_path,
+                        "line": str(link.line_number),
+                        "url": link.url + (f"#{link.anchor}" if link.anchor else ""),
+                        "reason": reason,
+                    }
+                )
 
         # Validate external links (with concurrency)
-        external_links = [
-            link for link in all_links
-            if link.is_external and not link.is_private
-        ]
+        external_links = [link for link in all_links if link.is_external and not link.is_private]
         private_links = [link for link in all_links if link.is_private]
         private_count = len(private_links)
 
@@ -527,12 +516,14 @@ class MarkdownLinkValidator:
                         valid_count += 1
                     else:
                         invalid_count += 1
-                        invalid_details.append({
-                            "file": link.file_path,
-                            "line": str(link.line_number),
-                            "url": link.url,
-                            "reason": reason,
-                        })
+                        invalid_details.append(
+                            {
+                                "file": link.file_path,
+                                "line": str(link.line_number),
+                                "url": link.url,
+                                "reason": reason,
+                            }
+                        )
         elif not self.check_external:
             # External links are skipped
             pass

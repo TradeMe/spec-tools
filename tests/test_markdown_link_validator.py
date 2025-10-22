@@ -1,15 +1,8 @@
 """Tests for the markdown link validator."""
 
-from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
-import pytest
-
-from spec_tools.markdown_link_validator import (
-    Link,
-    LinkValidationResult,
-    MarkdownLinkValidator,
-)
+from spec_tools.markdown_link_validator import MarkdownLinkValidator
 
 
 class TestMarkdownLinkValidator:
@@ -168,12 +161,8 @@ Login details here.
         # Test various heading formats
         assert validator._heading_to_anchor("Configuration") == "configuration"
         assert validator._heading_to_anchor("API Reference") == "api-reference"
-        assert (
-            validator._heading_to_anchor("Getting Started!") == "getting-started"
-        )
-        assert (
-            validator._heading_to_anchor("What's New?") == "whats-new"
-        )
+        assert validator._heading_to_anchor("Getting Started!") == "getting-started"
+        assert validator._heading_to_anchor("What's New?") == "whats-new"
 
     def test_classify_external_link(self, tmp_path):
         """Test classifying links as external or internal."""
@@ -468,9 +457,7 @@ See [missing file](./nonexistent.md) and [bad anchor](#missing-section).
     def test_multiple_links_same_line(self, tmp_path):
         """Test extracting multiple links on the same line."""
         md_file = tmp_path / "test.md"
-        md_file.write_text(
-            "See [doc1](./doc1.md) and [doc2](./doc2.md) for info."
-        )
+        md_file.write_text("See [doc1](./doc1.md) and [doc2](./doc2.md) for info.")
 
         validator = MarkdownLinkValidator(root_dir=tmp_path)
         links = validator.extract_links_from_file("test.md")
