@@ -3,8 +3,9 @@ README.md
 LICENSE
 
 # Specifications
-specs/spec-[0-9][0-9][0-9]-*.md
-specs/README.md
+specs/spec-[0-9][0-9][0-9]-*.md  # Numbered specs (preferred format)
+specs/README.md                   # Specs index
+specs/*.md                        # Other spec files (legacy format)
 
 # Python package
 spec_tools/**/*.py

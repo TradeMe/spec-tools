@@ -40,6 +40,7 @@ Specifications (specs) are formal documents that describe features, requirements
 | Spec | Title | Status | Description |
 |------|-------|--------|-------------|
 | [spec-001](spec-001-linter-tool.md) | Allowlist Linter Tool | Implemented | File allowlist validation tool |
+| [markdown-link-validator](markdown-link-validator.md) | Markdown Link Validator | Implemented | Validates hyperlinks in markdown files (EARS format) |
 
 ### Future Features (Planned)
 
@@ -51,7 +52,9 @@ Specifications (specs) are formal documents that describe features, requirements
 
 ## Naming Convention
 
-Spec files follow the pattern: `spec-NNN-short-title.md`
+### Preferred Format (New Specs)
+
+Spec files should follow the pattern: `spec-NNN-short-title.md`
 
 - **NNN**: Zero-padded 3-digit number
 - **short-title**: Kebab-case description
@@ -64,6 +67,10 @@ Spec files follow the pattern: `spec-NNN-short-title.md`
 - **200-299**: Integrations and extensions
 - **300-399**: Research and experiments
 - **900-999**: Deprecated specs
+
+### Legacy Format
+
+Some specs use descriptive filenames without numbers (e.g., `markdown-link-validator.md`). These are supported but new specs should use the numbered format for better organization and sorting.
 
 ## Spec Status Values
 
@@ -150,8 +157,14 @@ Ideas for future improvements
 This directory is validated by spec-tools itself! The `.specallowlist` includes:
 
 ```
+# Numbered specs (preferred format)
 specs/spec-[0-9][0-9][0-9]-*.md
+
+# Index file
 specs/README.md
+
+# Other spec files (legacy format)
+specs/*.md
 ```
 
 Run the linter to verify:
