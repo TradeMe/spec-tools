@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from .linter import SpecLinter
+from .markdown_link_validator import MarkdownLinkValidator
 
 
 def cmd_lint(args) -> int:
@@ -44,6 +45,47 @@ def cmd_lint(args) -> int:
         return 1
     except Exception as e:
         print(f"Unexpected error: {e}", file=sys.stderr)
+        if args.verbose:
+            raise
+        return 1
+
+
+def cmd_check_links(args) -> int:
+    """Execute the check-links command.
+
+    Args:
+        args: Parsed command-line arguments.
+
+    Returns:
+        Exit code (0 for success, 1 for failure).
+    """
+    try:
+        validator = MarkdownLinkValidator(
+            root_dir=Path(args.directory),
+            config_file=args.config,
+            timeout=args.timeout,
+            max_concurrent=args.max_concurrent,
+            check_external=not args.no_external,
+            use_gitignore=not args.no_gitignore,
+        )
+
+        # Run validation
+        result = validator.validate(verbose=args.verbose)
+
+        # Print results
+        if args.verbose or not result.is_valid:
+            print(result)
+        elif result.is_valid:
+            print(
+                f"✓ All {result.valid_links} links valid "
+                f"({result.private_links} private links skipped)"
+            )
+
+        # Return appropriate exit code
+        return 0 if result.is_valid else 1
+
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
         if args.verbose:
             raise
         return 1
@@ -142,6 +184,101 @@ Allowlist file format:
     )
 
     lint_parser.set_defaults(func=cmd_lint)
+
+    # Check-links command
+    check_links_parser = subparsers.add_parser(
+        "check-links",
+        help="Validate hyperlinks in markdown files",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Check links in current directory
+  spec-tools check-links
+
+  # Check links in a specific directory
+  spec-tools check-links /path/to/docs
+
+  # Use a custom config file
+  spec-tools check-links --config .myconfigfile
+
+  # Skip external URL validation
+  spec-tools check-links --no-external
+
+  # Set timeout for external URLs
+  spec-tools check-links --timeout 30
+
+Configuration file format (.speclinkconfig):
+  The config file lists private URL patterns to skip validation.
+  Each line is a pattern. Lines starting with # are comments.
+
+  Example .speclinkconfig:
+    # Private domains
+    internal.company.com
+    localhost
+
+    # Private URL prefixes
+    https://private.example.com/
+    http://localhost:
+    http://127.0.0.1:
+
+Link validation rules:
+  - Internal links: Checked relative to the markdown file
+  - Anchors: Validated against headings in target files
+  - External URLs: HTTP requests verify accessibility
+  - Private URLs: Matched patterns are skipped
+        """,
+    )
+
+    check_links_parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to check (default: current directory)",
+    )
+
+    check_links_parser.add_argument(
+        "--config",
+        "-c",
+        default=None,
+        help="Path to config file (default: .speclinkconfig)",
+    )
+
+    check_links_parser.add_argument(
+        "--timeout",
+        "-t",
+        type=int,
+        default=10,
+        help="Timeout for external URL requests in seconds (default: 10)",
+    )
+
+    check_links_parser.add_argument(
+        "--max-concurrent",
+        "-m",
+        type=int,
+        default=10,
+        help="Maximum concurrent external URL requests (default: 10)",
+    )
+
+    check_links_parser.add_argument(
+        "--no-external",
+        action="store_true",
+        help="Skip external URL validation",
+    )
+
+    check_links_parser.add_argument(
+        "--no-gitignore",
+        action="store_true",
+        help="Don't respect .gitignore patterns",
+    )
+
+    check_links_parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Verbose output",
+    )
+
+    check_links_parser.set_defaults(func=cmd_check_links)
 
     # Parse arguments
     args = parser.parse_args(argv)
