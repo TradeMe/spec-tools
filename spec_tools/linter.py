@@ -3,7 +3,6 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Set, Tuple
 
 import pathspec
 
@@ -14,7 +13,7 @@ class LintResult:
 
     total_files: int
     matched_files: int
-    unmatched_files: List[str]
+    unmatched_files: list[str]
     ignored_files: int
 
     @property
@@ -51,8 +50,8 @@ class SpecLinter:
 
     def __init__(
         self,
-        root_dir: Optional[Path] = None,
-        allowlist_file: Optional[str] = None,
+        root_dir: Path | None = None,
+        allowlist_file: str | None = None,
         use_gitignore: bool = True,
     ):
         """Initialize the linter.
@@ -66,8 +65,8 @@ class SpecLinter:
         self.allowlist_file = allowlist_file or self.DEFAULT_ALLOWLIST_FILE
         self.use_gitignore = use_gitignore
 
-        self.allowlist_spec: Optional[pathspec.PathSpec] = None
-        self.ignore_spec: Optional[pathspec.PathSpec] = None
+        self.allowlist_spec: pathspec.PathSpec | None = None
+        self.ignore_spec: pathspec.PathSpec | None = None
 
     def _strip_inline_comment(self, line: str) -> str:
         """Strip inline comments from a pattern line.
@@ -90,7 +89,7 @@ class SpecLinter:
         parts = stripped.split("#", 1)
         return parts[0].strip()
 
-    def load_patterns(self) -> Tuple[List[str], List[str]]:
+    def load_patterns(self) -> tuple[list[str], list[str]]:
         """Load patterns from allowlist and gitignore files.
 
         Returns:
@@ -139,7 +138,7 @@ class SpecLinter:
                 pathspec.patterns.GitWildMatchPattern, ignore_patterns
             )
 
-    def get_all_files(self) -> Set[str]:
+    def get_all_files(self) -> set[str]:
         """Get all files in the repository, respecting gitignore.
 
         Returns:

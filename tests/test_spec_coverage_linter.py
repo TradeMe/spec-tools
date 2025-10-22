@@ -1,8 +1,6 @@
 """Tests for the spec coverage linter."""
 
-from pathlib import Path
 
-import pytest
 
 from spec_tools.spec_coverage_linter import SpecCoverageLinter
 

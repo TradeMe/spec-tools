@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List
 
 
 @dataclass
@@ -11,11 +10,11 @@ class StructureValidationResult:
 
     total_specs: int
     specs_with_tests: int
-    specs_without_tests: List[str]
+    specs_without_tests: list[str]
     total_test_dirs: int
     test_dirs_with_specs: int
-    test_dirs_without_specs: List[str]
-    spec_to_test_mapping: Dict[str, str]
+    test_dirs_without_specs: list[str]
+    spec_to_test_mapping: dict[str, str]
     is_valid: bool
 
     def __str__(self) -> str:
@@ -25,7 +24,10 @@ class StructureValidationResult:
         lines.append("SPEC-TEST STRUCTURE REPORT")
         lines.append("=" * 60)
         lines.append(f"Specs with tests: {self.specs_with_tests}/{self.total_specs}")
-        lines.append(f"Test dirs/files with specs: {self.test_dirs_with_specs}/{self.total_test_dirs}")
+        lines.append(
+            f"Test dirs/files with specs: {self.test_dirs_with_specs}/"
+            f"{self.total_test_dirs}"
+        )
         lines.append("")
 
         if self.specs_without_tests:
@@ -75,7 +77,7 @@ class StructureLinter:
         self.specs_dir = Path(specs_dir) if specs_dir else self.root_dir / "specs"
         self.tests_dir = Path(tests_dir) if tests_dir else self.root_dir / "tests"
 
-    def get_expected_test_paths(self, spec_file: Path) -> List[Path]:
+    def get_expected_test_paths(self, spec_file: Path) -> list[Path]:
         """Get the expected test file/directory paths for a spec file.
 
         For a spec file like "specs/foo-bar.md", we expect either:
@@ -153,7 +155,7 @@ class StructureLinter:
 
         return None
 
-    def get_all_requirement_test_paths(self) -> List[Path]:
+    def get_all_requirement_test_paths(self) -> list[Path]:
         """Get all test files and directories that should correspond to specs.
 
         This excludes generic test files that don't follow the spec structure pattern.

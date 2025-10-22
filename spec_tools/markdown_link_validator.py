@@ -7,7 +7,6 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import pathspec
 
@@ -22,7 +21,7 @@ class Link:
     line_number: int  # Line number in source file
     is_external: bool = False  # Whether link is an external URL
     is_private: bool = False  # Whether link matches private URL pattern
-    anchor: Optional[str] = None  # Anchor fragment (#heading)
+    anchor: str | None = None  # Anchor fragment (#heading)
 
 
 @dataclass
@@ -34,7 +33,7 @@ class LinkValidationResult:
     invalid_links: int
     private_links: int
     skipped_links: int
-    invalid_link_details: List[Dict[str, str]] = field(default_factory=list)
+    invalid_link_details: list[dict[str, str]] = field(default_factory=list)
     markdown_files_checked: int = 0
 
     @property
@@ -86,8 +85,8 @@ class MarkdownLinkValidator:
 
     def __init__(
         self,
-        root_dir: Optional[Path] = None,
-        config_file: Optional[str] = None,
+        root_dir: Path | None = None,
+        config_file: str | None = None,
         timeout: int = DEFAULT_TIMEOUT,
         max_concurrent: int = DEFAULT_MAX_CONCURRENT,
         check_external: bool = True,
@@ -110,8 +109,8 @@ class MarkdownLinkValidator:
         self.check_external = check_external
         self.use_gitignore = use_gitignore
 
-        self.private_url_patterns: List[str] = []
-        self.ignore_spec: Optional[pathspec.PathSpec] = None
+        self.private_url_patterns: list[str] = []
+        self.ignore_spec: pathspec.PathSpec | None = None
 
     def load_config(self) -> None:
         """Load configuration from config file."""
@@ -159,7 +158,7 @@ class MarkdownLinkValidator:
                 pathspec.patterns.GitWildMatchPattern, patterns
             )
 
-    def get_markdown_files(self) -> List[str]:
+    def get_markdown_files(self) -> list[str]:
         """Get all markdown files in the repository.
 
         Returns:
@@ -197,7 +196,7 @@ class MarkdownLinkValidator:
 
         return markdown_files
 
-    def extract_links_from_file(self, file_path: str) -> List[Link]:
+    def extract_links_from_file(self, file_path: str) -> list[Link]:
         """Extract all links from a markdown file.
 
         Args:
@@ -217,7 +216,7 @@ class MarkdownLinkValidator:
             return links
 
         # Extract reference definitions first
-        references: Dict[str, str] = {}
+        references: dict[str, str] = {}
         for match in self.REFERENCE_DEF_PATTERN.finditer(content):
             ref_id = match.group(1).lower()
             url = match.group(2)
@@ -251,7 +250,7 @@ class MarkdownLinkValidator:
 
         return links
 
-    def _parse_url_and_anchor(self, url: str) -> Tuple[str, Optional[str]]:
+    def _parse_url_and_anchor(self, url: str) -> tuple[str, str | None]:
         """Parse URL and extract anchor fragment.
 
         Args:
@@ -311,7 +310,7 @@ class MarkdownLinkValidator:
             parsed = urllib.parse.urlparse(url)
             return pattern in parsed.netloc
 
-    def validate_internal_link(self, link: Link) -> Tuple[bool, str]:
+    def validate_internal_link(self, link: Link) -> tuple[bool, str]:
         """Validate an internal (relative path) link.
 
         Args:
@@ -351,7 +350,7 @@ class MarkdownLinkValidator:
 
         return True, ""
 
-    def _validate_anchor(self, file_path: str, anchor: str) -> Tuple[bool, str]:
+    def _validate_anchor(self, file_path: str, anchor: str) -> tuple[bool, str]:
         """Validate that an anchor exists in a markdown file.
 
         Args:
@@ -408,7 +407,7 @@ class MarkdownLinkValidator:
 
         return heading
 
-    def validate_external_link(self, link: Link, retries: int = 2) -> Tuple[bool, str]:
+    def validate_external_link(self, link: Link, retries: int = 2) -> tuple[bool, str]:
         """Validate an external URL.
 
         Args:
@@ -462,7 +461,7 @@ class MarkdownLinkValidator:
             print(f"Found {len(markdown_files)} markdown files")
 
         # Extract all links
-        all_links: List[Link] = []
+        all_links: list[Link] = []
         for md_file in markdown_files:
             links = self.extract_links_from_file(md_file)
             all_links.extend(links)

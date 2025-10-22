@@ -2,9 +2,8 @@
 
 import ast
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Set
 
 
 @dataclass
@@ -13,12 +12,12 @@ class SpecCoverageResult:
 
     total_requirements: int
     covered_requirements: int
-    uncovered_requirements: List[str]
+    uncovered_requirements: list[str]
     total_tests: int
     tests_with_requirements: int
-    tests_without_requirements: List[str]
-    requirement_to_tests: Dict[str, List[str]]
-    test_to_requirements: Dict[str, List[str]]
+    tests_without_requirements: list[str]
+    requirement_to_tests: dict[str, list[str]]
+    test_to_requirements: dict[str, list[str]]
     coverage_percentage: float
     is_valid: bool
 
@@ -29,8 +28,13 @@ class SpecCoverageResult:
         lines.append("SPEC COVERAGE REPORT")
         lines.append("=" * 60)
         lines.append(f"Coverage: {self.coverage_percentage:.1f}%")
-        lines.append(f"Requirements: {self.covered_requirements}/{self.total_requirements} covered")
-        lines.append(f"Tests: {self.tests_with_requirements}/{self.total_tests} linked to requirements")
+        lines.append(
+            f"Requirements: {self.covered_requirements}/{self.total_requirements} covered"
+        )
+        lines.append(
+            f"Tests: {self.tests_with_requirements}/{self.total_tests} "
+            f"linked to requirements"
+        )
         lines.append("")
 
         if self.uncovered_requirements:
@@ -77,7 +81,7 @@ class SpecCoverageLinter:
         self.specs_dir = Path(specs_dir) if specs_dir else self.root_dir / "specs"
         self.tests_dir = Path(tests_dir) if tests_dir else self.root_dir / "tests"
 
-    def extract_requirements_from_spec(self, spec_file: Path) -> Set[str]:
+    def extract_requirements_from_spec(self, spec_file: Path) -> set[str]:
         """Extract all requirement IDs from a spec file.
 
         Args:
@@ -97,7 +101,7 @@ class SpecCoverageLinter:
 
     def extract_requirements_from_tests(
         self, test_file: Path
-    ) -> Dict[str, List[str]]:
+    ) -> dict[str, list[str]]:
         """Extract requirement markers from test functions.
 
         Args:
@@ -131,7 +135,7 @@ class SpecCoverageLinter:
 
         return test_to_reqs
 
-    def _extract_req_from_decorator(self, decorator: ast.expr) -> List[str]:
+    def _extract_req_from_decorator(self, decorator: ast.expr) -> list[str]:
         """Extract requirement IDs from a decorator node.
 
         Args:
@@ -192,7 +196,7 @@ class SpecCoverageLinter:
                         return f"{node.name}::{func_node.name}"
         return func_node.name
 
-    def get_all_tests(self) -> List[str]:
+    def get_all_tests(self) -> list[str]:
         """Get all test function names from the test directory.
 
         Returns:
@@ -235,7 +239,7 @@ class SpecCoverageLinter:
             test_to_requirements.update(mappings)
 
         # Build reverse mapping: requirement to tests
-        requirement_to_tests: Dict[str, List[str]] = {}
+        requirement_to_tests: dict[str, list[str]] = {}
         for test_name, req_ids in test_to_requirements.items():
             for req_id in req_ids:
                 if req_id not in requirement_to_tests:

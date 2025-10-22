@@ -3,7 +3,6 @@
 import argparse
 import sys
 from pathlib import Path
-from typing import Optional
 
 from .linter import SpecLinter
 from .markdown_link_validator import MarkdownLinkValidator
@@ -157,7 +156,7 @@ def cmd_check_structure(args) -> int:
         return 1
 
 
-def main(argv: Optional[list] = None) -> int:
+def main(argv: list | None = None) -> int:
     """Main entry point for the CLI.
 
     Args:

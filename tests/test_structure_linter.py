@@ -1,8 +1,6 @@
 """Tests for the structure linter."""
 
-from pathlib import Path
 
-import pytest
 
 from spec_tools.structure_linter import StructureLinter
 
