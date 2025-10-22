@@ -269,3 +269,40 @@ class TestStructureLinter:
 
         # __init__.py should not be considered a test file
         assert "__init__.py" not in str(result.test_dirs_without_specs)
+
+    def test_all_valid_structure_shows_passed(self, tmp_path):
+        """Test that fully valid structure shows PASSED message."""
+        spec_dir = tmp_path / "specs"
+        spec_dir.mkdir()
+        (spec_dir / "feature.md").write_text("# Feature")
+
+        tests_dir = tmp_path / "tests"
+        tests_dir.mkdir()
+        (tests_dir / "test_feature.py").write_text("def test_something(): pass")
+
+        linter = StructureLinter(root_dir=tmp_path)
+        result = linter.lint()
+
+        # Should show valid mappings and PASSED message
+        assert result.is_valid
+        result_str = str(result)
+        assert "✅ Valid Spec-Test Mappings:" in result_str
+        assert "feature.md → test_feature.py" in result_str
+        assert "✅ Structure validation PASSED" in result_str
+
+    def test_tests_without_specs_shown(self, tmp_path):
+        """Test that tests without corresponding specs are shown in output."""
+        spec_dir = tmp_path / "specs"
+        spec_dir.mkdir()
+
+        tests_dir = tmp_path / "tests"
+        tests_dir.mkdir()
+        (tests_dir / "test_orphan.py").write_text("def test_something(): pass")
+
+        linter = StructureLinter(root_dir=tmp_path)
+        result = linter.lint()
+
+        # Should show tests without specs warning
+        result_str = str(result)
+        assert "⚠️  Test Files/Directories Without Corresponding Specs:" in result_str
+        assert "test_orphan.py" in result_str

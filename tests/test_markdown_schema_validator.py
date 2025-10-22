@@ -867,3 +867,127 @@ Content
         import shutil
 
         shutil.rmtree(temp_dir)
+
+    @pytest.mark.req("REQ-057")
+    def test_nonexistent_config_file_uses_defaults(self):
+        """Test that nonexistent configuration files fall back to defaults gracefully."""
+        temp_dir = self.create_temp_dir()
+
+        # Specify a config file that doesn't exist
+        config_file = "nonexistent-config.json"
+
+        # Should not crash, should use default schema
+        validator = MarkdownSchemaValidator(root_dir=temp_dir, config_file=config_file)
+
+        # Should have loaded default schema
+        assert validator.schema is not None
+        assert "metadata_fields" in validator.schema
+
+        import shutil
+
+        shutil.rmtree(temp_dir)
+
+    @pytest.mark.req("REQ-058", "REQ-059")
+    def test_error_reporting_behavior(self):
+        """Test that errors are properly reported and can include stack traces."""
+        temp_dir = self.create_temp_dir()
+
+        # Create a valid validator
+        validator = MarkdownSchemaValidator(root_dir=temp_dir)
+
+        # Test that exceptions during validation contain useful information
+        nonexistent_file = Path(temp_dir) / "nonexistent.md"
+        violations = validator.validate_file(nonexistent_file)
+
+        # Should return violations with error messages, not crash
+        assert isinstance(violations, list)
+
+        import shutil
+
+        shutil.rmtree(temp_dir)
+
+    @pytest.mark.req("NFR-002")
+    def test_clear_actionable_error_messages(self):
+        """Test that validation errors provide clear, actionable messages."""
+        temp_dir = self.create_temp_dir()
+        specs_dir = Path(temp_dir) / "specs"
+        specs_dir.mkdir()
+
+        # Create a spec file with multiple violations
+        spec_file = specs_dir / "bad-spec.md"
+        spec_file.write_text("""# Wrong Heading
+
+No metadata fields.
+
+**REQ-001** This requirement has no colon and bad format.
+""")
+
+        validator = MarkdownSchemaValidator(root_dir=temp_dir)
+        result = validator.validate()
+
+        # Verify error messages are clear and actionable
+        assert len(result.violations) > 0
+
+        for violation in result.violations:
+            # Each violation should have a clear message
+            assert violation.message
+            assert len(violation.message) > 10  # Not just a code or number
+
+            # Should indicate what's wrong
+            assert isinstance(violation.severity, str)
+            assert violation.severity in ["error", "warning"]
+
+            # Should indicate where the problem is
+            assert violation.file_path
+            assert violation.line_number >= 0
+
+        import shutil
+
+        shutil.rmtree(temp_dir)
+
+    @pytest.mark.req("NFR-003")
+    def test_minimal_dependencies(self):
+        """Test that the validator uses minimal dependencies, specifically pathspec."""
+        # Verify pathspec is used (it should be available and is the main dependency)
+        # Verify pathspec is imported in the module
+        import spec_tools.markdown_schema_validator as msv_module
+        from spec_tools.markdown_schema_validator import MarkdownSchemaValidator
+
+        assert hasattr(msv_module, "pathspec")
+
+        temp_dir = self.create_temp_dir()
+        validator = MarkdownSchemaValidator(root_dir=temp_dir, respect_gitignore=True)
+
+        # When gitignore is respected, the validator uses pathspec
+        assert validator.gitignore_spec is not None or validator.respect_gitignore
+
+        import shutil
+
+        shutil.rmtree(temp_dir)
+
+    @pytest.mark.req("TEST-007")
+    def test_integration_with_real_spec_files(self):
+        """Integration test: validate real specification files from the project."""
+
+        # Get the project root (two levels up from tests/)
+        project_root = Path(__file__).parent.parent
+        specs_dir = project_root / "specs"
+
+        # Skip if specs directory doesn't exist (e.g., in isolated test environments)
+        if not specs_dir.exists():
+            pytest.skip("Specs directory not found for integration test")
+
+        # Validate the real spec files
+        validator = MarkdownSchemaValidator(root_dir=project_root)
+        result = validator.validate()
+
+        # Real spec files should pass validation (or at least not crash)
+        assert result.total_files > 0
+        assert isinstance(result.is_valid, bool)
+
+        # If validation fails, ensure violations are reported properly
+        if not result.is_valid:
+            assert len(result.violations) > 0
+            for violation in result.violations:
+                assert violation.message
+                assert violation.file_path

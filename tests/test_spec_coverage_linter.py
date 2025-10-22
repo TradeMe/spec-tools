@@ -286,3 +286,77 @@ def test_req_001_b():
         assert "SPEC COVERAGE REPORT" in result_str
         assert "Coverage:" in result_str
         assert "REQ-001" in result_str
+
+    def test_malformed_test_file_handling(self, tmp_path):
+        """Test that malformed test files are handled gracefully."""
+        spec_dir = tmp_path / "specs"
+        spec_dir.mkdir()
+        (spec_dir / "feature.md").write_text("**REQ-001**: Do something.")
+
+        tests_dir = tmp_path / "tests"
+        tests_dir.mkdir()
+
+        # Create a malformed Python file
+        (tests_dir / "test_malformed.py").write_text("def test_something(:\n    # Invalid syntax")
+
+        linter = SpecCoverageLinter(root_dir=tmp_path)
+        result = linter.lint()
+
+        # Should not crash, should report uncovered requirement
+        assert result.total_requirements == 1
+        assert "REQ-001" in result.uncovered_requirements
+
+    def test_complete_coverage_with_tests_without_markers(self, tmp_path):
+        """Test reporting when all requirements are covered but some tests lack markers."""
+        spec_dir = tmp_path / "specs"
+        spec_dir.mkdir()
+        (spec_dir / "feature.md").write_text("**REQ-001**: Do something.")
+
+        tests_dir = tmp_path / "tests"
+        tests_dir.mkdir()
+
+        # Test with marker
+        (tests_dir / "test_feature.py").write_text("""
+import pytest
+
+@pytest.mark.req("REQ-001")
+def test_requirement_one():
+    pass
+
+def test_helper_function():
+    # This test has no requirement marker
+    pass
+""")
+
+        linter = SpecCoverageLinter(root_dir=tmp_path)
+        result = linter.lint()
+
+        # All requirements covered, but some tests without markers
+        assert result.coverage_percentage == 100.0
+        assert len(result.tests_without_requirements) > 0
+        assert any("test_helper_function" in test for test in result.tests_without_requirements)
+
+    def test_100_percent_coverage_passes(self, tmp_path):
+        """Test that 100% coverage results in is_valid=True."""
+        spec_dir = tmp_path / "specs"
+        spec_dir.mkdir()
+        (spec_dir / "feature.md").write_text("**REQ-001**: Do something.")
+
+        tests_dir = tmp_path / "tests"
+        tests_dir.mkdir()
+
+        (tests_dir / "test_feature.py").write_text("""
+import pytest
+
+@pytest.mark.req("REQ-001")
+def test_requirement_one():
+    pass
+""")
+
+        linter = SpecCoverageLinter(root_dir=tmp_path)
+        result = linter.lint()
+
+        # 100% coverage should pass
+        assert result.is_valid
+        assert result.coverage_percentage == 100.0
+        assert "✅ Spec coverage validation PASSED" in str(result)
