@@ -18,6 +18,18 @@ Key features:
 - Validates that all tracked files match at least one allowlist pattern
 - Reports unmatched files for easy identification
 
+### Markdown Link Validator
+
+The `check-links` tool validates hyperlinks in markdown files to ensure documentation stays up-to-date and accessible.
+
+Key features:
+- Validates internal links (relative paths) resolve correctly
+- Checks anchor links point to existing headings
+- Validates external URLs are accessible
+- Supports private URL patterns that are skipped during validation
+- Concurrent external URL checking for performance
+- Respects `.gitignore` patterns by default
+
 ## Installation
 
 ### Using uv (recommended)
@@ -99,6 +111,64 @@ This makes it easy to integrate into CI/CD pipelines:
 # .github/workflows/ci.yml
 - name: Validate file allowlist
   run: spec-tools lint
+```
+
+### Check Links Command
+
+Validate all hyperlinks in your markdown documentation:
+
+```bash
+# Check links in current directory
+spec-tools check-links
+
+# Check links in a specific directory
+spec-tools check-links /path/to/docs
+
+# Skip external URL validation (faster)
+spec-tools check-links --no-external
+
+# Use a custom config file for private URLs
+spec-tools check-links --config .myconfigfile
+
+# Set timeout for external URLs (default: 10 seconds)
+spec-tools check-links --timeout 30
+
+# Limit concurrent requests (default: 10)
+spec-tools check-links --max-concurrent 5
+
+# Verbose output
+spec-tools check-links --verbose
+```
+
+#### Private URL Configuration
+
+Create a `.speclinkconfig` file to specify private URL patterns that should not be validated:
+
+```
+# Private domains (will skip any URL containing these domains)
+internal.company.com
+localhost
+
+# Private URL prefixes (exact prefix match)
+https://private.example.com/
+http://localhost:
+http://127.0.0.1:
+```
+
+#### What Gets Validated
+
+- **Internal links**: `[text](./file.md)` - checked relative to the markdown file
+- **Anchor links**: `[text](#heading)` - validated against headings in the file
+- **Cross-file anchors**: `[text](./other.md#section)` - validates both file and heading
+- **External URLs**: `[text](https://example.com)` - HTTP request to verify accessibility
+- **Private URLs**: URLs matching configured patterns are skipped
+
+#### CI/CD Integration
+
+```yaml
+# .github/workflows/ci.yml
+- name: Validate documentation links
+  run: spec-tools check-links --no-external  # Skip external URLs in CI
 ```
 
 ## Pattern Syntax
