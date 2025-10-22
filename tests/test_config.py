@@ -35,9 +35,7 @@ def test_config_get_lint_config():
 
 def test_config_get_check_links_config():
     """Test Config.get_check_links_config() method."""
-    config = Config(
-        {"check-links": {"timeout": 20, "max_concurrent": 5, "check_external": False}}
-    )
+    config = Config({"check-links": {"timeout": 20, "max_concurrent": 5, "check_external": False}})
     links_config = config.get_check_links_config()
     assert links_config == {"timeout": 20, "max_concurrent": 5, "check_external": False}
 
@@ -178,7 +176,13 @@ def test_merge_config_with_args_defaults():
     assert result["use_gitignore"] is True
 
     # Test check-links defaults
-    args = MockArgs(config=None, timeout=None, max_concurrent=None, no_external=False, no_gitignore=False)
+    args = MockArgs(
+        config=None,
+        timeout=None,
+        max_concurrent=None,
+        no_external=False,
+        no_gitignore=False,
+    )
     result = merge_config_with_args(config, args, "check-links")
     assert result["config_file"] is None
     assert result["timeout"] == 10

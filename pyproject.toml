@@ -28,6 +28,7 @@ dev = [
 spec-tools = "spec_tools.cli:main"
 spec-lint = "spec_tools.cli:main"
 
+# Ruff linter configuration
 [tool.ruff]
 line-length = 100
 target-version = "py38"
@@ -47,8 +48,32 @@ ignore = []
 [tool.ruff.lint.isort]
 known-first-party = ["spec_tools"]
 
+# Pytest configuration
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["spec_tools"]
+omit = ["*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+# spec-tools configuration (dogfooding our own tool!)
+[tool.spec-tools.lint]
+allowlist = ".specallowlist"
+use_gitignore = true
+
+[tool.spec-tools.check-schema]
+use_gitignore = true
