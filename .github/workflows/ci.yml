@@ -87,3 +87,8 @@ jobs:
       run: |
         source .venv/bin/activate
         spec-tools check-coverage
+
+    - name: Validate spec schema
+      run: |
+        source .venv/bin/activate
+        spec-tools check-schema --verbose

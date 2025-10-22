@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .linter import SpecLinter
 from .markdown_link_validator import MarkdownLinkValidator
+from .markdown_schema_validator import MarkdownSchemaValidator
 from .spec_coverage_linter import SpecCoverageLinter
 from .structure_linter import StructureLinter
 
@@ -145,6 +146,41 @@ def cmd_check_structure(args) -> int:
 
         # Print results
         print(result)
+
+        # Return appropriate exit code
+        return 0 if result.is_valid else 1
+
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        if args.verbose:
+            raise
+        return 1
+
+
+def cmd_check_schema(args) -> int:
+    """Execute the check-schema command.
+
+    Args:
+        args: Parsed command-line arguments.
+
+    Returns:
+        Exit code (0 for success, 1 for failure).
+    """
+    try:
+        validator = MarkdownSchemaValidator(
+            root_dir=Path(args.directory),
+            config_file=args.config,
+            respect_gitignore=not args.no_gitignore,
+        )
+
+        # Run validation
+        result = validator.validate()
+
+        # Print results
+        if args.verbose or not result.is_valid:
+            print(result)
+        elif result.is_valid:
+            print(f"✓ All {result.valid_files} markdown files conform to schema")
 
         # Return appropriate exit code
         return 0 if result.is_valid else 1
@@ -473,6 +509,65 @@ Structure conventions:
     )
 
     check_structure_parser.set_defaults(func=cmd_check_structure)
+
+    # Check-schema command
+    check_schema_parser = subparsers.add_parser(
+        "check-schema",
+        help="Validate markdown files against a defined schema",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Check schema in current directory
+  spec-tools check-schema
+
+  # Check schema in a specific directory
+  spec-tools check-schema /path/to/specs
+
+  # Use a custom config file
+  spec-tools check-schema --config .myschemaconfig
+
+Schema validation includes:
+  - Required and optional metadata fields
+  - Heading structure and hierarchy
+  - EARS format compliance for requirements
+  - Body content validation
+
+Default schema (no config file):
+  - Files: specs/*.md
+  - Metadata: ID, Version, Date, Status
+  - Headings: H1 (Specification: ...), H2 (Overview), H2 (Requirements)
+  - EARS format validation for requirements sections
+        """,
+    )
+
+    check_schema_parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to check (default: current directory)",
+    )
+
+    check_schema_parser.add_argument(
+        "--config",
+        "-c",
+        default=None,
+        help="Path to schema config file (default: .specschemaconfig)",
+    )
+
+    check_schema_parser.add_argument(
+        "--no-gitignore",
+        action="store_true",
+        help="Don't respect .gitignore patterns",
+    )
+
+    check_schema_parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Verbose output",
+    )
+
+    check_schema_parser.set_defaults(func=cmd_check_schema)
 
     # Parse arguments
     args = parser.parse_args(argv)

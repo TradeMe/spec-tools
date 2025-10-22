@@ -8,6 +8,11 @@ from .markdown_link_validator import (
     LinkValidationResult,
     MarkdownLinkValidator,
 )
+from .markdown_schema_validator import (
+    MarkdownSchemaValidator,
+    SchemaValidationResult,
+    SchemaViolation,
+)
 
 __all__ = [
     "SpecLinter",
@@ -15,5 +20,8 @@ __all__ = [
     "MarkdownLinkValidator",
     "LinkValidationResult",
     "Link",
+    "MarkdownSchemaValidator",
+    "SchemaValidationResult",
+    "SchemaViolation",
     "__version__",
 ]
