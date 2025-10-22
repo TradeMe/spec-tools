@@ -77,3 +77,8 @@ jobs:
       run: |
         source .venv/bin/activate
         spec-tools lint --verbose
+
+    - name: Validate spec schema
+      run: |
+        source .venv/bin/activate
+        spec-tools check-schema --verbose

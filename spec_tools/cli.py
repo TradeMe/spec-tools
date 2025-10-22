@@ -115,9 +115,7 @@ def cmd_check_schema(args) -> int:
         if args.verbose or not result.is_valid:
             print(result)
         elif result.is_valid:
-            print(
-                f"✓ All {result.valid_files} markdown files conform to schema"
-            )
+            print(f"✓ All {result.valid_files} markdown files conform to schema")
 
         # Return appropriate exit code
         return 0 if result.is_valid else 1

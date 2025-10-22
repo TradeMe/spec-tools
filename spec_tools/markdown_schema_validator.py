@@ -19,16 +19,18 @@ import pathspec
 @dataclass
 class HeadingNode:
     """Represents a heading in a markdown document."""
+
     level: int
     text: str
     line_number: int
-    children: List['HeadingNode'] = field(default_factory=list)
+    children: List["HeadingNode"] = field(default_factory=list)
     body_lines: List[Tuple[int, str]] = field(default_factory=list)
 
 
 @dataclass
 class SchemaViolation:
     """Represents a schema validation violation."""
+
     file_path: str
     line_number: int
     severity: str  # 'error' or 'warning'
@@ -41,6 +43,7 @@ class SchemaViolation:
 @dataclass
 class SchemaValidationResult:
     """Result of markdown schema validation."""
+
     total_files: int
     valid_files: int
     invalid_files: int
@@ -72,8 +75,8 @@ class SchemaValidationResult:
 class MarkdownParser:
     """Parse markdown files into a structured tree."""
 
-    HEADING_PATTERN = re.compile(r'^(#{1,6})\s+(.+)$')
-    METADATA_PATTERN = re.compile(r'^\*\*([^*]+)\*\*:\s*(.+)$')
+    HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+)$")
+    METADATA_PATTERN = re.compile(r"^\*\*([^*]+)\*\*:\s*(.+)$")
 
     @staticmethod
     def parse_file(file_path: Path) -> Tuple[Dict[str, str], List[HeadingNode]]:
@@ -92,16 +95,16 @@ class MarkdownParser:
         in_code_block = False  # Track if we're inside a code block
 
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 lines = f.readlines()
         except Exception as e:
             raise RuntimeError(f"Failed to read {file_path}: {e}") from e
 
         for i, line in enumerate(lines, start=1):
-            line = line.rstrip('\n')
+            line = line.rstrip("\n")
 
             # Check for code block delimiter
-            if line.strip().startswith('```'):
+            if line.strip().startswith("```"):
                 in_code_block = not in_code_block
                 # Add to current heading's body if we have one
                 if current_stack:
@@ -145,7 +148,7 @@ class MarkdownParser:
 
             # Check for metadata (bold key: value pairs)
             # Can appear before first heading OR right after H1 heading
-            if (not headings or metadata_section):
+            if not headings or metadata_section:
                 metadata_match = MarkdownParser.METADATA_PATTERN.match(line)
                 if metadata_match:
                     key = metadata_match.group(1).strip()
@@ -186,22 +189,22 @@ class EARSValidator:
 
     # EARS patterns - support both "The system shall" and test-specific patterns
     # like "Unit tests shall", "Integration tests shall", etc.
-    SUBJECT_PATTERN = r'(The system|The [\w\s]+|Unit tests|Integration tests|[\w\s]+ tests)'
+    SUBJECT_PATTERN = r"(The system|The [\w\s]+|Unit tests|Integration tests|[\w\s]+ tests)"
 
-    UNCONDITIONAL = re.compile(rf'\b{SUBJECT_PATTERN}\s+shall\b', re.IGNORECASE)
-    EVENT_DRIVEN = re.compile(rf'\bWHEN\b.*\b{SUBJECT_PATTERN}\s+shall\b', re.IGNORECASE)
-    CONDITIONAL = re.compile(rf'\bIF\b.*\bTHEN\b.*\b{SUBJECT_PATTERN}\s+shall\b', re.IGNORECASE)
-    UNWANTED = re.compile(rf'\bWHILE\b.*\b{SUBJECT_PATTERN}\s+shall\b', re.IGNORECASE)
-    STATE_DRIVEN = re.compile(rf'\bWHILE\b.*\b{SUBJECT_PATTERN}\s+shall\b', re.IGNORECASE)
-    OPTIONAL = re.compile(rf'\bWHERE\b.*\b{SUBJECT_PATTERN}\s+shall\b', re.IGNORECASE)
+    UNCONDITIONAL = re.compile(rf"\b{SUBJECT_PATTERN}\s+shall\b", re.IGNORECASE)
+    EVENT_DRIVEN = re.compile(rf"\bWHEN\b.*\b{SUBJECT_PATTERN}\s+shall\b", re.IGNORECASE)
+    CONDITIONAL = re.compile(rf"\bIF\b.*\bTHEN\b.*\b{SUBJECT_PATTERN}\s+shall\b", re.IGNORECASE)
+    UNWANTED = re.compile(rf"\bWHILE\b.*\b{SUBJECT_PATTERN}\s+shall\b", re.IGNORECASE)
+    STATE_DRIVEN = re.compile(rf"\bWHILE\b.*\b{SUBJECT_PATTERN}\s+shall\b", re.IGNORECASE)
+    OPTIONAL = re.compile(rf"\bWHERE\b.*\b{SUBJECT_PATTERN}\s+shall\b", re.IGNORECASE)
 
-    REQUIREMENT_ID = re.compile(r'^\*\*(REQ|NFR|TEST)-\d+\*\*:')
+    REQUIREMENT_ID = re.compile(r"^\*\*(REQ|NFR|TEST)-\d+\*\*:")
 
     @staticmethod
     def is_ears_compliant(text: str) -> bool:
         """Check if a requirement statement follows EARS format."""
         # Must contain "shall"
-        if not re.search(r'\bshall\b', text, re.IGNORECASE):
+        if not re.search(r"\bshall\b", text, re.IGNORECASE):
             return False
 
         # Check if matches any EARS pattern
@@ -237,14 +240,14 @@ class EARSValidator:
             return None  # Not a requirement line
 
         # Extract requirement text (after the ID)
-        text = EARSValidator.REQUIREMENT_ID.sub('', line).strip()
+        text = EARSValidator.REQUIREMENT_ID.sub("", line).strip()
 
         if not EARSValidator.is_ears_compliant(text):
             return SchemaViolation(
                 file_path=file_path,
                 line_number=line_num,
-                severity='error',
-                message=f"Requirement does not follow EARS format: {text[:50]}..."
+                severity="error",
+                message=f"Requirement does not follow EARS format: {text[:50]}...",
             )
 
         return None
@@ -286,32 +289,32 @@ class MarkdownSchemaValidator:
         # Default schema for EARS spec files if no config exists
         if not config_path.exists():
             return {
-                'files': ['specs/*.md'],
-                'metadata_fields': {
-                    'required': ['ID', 'Version', 'Date', 'Status'],
-                    'optional': []
+                "files": ["specs/*.md"],
+                "metadata_fields": {
+                    "required": ["ID", "Version", "Date", "Status"],
+                    "optional": [],
                 },
-                'headings': {
-                    'required': [
-                        {'level': 1, 'pattern': r'^Specification:\s+.+$'},
-                        {'level': 2, 'text': 'Overview'},
-                        {'level': 2, 'pattern': r'^Requirements\s+\(EARS Format\)$'},
+                "headings": {
+                    "required": [
+                        {"level": 1, "pattern": r"^Specification:\s+.+$"},
+                        {"level": 2, "text": "Overview"},
+                        {"level": 2, "pattern": r"^Requirements\s+\(EARS Format\)$"},
                     ],
-                    'optional': [
-                        {'level': 2, 'text': 'Configuration File Format'},
-                        {'level': 2, 'text': 'Examples'},
-                        {'level': 2, 'text': 'Non-Functional Requirements'},
-                        {'level': 2, 'text': 'Test Coverage'},
-                    ]
+                    "optional": [
+                        {"level": 2, "text": "Configuration File Format"},
+                        {"level": 2, "text": "Examples"},
+                        {"level": 2, "text": "Non-Functional Requirements"},
+                        {"level": 2, "text": "Test Coverage"},
+                    ],
                 },
-                'ears_validation': {
-                    'enabled': True,
-                    'sections': [
-                        'Requirements (EARS Format)',
-                        'Non-Functional Requirements',
-                        'Test Coverage'
-                    ]
-                }
+                "ears_validation": {
+                    "enabled": True,
+                    "sections": [
+                        "Requirements (EARS Format)",
+                        "Non-Functional Requirements",
+                        "Test Coverage",
+                    ],
+                },
             }
 
         # TODO: Load from YAML file when implemented
@@ -328,9 +331,9 @@ class MarkdownSchemaValidator:
             return None
 
         try:
-            with open(gitignore_path, encoding='utf-8') as f:
+            with open(gitignore_path, encoding="utf-8") as f:
                 patterns = f.read().splitlines()
-            return pathspec.PathSpec.from_lines('gitwildmatch', patterns)
+            return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
         except Exception:
             return None
 
@@ -340,14 +343,14 @@ class MarkdownSchemaValidator:
         Returns:
             List of Path objects for markdown files
         """
-        file_patterns = self.schema.get('files', ['**/*.md'])
+        file_patterns = self.schema.get("files", ["**/*.md"])
         matched_files = set()
 
         for pattern in file_patterns:
             # Use pathspec for glob pattern matching
-            spec = pathspec.PathSpec.from_lines('gitwildmatch', [pattern])
+            spec = pathspec.PathSpec.from_lines("gitwildmatch", [pattern])
 
-            for file_path in self.root_dir.rglob('*'):
+            for file_path in self.root_dir.rglob("*"):
                 if not file_path.is_file():
                     continue
 
@@ -362,7 +365,7 @@ class MarkdownSchemaValidator:
                     continue
 
                 # Skip .git directory
-                if '.git' in rel_path.parts:
+                if ".git" in rel_path.parts:
                     continue
 
                 # Check if matches pattern
@@ -382,17 +385,19 @@ class MarkdownSchemaValidator:
             List of schema violations
         """
         violations = []
-        metadata_config = self.schema.get('metadata_fields', {})
-        required_fields = metadata_config.get('required', [])
+        metadata_config = self.schema.get("metadata_fields", {})
+        required_fields = metadata_config.get("required", [])
 
         for field_name in required_fields:
             if field_name not in metadata:
-                violations.append(SchemaViolation(
-                    file_path=str(file_path.relative_to(self.root_dir)),
-                    line_number=1,
-                    severity='error',
-                    message=f"Missing required metadata field: {field_name}"
-                ))
+                violations.append(
+                    SchemaViolation(
+                        file_path=str(file_path.relative_to(self.root_dir)),
+                        line_number=1,
+                        severity="error",
+                        message=f"Missing required metadata field: {field_name}",
+                    )
+                )
 
         return violations
 
@@ -410,13 +415,13 @@ class MarkdownSchemaValidator:
         """
         violations = []
         all_headings = MarkdownParser.flatten_headings(headings)
-        heading_config = self.schema.get('headings', {})
-        required_headings = heading_config.get('required', [])
+        heading_config = self.schema.get("headings", {})
+        required_headings = heading_config.get("required", [])
 
         for required in required_headings:
-            level = required.get('level')
-            text = required.get('text')
-            pattern = required.get('pattern')
+            level = required.get("level")
+            text = required.get("text")
+            pattern = required.get("pattern")
 
             # Find matching heading
             found = False
@@ -432,13 +437,15 @@ class MarkdownSchemaValidator:
                     break
 
             if not found:
-                violations.append(SchemaViolation(
-                    file_path=str(file_path.relative_to(self.root_dir)),
-                    line_number=1,
-                    severity='error',
-                    message=f"Missing required heading: level {level}, "
-                           f"{'text=' + repr(text) if text else 'pattern=' + repr(pattern)}"
-                ))
+                violations.append(
+                    SchemaViolation(
+                        file_path=str(file_path.relative_to(self.root_dir)),
+                        line_number=1,
+                        severity="error",
+                        message=f"Missing required heading: level {level}, "
+                        f"{'text=' + repr(text) if text else 'pattern=' + repr(pattern)}",
+                    )
+                )
 
         return violations
 
@@ -455,12 +462,12 @@ class MarkdownSchemaValidator:
             List of schema violations
         """
         violations = []
-        ears_config = self.schema.get('ears_validation', {})
+        ears_config = self.schema.get("ears_validation", {})
 
-        if not ears_config.get('enabled', False):
+        if not ears_config.get("enabled", False):
             return violations
 
-        ears_sections = ears_config.get('sections', [])
+        ears_sections = ears_config.get("sections", [])
         all_headings = MarkdownParser.flatten_headings(headings)
 
         # Find headings that should contain EARS requirements
@@ -472,7 +479,7 @@ class MarkdownSchemaValidator:
                     in_code_block = False
                     for line_num, line in heading.body_lines:
                         # Check for code block delimiter
-                        if line.strip().startswith('```'):
+                        if line.strip().startswith("```"):
                             in_code_block = not in_code_block
                             continue
 
@@ -491,7 +498,7 @@ class MarkdownSchemaValidator:
                         in_code_block = False
                         for line_num, line in child.body_lines:
                             # Check for code block delimiter
-                            if line.strip().startswith('```'):
+                            if line.strip().startswith("```"):
                                 in_code_block = not in_code_block
                                 continue
 
@@ -521,12 +528,14 @@ class MarkdownSchemaValidator:
         try:
             metadata, headings = MarkdownParser.parse_file(file_path)
         except Exception as e:
-            violations.append(SchemaViolation(
-                file_path=str(file_path.relative_to(self.root_dir)),
-                line_number=1,
-                severity='error',
-                message=f"Failed to parse file: {e}"
-            ))
+            violations.append(
+                SchemaViolation(
+                    file_path=str(file_path.relative_to(self.root_dir)),
+                    line_number=1,
+                    severity="error",
+                    message=f"Failed to parse file: {e}",
+                )
+            )
             return violations
 
         # Validate metadata
@@ -565,5 +574,5 @@ class MarkdownSchemaValidator:
             valid_files=valid_files,
             invalid_files=invalid_files,
             violations=all_violations,
-            markdown_files_checked=len(files)
+            markdown_files_checked=len(files),
         )

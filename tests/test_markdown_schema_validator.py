@@ -21,7 +21,7 @@ class TestMarkdownParser:
 ### Subsection 1.1
 ## Section 2
 """
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             path = Path(f.name)
@@ -51,7 +51,7 @@ class TestMarkdownParser:
 ## Overview
 Content here.
 """
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             path = Path(f.name)
@@ -60,10 +60,10 @@ Content here.
             metadata, headings = MarkdownParser.parse_file(path)
 
             assert len(metadata) == 4
-            assert metadata['ID'] == 'SPEC-001'
-            assert metadata['Version'] == '1.0'
-            assert metadata['Date'] == '2025-10-22'
-            assert metadata['Status'] == 'Draft'
+            assert metadata["ID"] == "SPEC-001"
+            assert metadata["Version"] == "1.0"
+            assert metadata["Date"] == "2025-10-22"
+            assert metadata["Status"] == "Draft"
             assert len(headings) == 1
             assert headings[0].text == "Specification: Test Spec"
         finally:
@@ -76,7 +76,7 @@ Content here.
 
 # Title
 """
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             path = Path(f.name)
@@ -85,8 +85,8 @@ Content here.
             metadata, headings = MarkdownParser.parse_file(path)
 
             assert len(metadata) == 2
-            assert metadata['ID'] == 'SPEC-001'
-            assert metadata['Version'] == '1.0'
+            assert metadata["ID"] == "SPEC-001"
+            assert metadata["Version"] == "1.0"
         finally:
             path.unlink()
 
@@ -103,7 +103,7 @@ More content here.
 
 **REQ-001**: The system shall do something.
 """
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             path = Path(f.name)
@@ -117,8 +117,8 @@ More content here.
             assert len(section.body_lines) > 0
 
             # Check that requirement line is in body
-            body_text = '\n'.join(line for _, line in section.body_lines)
-            assert '**REQ-001**:' in body_text
+            body_text = "\n".join(line for _, line in section.body_lines)
+            assert "**REQ-001**:" in body_text
         finally:
             path.unlink()
 
@@ -130,7 +130,7 @@ More content here.
 ### Subsection 1.2
 ## Section 2
 """
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(content)
             f.flush()
             path = Path(f.name)
@@ -183,9 +183,7 @@ class TestEARSValidator:
 
     def test_test_requirements(self):
         """Test validation of test-specific requirements."""
-        assert EARSValidator.is_ears_compliant(
-            "Unit tests shall cover all error cases."
-        )
+        assert EARSValidator.is_ears_compliant("Unit tests shall cover all error cases.")
         assert EARSValidator.is_ears_compliant(
             "Integration tests shall validate end-to-end workflows."
         )
@@ -193,14 +191,10 @@ class TestEARSValidator:
     def test_non_ears_compliant(self):
         """Test detection of non-compliant requirements."""
         # Missing "shall"
-        assert not EARSValidator.is_ears_compliant(
-            "The system processes requests."
-        )
+        assert not EARSValidator.is_ears_compliant("The system processes requests.")
 
         # Wrong structure
-        assert not EARSValidator.is_ears_compliant(
-            "Process all requests quickly."
-        )
+        assert not EARSValidator.is_ears_compliant("Process all requests quickly.")
 
     def test_requirement_id_pattern(self):
         """Test requirement ID pattern matching."""
@@ -223,8 +217,8 @@ class TestEARSValidator:
         violation = EARSValidator.validate_requirement(1, line, "test.md")
         assert violation is not None
         assert isinstance(violation, SchemaViolation)
-        assert violation.severity == 'error'
-        assert 'EARS format' in violation.message
+        assert violation.severity == "error"
+        assert "EARS format" in violation.message
 
     def test_validate_non_requirement_line(self):
         """Test that non-requirement lines are not validated."""
@@ -280,6 +274,7 @@ This is a test specification.
             assert len(result.violations) == 0
         finally:
             import shutil
+
             shutil.rmtree(temp_dir)
 
     def test_missing_metadata(self):
@@ -312,11 +307,12 @@ Content here.
 
             # Should have violations for missing Version, Date, Status
             missing_fields = [
-                v for v in result.violations if 'Missing required metadata' in v.message
+                v for v in result.violations if "Missing required metadata" in v.message
             ]
             assert len(missing_fields) == 3
         finally:
             import shutil
+
             shutil.rmtree(temp_dir)
 
     def test_missing_required_heading(self):
@@ -345,10 +341,11 @@ Content here.
 
             assert not result.is_valid
             # Should have violation for missing "Overview" heading
-            overview_violations = [v for v in result.violations if 'Overview' in v.message]
+            overview_violations = [v for v in result.violations if "Overview" in v.message]
             assert len(overview_violations) == 1
         finally:
             import shutil
+
             shutil.rmtree(temp_dir)
 
     def test_invalid_ears_format(self):
@@ -383,10 +380,11 @@ Test content.
 
             assert not result.is_valid
             # Should have violations for invalid EARS format
-            ears_violations = [v for v in result.violations if 'EARS format' in v.message]
+            ears_violations = [v for v in result.violations if "EARS format" in v.message]
             assert len(ears_violations) == 2
         finally:
             import shutil
+
             shutil.rmtree(temp_dir)
 
     def test_gitignore_respected(self):
@@ -411,6 +409,7 @@ Test content.
             assert len(files) == 0
         finally:
             import shutil
+
             shutil.rmtree(temp_dir)
 
     def test_gitignore_disabled(self):
@@ -449,6 +448,7 @@ Test
             assert len(files) == 1
         finally:
             import shutil
+
             shutil.rmtree(temp_dir)
 
     def test_h1_pattern_matching(self):
@@ -481,10 +481,11 @@ Test
 
             assert not result.is_valid
             # Should have violation for H1 not matching pattern
-            h1_violations = [v for v in result.violations if 'level 1' in v.message]
+            h1_violations = [v for v in result.violations if "level 1" in v.message]
             assert len(h1_violations) >= 1
         finally:
             import shutil
+
             shutil.rmtree(temp_dir)
 
     def test_multiple_files(self):
@@ -532,4 +533,5 @@ Test
             assert result.total_files == 2
         finally:
             import shutil
+
             shutil.rmtree(temp_dir)
