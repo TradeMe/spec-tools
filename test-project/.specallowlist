@@ -1,0 +1,5 @@
+# Test project allowlist
+*.md
+*.py
+pyproject.toml
+.specallowlist

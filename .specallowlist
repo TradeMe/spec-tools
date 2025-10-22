@@ -6,6 +6,13 @@ LICENSE
 spec_tools/**/*.py
 tests/**/*.py
 
+# Test project
+test-project/**/*.py
+test-project/**/*.md
+test-project/.specallowlist
+test-project/.gitignore
+test-project/pyproject.toml
+
 # Configuration files
 pyproject.toml
 .specallowlist
