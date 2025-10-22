@@ -7,6 +7,8 @@ from typing import Optional
 
 from .linter import SpecLinter
 from .markdown_link_validator import MarkdownLinkValidator
+from .spec_coverage_linter import SpecCoverageLinter
+from .structure_linter import StructureLinter
 
 
 def cmd_lint(args) -> int:
@@ -80,6 +82,70 @@ def cmd_check_links(args) -> int:
                 f"✓ All {result.valid_links} links valid "
                 f"({result.private_links} private links skipped)"
             )
+
+        # Return appropriate exit code
+        return 0 if result.is_valid else 1
+
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        if args.verbose:
+            raise
+        return 1
+
+
+def cmd_check_coverage(args) -> int:
+    """Execute the check-coverage command.
+
+    Args:
+        args: Parsed command-line arguments.
+
+    Returns:
+        Exit code (0 for success, 1 for failure).
+    """
+    try:
+        linter = SpecCoverageLinter(
+            root_dir=Path(args.directory),
+            specs_dir=Path(args.specs_dir) if args.specs_dir else None,
+            tests_dir=Path(args.tests_dir) if args.tests_dir else None,
+        )
+
+        # Run linter
+        result = linter.lint()
+
+        # Print results
+        print(result)
+
+        # Return appropriate exit code
+        return 0 if result.is_valid else 1
+
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        if args.verbose:
+            raise
+        return 1
+
+
+def cmd_check_structure(args) -> int:
+    """Execute the check-structure command.
+
+    Args:
+        args: Parsed command-line arguments.
+
+    Returns:
+        Exit code (0 for success, 1 for failure).
+    """
+    try:
+        linter = StructureLinter(
+            root_dir=Path(args.directory),
+            specs_dir=Path(args.specs_dir) if args.specs_dir else None,
+            tests_dir=Path(args.tests_dir) if args.tests_dir else None,
+        )
+
+        # Run linter
+        result = linter.lint()
+
+        # Print results
+        print(result)
 
         # Return appropriate exit code
         return 0 if result.is_valid else 1
@@ -279,6 +345,135 @@ Link validation rules:
     )
 
     check_links_parser.set_defaults(func=cmd_check_links)
+
+    # Check-coverage command
+    check_coverage_parser = subparsers.add_parser(
+        "check-coverage",
+        help="Validate that all spec requirements have corresponding tests",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Check spec coverage in current directory
+  spec-tools check-coverage
+
+  # Check coverage in a specific directory
+  spec-tools check-coverage /path/to/project
+
+  # Use custom specs and tests directories
+  spec-tools check-coverage --specs-dir my-specs --tests-dir my-tests
+
+How it works:
+  This tool validates spec-to-test traceability by:
+  1. Extracting requirement IDs from spec files (e.g., REQ-001, NFR-001)
+  2. Finding pytest.mark.req markers in test files
+  3. Verifying each requirement has at least one test
+  4. Reporting requirements without tests
+
+Test marking format:
+  Use pytest markers to link tests to requirements:
+
+  @pytest.mark.req("REQ-001")
+  def test_something():
+      '''Test for requirement REQ-001.'''
+      ...
+
+  # For tests covering multiple requirements:
+  @pytest.mark.req("REQ-001", "REQ-002")
+  def test_combined():
+      '''Test for requirements REQ-001 and REQ-002.'''
+      ...
+        """,
+    )
+
+    check_coverage_parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Root directory of the project (default: current directory)",
+    )
+
+    check_coverage_parser.add_argument(
+        "--specs-dir",
+        default=None,
+        help="Directory containing spec files (default: <directory>/specs)",
+    )
+
+    check_coverage_parser.add_argument(
+        "--tests-dir",
+        default=None,
+        help="Directory containing test files (default: <directory>/tests)",
+    )
+
+    check_coverage_parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Verbose output",
+    )
+
+    check_coverage_parser.set_defaults(func=cmd_check_coverage)
+
+    # Check-structure command
+    check_structure_parser = subparsers.add_parser(
+        "check-structure",
+        help="Validate that spec files have corresponding test files/directories",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Check structure in current directory
+  spec-tools check-structure
+
+  # Check structure in a specific directory
+  spec-tools check-structure /path/to/project
+
+  # Use custom specs and tests directories
+  spec-tools check-structure --specs-dir my-specs --tests-dir my-tests
+
+How it works:
+  This tool validates spec-to-test structure alignment by:
+  1. Finding all spec files in the specs directory
+  2. Verifying each spec has a corresponding test file or directory
+  3. Reporting specs without tests
+
+Structure conventions:
+  For a spec file: specs/foo-bar.md
+  Expected test paths:
+    - tests/test_foo_bar.py  (single test file)
+    - tests/foo_bar/         (test directory)
+
+  Note: Having test files without corresponding specs is allowed.
+  These are typically unit tests that don't directly correspond to
+  a spec requirement (e.g., testing implementation details).
+        """,
+    )
+
+    check_structure_parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Root directory of the project (default: current directory)",
+    )
+
+    check_structure_parser.add_argument(
+        "--specs-dir",
+        default=None,
+        help="Directory containing spec files (default: <directory>/specs)",
+    )
+
+    check_structure_parser.add_argument(
+        "--tests-dir",
+        default=None,
+        help="Directory containing test files (default: <directory>/tests)",
+    )
+
+    check_structure_parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Verbose output",
+    )
+
+    check_structure_parser.set_defaults(func=cmd_check_structure)
 
     # Parse arguments
     args = parser.parse_args(argv)

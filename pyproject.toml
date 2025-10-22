@@ -51,3 +51,6 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+markers = [
+    "req: marks tests as linked to specific requirements (e.g., @pytest.mark.req('REQ-001'))"
+]
