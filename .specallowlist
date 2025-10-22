@@ -1,0 +1,16 @@
+# Documentation
+*.md
+LICENSE
+
+# Python package
+spec_tools/**/*.py
+tests/**/*.py
+
+# Configuration files
+pyproject.toml
+.specallowlist
+
+# Git configuration
+.gitignore
+.github/workflows/*.yml
+.github/workflows/*.yaml
