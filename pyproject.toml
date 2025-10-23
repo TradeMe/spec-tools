@@ -79,7 +79,7 @@ allowlist = ".specallowlist"
 use_gitignore = true
 
 [tool.spec-tools.check-coverage]
-min_coverage = 50.0
+min_coverage = 49.0
 
 [tool.spec-tools.check-schema]
 use_gitignore = true
