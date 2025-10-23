@@ -78,5 +78,8 @@ exclude_lines = [
 allowlist = ".specallowlist"
 use_gitignore = true
 
+[tool.spec-tools.check-coverage]
+min_coverage = 88.4
+
 [tool.spec-tools.check-schema]
 use_gitignore = true

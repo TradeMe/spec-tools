@@ -86,7 +86,7 @@ jobs:
     - name: Validate spec coverage
       run: |
         source .venv/bin/activate
-        spec-tools check-coverage || echo "⚠️  Spec coverage not at 100% yet (aspirational goal)"
+        spec-tools check-coverage
 
     - name: Validate spec schema
       run: |

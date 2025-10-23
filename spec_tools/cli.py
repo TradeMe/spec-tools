@@ -112,10 +112,15 @@ def cmd_check_coverage(args) -> int:
         Exit code (0 for success, 1 for failure).
     """
     try:
+        # Load config from pyproject.toml and merge with CLI args
+        config = load_config(Path(args.directory))
+        merged_config = merge_config_with_args(config, args, "check-coverage")
+
         linter = SpecCoverageLinter(
             root_dir=Path(args.directory),
             specs_dir=Path(args.specs_dir) if args.specs_dir else None,
             tests_dir=Path(args.tests_dir) if args.tests_dir else None,
+            min_coverage=merged_config["min_coverage"],
         )
 
         # Run linter
@@ -457,6 +462,13 @@ Test marking format:
         "-v",
         action="store_true",
         help="Verbose output",
+    )
+
+    check_coverage_parser.add_argument(
+        "--min-coverage",
+        type=float,
+        default=None,
+        help="Minimum acceptable coverage percentage (default: 100.0 or from pyproject.toml)",
     )
 
     check_coverage_parser.set_defaults(func=cmd_check_coverage)
