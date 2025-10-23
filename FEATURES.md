@@ -64,6 +64,8 @@ This document tracks implemented features and planned milestones for the spec-to
 
 ## Planned Milestones
 
+Future milestone specifications are stored in `specs/future/` to distinguish them from implemented features.
+
 ### Milestone 001: Semantic Test Adherence
 
 **Status**: Future
@@ -71,7 +73,7 @@ This document tracks implemented features and planned milestones for the spec-to
 
 #### Semantic Test-Adherence Check (`check-semantic-test-adherence`)
 - **Command**: `spec-tools check-semantic-test-adherence`
-- **Specification**: SPEC-003 (planned)
+- **Specification**: SPEC-003 (`specs/future/semantic-test-adherence.md`)
 - **Description**: Validates that tests marked with requirement IDs actually test the behavior specified in those requirements
 - **Key Features** (planned):
   - Semantic analysis of requirement text vs. test implementation
