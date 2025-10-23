@@ -1,13 +1,15 @@
 # Specification: Spec Coverage Linter
 
 **ID**: SPEC-003
-**Version**: 1.0
-**Date**: 2025-10-22
+**Version**: 2.0
+**Date**: 2025-10-23
 **Status**: Draft
 
 ## Overview
 
 This specification defines the requirements for a spec coverage linter tool that validates test-to-requirement traceability by ensuring all specification requirements have corresponding test cases.
+
+**Key Feature:** The linter uses fully qualified requirement IDs (format: `SPEC-XXX/REQ-XXX`) to eliminate ambiguity when multiple specifications may define requirements with the same local ID. This ensures precise traceability between specifications and their test coverage.
 
 ## Requirements (EARS Format)
 
@@ -19,6 +21,10 @@ This specification defines the requirements for a spec coverage linter tool that
 
 **REQ-003**: The system shall support custom requirement ID prefixes beyond REQ, NFR, and TEST.
 
+**REQ-041**: The system shall extract the spec ID from each spec file using the pattern `**ID**: SPEC-XXX` where XXX is a three-digit number.
+
+**REQ-042**: The system shall associate each extracted requirement ID with its parent spec ID to form a fully qualified requirement ID in the format `SPEC-XXX/REQ-XXX`.
+
 ### Test Discovery
 
 **REQ-004**: The system shall scan the tests directory to find all Python test files matching the pattern `test_*.py`.
@@ -27,7 +33,7 @@ This specification defines the requirements for a spec coverage linter tool that
 
 **REQ-006**: The system shall identify test functions by the naming pattern starting with `test_`.
 
-**REQ-007**: The system shall extract requirement markers from test decorators in the format `@pytest.mark.req("REQ-XXX")`.
+**REQ-007**: The system shall extract requirement markers from test decorators in the format `@pytest.mark.req("SPEC-XXX/REQ-XXX")` where SPEC-XXX identifies the specification and REQ-XXX identifies the requirement within that specification.
 
 **REQ-008**: The system shall support test functions with multiple requirement markers.
 
@@ -35,13 +41,19 @@ This specification defines the requirements for a spec coverage linter tool that
 
 ### Coverage Analysis
 
-**REQ-010**: The system shall create a mapping from requirement IDs to test names that cover them.
+**REQ-010**: The system shall create a mapping from fully qualified requirement IDs (SPEC-XXX/REQ-XXX) to test names that cover them.
 
 **REQ-011**: The system shall identify all requirements that have no corresponding test coverage.
 
 **REQ-012**: The system shall calculate the coverage percentage as (covered requirements / total requirements) × 100.
 
 **REQ-013**: The system shall identify all test functions that have no requirement markers.
+
+**REQ-043**: WHEN a test references a requirement marker, the system shall validate that the spec ID (SPEC-XXX) exists in the specs directory.
+
+**REQ-044**: WHEN a test references a requirement marker, the system shall validate that the requirement ID (REQ-XXX) exists within the referenced spec file.
+
+**REQ-045**: IF a test references a non-existent spec ID or requirement ID, THEN the system shall report an error identifying the invalid reference.
 
 ### Configuration
 
@@ -139,9 +151,9 @@ Requirements: 61/69 covered
 Tests: 65/119 linked to requirements
 
 ❌ Uncovered Requirements:
-  - NFR-001
-  - REQ-036
-  - REQ-037
+  - SPEC-003/NFR-001
+  - SPEC-003/REQ-036
+  - SPEC-003/REQ-037
 
 ❌ Spec coverage validation FAILED
 ============================================================
@@ -183,6 +195,42 @@ spec-tools check-coverage --min-coverage 90.0
 ```
 
 This overrides any pyproject.toml configuration.
+
+### Test Marker Examples
+
+Example test file using fully qualified requirement IDs:
+
+```python
+import pytest
+
+@pytest.mark.req("SPEC-003/REQ-001")
+def test_scans_specs_directory():
+    """Test that the system scans the specs directory."""
+    # Test implementation
+    pass
+
+@pytest.mark.req("SPEC-003/REQ-007", "SPEC-003/REQ-008")
+def test_extracts_multiple_requirements():
+    """Test extraction of multiple requirement markers."""
+    # Test implementation
+    pass
+
+class TestCoverageAnalysis:
+    """Tests for coverage analysis functionality."""
+
+    @pytest.mark.req("SPEC-003/REQ-010")
+    def test_creates_requirement_mapping(self):
+        """Test that requirement-to-test mapping is created."""
+        # Test implementation
+        pass
+```
+
+**Key Points:**
+- Requirement markers use fully qualified format: `SPEC-XXX/REQ-XXX`
+- Multiple requirements can be specified in a single marker
+- The spec ID (SPEC-XXX) must match the `**ID**: SPEC-XXX` in the spec file
+- The requirement ID (REQ-XXX) must exist in that spec file
+- Invalid references will be reported as errors during validation
 
 ## Non-Functional Requirements
 
