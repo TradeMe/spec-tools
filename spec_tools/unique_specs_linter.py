@@ -127,9 +127,16 @@ class UniqueSpecsLinter:
 
         total_requirements = 0
 
-        # Process all spec files
+        # Process all spec files (excluding future/, jobs/, and principles.md)
         for spec_file in self.specs_dir.rglob("*.md"):
             relative_path = str(spec_file.relative_to(self.root_dir))
+
+            # Skip future/, jobs/ directories and principles.md
+            rel_to_specs = spec_file.relative_to(self.specs_dir)
+            if "future" in rel_to_specs.parts or "jobs" in rel_to_specs.parts:
+                continue
+            if spec_file.name == "principles.md":
+                continue
 
             # Extract SPEC ID
             spec_id = self.extract_spec_id(spec_file)
