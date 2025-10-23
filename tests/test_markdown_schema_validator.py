@@ -16,7 +16,7 @@ from spec_tools.markdown_schema_validator import (
 class TestMarkdownParser:
     """Tests for MarkdownParser."""
 
-    @pytest.mark.req("REQ-007", "REQ-008", "REQ-009")
+    @pytest.mark.req("SPEC-002/REQ-007", "SPEC-002/REQ-008", "SPEC-002/REQ-009")
     def test_parse_headings(self):
         """Test parsing of markdown headings."""
         content = """# Title
@@ -42,7 +42,7 @@ class TestMarkdownParser:
         finally:
             path.unlink()
 
-    @pytest.mark.req("REQ-010", "REQ-013")
+    @pytest.mark.req("SPEC-002/REQ-010", "SPEC-002/REQ-013")
     def test_parse_metadata_after_h1(self):
         """Test parsing metadata fields after H1 heading."""
         content = """# Specification: Test Spec
@@ -73,7 +73,7 @@ Content here.
         finally:
             path.unlink()
 
-    @pytest.mark.req("REQ-011", "REQ-013")
+    @pytest.mark.req("SPEC-002/REQ-011", "SPEC-002/REQ-013")
     def test_parse_metadata_before_h1(self):
         """Test parsing metadata fields before any heading."""
         content = """**ID**: SPEC-001
@@ -95,7 +95,7 @@ Content here.
         finally:
             path.unlink()
 
-    @pytest.mark.req("REQ-012", "REQ-013")
+    @pytest.mark.req("SPEC-002/REQ-012", "SPEC-002/REQ-013")
     def test_parse_body_content(self):
         """Test that body content is captured under headings."""
         content = """# Title
@@ -128,7 +128,7 @@ More content here.
         finally:
             path.unlink()
 
-    @pytest.mark.req("REQ-007")
+    @pytest.mark.req("SPEC-002/REQ-007")
     def test_flatten_headings(self):
         """Test flattening heading tree."""
         content = """# Title
@@ -159,13 +159,13 @@ More content here.
 class TestEARSValidator:
     """Tests for EARSValidator."""
 
-    @pytest.mark.req("REQ-027", "REQ-031")
+    @pytest.mark.req("SPEC-002/REQ-027", "SPEC-002/REQ-031")
     def test_unconditional_requirement(self):
         """Test validation of unconditional requirements."""
         assert EARSValidator.is_ears_compliant("The system shall process all requests.")
         assert EARSValidator.is_ears_compliant("The application shall store data.")
 
-    @pytest.mark.req("REQ-028")
+    @pytest.mark.req("SPEC-002/REQ-028")
     def test_event_driven_requirement(self):
         """Test validation of event-driven requirements (WHEN)."""
         assert EARSValidator.is_ears_compliant(
@@ -175,7 +175,7 @@ class TestEARSValidator:
             "When receiving a request, the system shall validate the input."
         )
 
-    @pytest.mark.req("REQ-029")
+    @pytest.mark.req("SPEC-002/REQ-029")
     def test_conditional_requirement(self):
         """Test validation of conditional requirements (IF/THEN)."""
         assert EARSValidator.is_ears_compliant(
@@ -185,14 +185,14 @@ class TestEARSValidator:
             "If data is invalid, then the system shall reject the request."
         )
 
-    @pytest.mark.req("REQ-030")
+    @pytest.mark.req("SPEC-002/REQ-030")
     def test_optional_requirement(self):
         """Test validation of optional requirements (WHERE)."""
         assert EARSValidator.is_ears_compliant(
             "WHERE the user has permissions, the system shall allow modifications."
         )
 
-    @pytest.mark.req("REQ-031")
+    @pytest.mark.req("SPEC-002/REQ-031")
     def test_test_requirements(self):
         """Test validation of test-specific requirements."""
         assert EARSValidator.is_ears_compliant("Unit tests shall cover all error cases.")
@@ -200,7 +200,7 @@ class TestEARSValidator:
             "Integration tests shall validate end-to-end workflows."
         )
 
-    @pytest.mark.req("REQ-032")
+    @pytest.mark.req("SPEC-002/REQ-032")
     def test_non_ears_compliant(self):
         """Test detection of non-compliant requirements."""
         # Missing "shall"
@@ -209,7 +209,7 @@ class TestEARSValidator:
         # Wrong structure
         assert not EARSValidator.is_ears_compliant("Process all requests quickly.")
 
-    @pytest.mark.req("REQ-026")
+    @pytest.mark.req("SPEC-002/REQ-026")
     def test_requirement_id_pattern(self):
         """Test requirement ID pattern matching."""
         assert EARSValidator.REQUIREMENT_ID.match("**REQ-001**: ")
@@ -219,14 +219,14 @@ class TestEARSValidator:
         assert not EARSValidator.REQUIREMENT_ID.match("**INVALID-001**: ")
         assert not EARSValidator.REQUIREMENT_ID.match("REQ-001: ")
 
-    @pytest.mark.req("REQ-025", "REQ-027")
+    @pytest.mark.req("SPEC-002/REQ-025", "SPEC-002/REQ-027")
     def test_validate_requirement_valid(self):
         """Test validation of a valid requirement line."""
         line = "**REQ-001**: The system shall process all requests."
         violation = EARSValidator.validate_requirement(1, line, "test.md")
         assert violation is None
 
-    @pytest.mark.req("REQ-032")
+    @pytest.mark.req("SPEC-002/REQ-032")
     def test_validate_requirement_invalid(self):
         """Test validation of an invalid requirement line."""
         line = "**REQ-001**: The system processes requests."
@@ -236,7 +236,7 @@ class TestEARSValidator:
         assert violation.severity == "error"
         assert "EARS format" in violation.message
 
-    @pytest.mark.req("REQ-025")
+    @pytest.mark.req("SPEC-002/REQ-025")
     def test_validate_non_requirement_line(self):
         """Test that non-requirement lines are not validated."""
         line = "This is just normal text."
@@ -251,7 +251,9 @@ class TestMarkdownSchemaValidator:
         """Create a temporary directory for testing."""
         return tempfile.mkdtemp()
 
-    @pytest.mark.req("REQ-001", "REQ-002", "REQ-017", "TEST-001")
+    @pytest.mark.req(
+        "SPEC-002/REQ-001", "SPEC-002/REQ-002", "SPEC-002/REQ-017", "SPEC-002/TEST-001"
+    )
     def test_valid_spec_file(self):
         """Test validation of a valid specification file."""
         temp_dir = self.create_temp_dir()
@@ -295,7 +297,7 @@ This is a test specification.
 
             shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-014", "REQ-015", "TEST-002")
+    @pytest.mark.req("SPEC-002/REQ-014", "SPEC-002/REQ-015", "SPEC-002/TEST-002")
     def test_missing_metadata(self):
         """Test detection of missing metadata fields."""
         temp_dir = self.create_temp_dir()
@@ -334,7 +336,9 @@ Content here.
 
             shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-018", "REQ-021", "REQ-023", "TEST-003")
+    @pytest.mark.req(
+        "SPEC-002/REQ-018", "SPEC-002/REQ-021", "SPEC-002/REQ-023", "SPEC-002/TEST-003"
+    )
     def test_missing_required_heading(self):
         """Test detection of missing required headings."""
         temp_dir = self.create_temp_dir()
@@ -368,7 +372,7 @@ Content here.
 
             shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-032", "REQ-034", "TEST-004")
+    @pytest.mark.req("SPEC-002/REQ-032", "SPEC-002/REQ-034", "SPEC-002/TEST-004")
     def test_invalid_ears_format(self):
         """Test detection of invalid EARS format requirements."""
         temp_dir = self.create_temp_dir()
@@ -408,7 +412,7 @@ Test content.
 
             shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-004", "TEST-005")
+    @pytest.mark.req("SPEC-002/REQ-004", "SPEC-002/TEST-005")
     def test_gitignore_respected(self):
         """Test that .gitignore patterns are respected."""
         temp_dir = self.create_temp_dir()
@@ -434,7 +438,7 @@ Test content.
 
             shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-005", "TEST-005")
+    @pytest.mark.req("SPEC-002/REQ-005", "SPEC-002/TEST-005")
     def test_gitignore_disabled(self):
         """Test validation with gitignore disabled."""
         temp_dir = self.create_temp_dir()
@@ -474,7 +478,7 @@ Test
 
             shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-020", "REQ-022", "TEST-003")
+    @pytest.mark.req("SPEC-002/REQ-020", "SPEC-002/REQ-022", "SPEC-002/TEST-003")
     def test_h1_pattern_matching(self):
         """Test that H1 heading pattern is validated correctly."""
         temp_dir = self.create_temp_dir()
@@ -512,7 +516,7 @@ Test
 
             shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-048", "REQ-049", "TEST-006")
+    @pytest.mark.req("SPEC-002/REQ-048", "SPEC-002/REQ-049", "SPEC-002/TEST-006")
     def test_multiple_files(self):
         """Test validation of multiple files."""
         temp_dir = self.create_temp_dir()
@@ -561,7 +565,7 @@ Test
 
             shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-033", "REQ-034")
+    @pytest.mark.req("SPEC-002/REQ-033", "SPEC-002/REQ-034")
     def test_ears_validation_in_configured_sections(self):
         """Test that EARS validation only occurs in configured sections."""
         temp_dir = self.create_temp_dir()
@@ -599,7 +603,7 @@ This is just normal text without "shall" and that's fine here.
 
             shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-038", "REQ-043", "REQ-044")
+    @pytest.mark.req("SPEC-002/REQ-038", "SPEC-002/REQ-043", "SPEC-002/REQ-044")
     def test_default_schema_and_root_directory(self):
         """Test using default schema and default root directory."""
         temp_dir = self.create_temp_dir()
@@ -636,7 +640,7 @@ Content
 
             shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-048", "REQ-049", "REQ-050", "REQ-054")
+    @pytest.mark.req("SPEC-002/REQ-048", "SPEC-002/REQ-049", "SPEC-002/REQ-050", "SPEC-002/REQ-054")
     def test_validation_result_reporting(self):
         """Test that validation results include all required statistics."""
         temp_dir = self.create_temp_dir()
@@ -685,7 +689,7 @@ Content
 
             shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-051", "REQ-052", "REQ-053")
+    @pytest.mark.req("SPEC-002/REQ-051", "SPEC-002/REQ-052", "SPEC-002/REQ-053")
     def test_violation_details_and_output(self):
         """Test that violations include all required details."""
         temp_dir = self.create_temp_dir()
@@ -723,7 +727,7 @@ Content
 
             shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-054", "REQ-055")
+    @pytest.mark.req("SPEC-002/REQ-054", "SPEC-002/REQ-055")
     def test_exit_code_behavior(self):
         """Test that is_valid correctly indicates exit code behavior."""
         temp_dir = self.create_temp_dir()
@@ -765,7 +769,7 @@ Content
 
             shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-056")
+    @pytest.mark.req("SPEC-002/REQ-056")
     def test_unreadable_file_handling(self):
         """Test graceful handling of unreadable markdown files."""
         temp_dir = self.create_temp_dir()
@@ -790,7 +794,7 @@ Content
 
         shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-046")
+    @pytest.mark.req("SPEC-002/REQ-046")
     def test_verbose_option(self):
         """Test that verbose mode can be configured."""
         temp_dir = self.create_temp_dir()
@@ -813,7 +817,7 @@ Content
 
         shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-047")
+    @pytest.mark.req("SPEC-002/REQ-047")
     def test_no_gitignore_option(self):
         """Test that gitignore can be disabled via option."""
         temp_dir = self.create_temp_dir()
@@ -828,7 +832,7 @@ Content
 
         shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-016")
+    @pytest.mark.req("SPEC-002/REQ-016")
     def test_metadata_configuration(self):
         """Test that schema defines required and optional metadata fields."""
         temp_dir = self.create_temp_dir()
@@ -850,7 +854,7 @@ Content
 
         shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-024")
+    @pytest.mark.req("SPEC-002/REQ-024")
     def test_required_headings_pattern(self):
         """Test that default schema requires specific heading patterns."""
         temp_dir = self.create_temp_dir()
@@ -868,7 +872,7 @@ Content
 
         shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-057")
+    @pytest.mark.req("SPEC-002/REQ-057")
     def test_nonexistent_config_file_uses_defaults(self):
         """Test that nonexistent configuration files fall back to defaults gracefully."""
         temp_dir = self.create_temp_dir()
@@ -887,7 +891,7 @@ Content
 
         shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("REQ-058", "REQ-059")
+    @pytest.mark.req("SPEC-002/REQ-058", "SPEC-002/REQ-059")
     def test_error_reporting_behavior(self):
         """Test that errors are properly reported and can include stack traces."""
         temp_dir = self.create_temp_dir()
@@ -906,7 +910,7 @@ Content
 
         shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("NFR-002")
+    @pytest.mark.req("SPEC-002/NFR-002")
     def test_clear_actionable_error_messages(self):
         """Test that validation errors provide clear, actionable messages."""
         temp_dir = self.create_temp_dir()
@@ -945,7 +949,7 @@ No metadata fields.
 
         shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("NFR-003")
+    @pytest.mark.req("SPEC-002/NFR-003")
     def test_minimal_dependencies(self):
         """Test that the validator uses minimal dependencies, specifically pathspec."""
         # Verify pathspec is used (it should be available and is the main dependency)
@@ -965,7 +969,7 @@ No metadata fields.
 
         shutil.rmtree(temp_dir)
 
-    @pytest.mark.req("TEST-007")
+    @pytest.mark.req("SPEC-002/TEST-007")
     def test_integration_with_real_spec_files(self):
         """Integration test: validate real specification files from the project."""
 
