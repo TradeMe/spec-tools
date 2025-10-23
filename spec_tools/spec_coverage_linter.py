@@ -78,6 +78,38 @@ class SpecCoverageLinter:
         self.specs_dir = Path(specs_dir) if specs_dir else self.root_dir / "specs"
         self.tests_dir = Path(tests_dir) if tests_dir else self.root_dir / "tests"
 
+    def is_spec_provisional(self, spec_file: Path) -> bool:
+        """Check if a spec is provisional and should be excluded from coverage.
+
+        A spec is considered provisional if:
+        1. It's in a 'future' subdirectory, OR
+        2. Its Status metadata field is 'Provisional' or 'Planned'
+
+        Args:
+            spec_file: Path to the spec markdown file
+
+        Returns:
+            True if the spec is provisional and should be excluded
+        """
+        # Check if spec is in future/ directory
+        relative_path = spec_file.relative_to(self.specs_dir)
+        if "future" in relative_path.parts:
+            return True
+
+        # Check Status metadata field
+        try:
+            content = spec_file.read_text(encoding="utf-8")
+            # Look for **Status**: value in the first 20 lines
+            for line in content.split("\n")[:20]:
+                if line.startswith("**Status**:"):
+                    status = line.split(":", 1)[1].strip()
+                    if status.lower() in ("provisional", "planned"):
+                        return True
+        except Exception:
+            pass
+
+        return False
+
     def extract_requirements_from_spec(self, spec_file: Path) -> set[str]:
         """Extract all requirement IDs from a spec file.
 
@@ -221,9 +253,13 @@ class SpecCoverageLinter:
         Returns:
             SpecCoverageResult with validation results
         """
-        # Extract all requirements from spec files
+        # Extract all requirements from spec files (excluding provisional specs)
         all_requirements = set()
         for spec_file in self.specs_dir.rglob("*.md"):
+            # Skip provisional specs (future/planned features)
+            if self.is_spec_provisional(spec_file):
+                continue
+
             requirements = self.extract_requirements_from_spec(spec_file)
             all_requirements.update(requirements)
 

@@ -3,7 +3,7 @@
 **ID**: SPEC-003
 **Version**: 1.0
 **Date**: 2025-10-23
-**Status**: Draft
+**Status**: Provisional
 **Milestone**: milestone-001-semantic-test-adherence
 
 ## Overview

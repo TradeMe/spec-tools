@@ -62,9 +62,28 @@ This document tracks implemented features and planned milestones for the spec-to
   - Supports exact text and regex pattern matching
   - Configuration via `.specschemaconfig` or `pyproject.toml`
 
+## Specification Status Field
+
+All specification files include a `**Status**` metadata field that indicates their implementation state:
+
+- **Draft**: Specification is complete and actively being implemented/tested (counted in coverage)
+- **Approved**: Specification is finalized and fully implemented (counted in coverage)
+- **Provisional**: Specification is planned for future implementation (excluded from coverage)
+- **Planned**: Alternative status for future features (excluded from coverage)
+- **Deprecated**: Specification is no longer applicable (excluded from coverage)
+
+### Provisional Specifications
+
+Provisional specifications (planned features not yet implemented) are excluded from coverage validation to avoid artificially lowering coverage metrics. A spec is considered provisional if:
+
+1. It's located in the `specs/future/` directory, OR
+2. Its `**Status**` field is set to `Provisional` or `Planned`
+
+The `check-coverage` and `check-structure` linters automatically skip provisional specs.
+
 ## Planned Milestones
 
-Future milestone specifications are stored in `specs/future/` to distinguish them from implemented features.
+Future milestone specifications are stored in `specs/future/` with `Status: Provisional`.
 
 ### Milestone 001: Semantic Test Adherence
 
