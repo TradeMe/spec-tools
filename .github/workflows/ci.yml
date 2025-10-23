@@ -74,3 +74,12 @@ jobs:
 
     - name: Validate spec schema
       run: uv run spec-tools check-schema --verbose
+
+    - name: Validate unique spec IDs
+      run: uv run spec-tools check-unique-specs
+
+    - name: Validate semantic test-adherence (optional)
+      run: uv run spec-tools check-semantic-test-adherence --verbose
+      continue-on-error: true
+      env:
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
