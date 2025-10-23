@@ -15,6 +15,7 @@ test-project/pyproject.toml
 
 # Configuration files
 pyproject.toml
+uv.lock
 .specallowlist
 
 # Git configuration
