@@ -66,6 +66,7 @@ class SpecCoverageLinter:
         specs_dir: Path | None = None,
         tests_dir: Path | None = None,
         root_dir: Path | None = None,
+        min_coverage: float = 100.0,
     ):
         """Initialize the spec coverage linter.
 
@@ -73,10 +74,12 @@ class SpecCoverageLinter:
             specs_dir: Directory containing spec files (default: root_dir/specs)
             tests_dir: Directory containing test files (default: root_dir/tests)
             root_dir: Root directory of the project (default: current directory)
+            min_coverage: Minimum acceptable coverage percentage (default: 100.0)
         """
         self.root_dir = Path(root_dir) if root_dir else Path.cwd()
         self.specs_dir = Path(specs_dir) if specs_dir else self.root_dir / "specs"
         self.tests_dir = Path(tests_dir) if tests_dir else self.root_dir / "tests"
+        self.min_coverage = min_coverage
 
     def extract_requirements_from_spec(self, spec_file: Path) -> set[str]:
         """Extract all requirement IDs from a spec file.
@@ -256,8 +259,8 @@ class SpecCoverageLinter:
             (covered_count / total_requirements * 100) if total_requirements > 0 else 0.0
         )
 
-        # Validation passes if all requirements are covered
-        is_valid = len(uncovered_requirements) == 0
+        # Validation passes if coverage meets or exceeds minimum threshold
+        is_valid = coverage_percentage >= self.min_coverage
 
         return SpecCoverageResult(
             total_requirements=total_requirements,

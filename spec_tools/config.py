@@ -70,6 +70,14 @@ class Config:
         """
         return self.get("check-schema", {})
 
+    def get_check_coverage_config(self) -> dict[str, Any]:
+        """Get check-coverage-specific configuration.
+
+        Returns:
+            Dictionary of check-coverage configuration values.
+        """
+        return self.get("check-coverage", {})
+
 
 def find_pyproject_toml(start_path: Path | None = None) -> Path | None:
     """Find pyproject.toml by walking up the directory tree.
@@ -138,7 +146,7 @@ def merge_config_with_args(config: Config, args: Any, command: str) -> dict[str,
     Args:
         config: Config object from pyproject.toml.
         args: Parsed command-line arguments.
-        command: Command name ('lint', 'check-links', or 'check-schema').
+        command: Command name ('lint', 'check-links', 'check-schema', or 'check-coverage').
 
     Returns:
         Dictionary of merged configuration values.
@@ -224,5 +232,16 @@ def merge_config_with_args(config: Config, args: Any, command: str) -> dict[str,
             result["respect_gitignore"] = cmd_config["use_gitignore"]
         else:
             result["respect_gitignore"] = True
+
+    elif command == "check-coverage":
+        cmd_config = config.get_check_coverage_config()
+
+        # min_coverage
+        if hasattr(args, "min_coverage") and args.min_coverage is not None:
+            result["min_coverage"] = args.min_coverage
+        elif "min_coverage" in cmd_config:
+            result["min_coverage"] = cmd_config["min_coverage"]
+        else:
+            result["min_coverage"] = 100.0
 
     return result
