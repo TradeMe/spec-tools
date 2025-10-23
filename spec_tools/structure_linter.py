@@ -183,8 +183,12 @@ class StructureLinter:
         Returns:
             StructureValidationResult with validation results
         """
-        # Get all spec files
-        spec_files = list(self.specs_dir.rglob("*.md"))
+        # Get all spec files, excluding specs/future/ directory
+        spec_files = [
+            f
+            for f in self.specs_dir.rglob("*.md")
+            if "future" not in f.relative_to(self.specs_dir).parts
+        ]
 
         # Check each spec has a corresponding test
         spec_to_test_mapping = {}
