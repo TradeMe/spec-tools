@@ -15,6 +15,8 @@ class TestSpecCoverageLinter:
             """
 # Test Specification
 
+**ID**: SPEC-001
+
 **REQ-001**: The system shall do something.
 
 **REQ-002**: The system shall do something else.
@@ -26,9 +28,9 @@ class TestSpecCoverageLinter:
         linter = SpecCoverageLinter(root_dir=tmp_path)
         requirements = linter.extract_requirements_from_spec(spec_file)
 
-        assert "REQ-001" in requirements
-        assert "REQ-002" in requirements
-        assert "NFR-001" in requirements
+        assert "SPEC-001/REQ-001" in requirements
+        assert "SPEC-001/REQ-002" in requirements
+        assert "SPEC-001/NFR-001" in requirements
         assert len(requirements) == 3
 
     def test_extract_requirements_from_tests(self, tmp_path):
@@ -41,12 +43,12 @@ class TestSpecCoverageLinter:
 
 import pytest
 
-@pytest.mark.req("REQ-001")
+@pytest.mark.req("SPEC-999/REQ-001")
 def test_something():
     """Test for REQ-001."""
     assert True
 
-@pytest.mark.req("REQ-002", "REQ-003")
+@pytest.mark.req("SPEC-999/REQ-002", "SPEC-999/REQ-003")
 def test_combined():
     """Test for REQ-002 and REQ-003."""
     assert True
@@ -61,11 +63,11 @@ def test_unmarked():
         test_to_reqs = linter.extract_requirements_from_tests(test_file)
 
         assert "test_example.py::test_something" in test_to_reqs
-        assert "REQ-001" in test_to_reqs["test_example.py::test_something"]
+        assert "SPEC-999/REQ-001" in test_to_reqs["test_example.py::test_something"]
 
         assert "test_example.py::test_combined" in test_to_reqs
-        assert "REQ-002" in test_to_reqs["test_example.py::test_combined"]
-        assert "REQ-003" in test_to_reqs["test_example.py::test_combined"]
+        assert "SPEC-999/REQ-002" in test_to_reqs["test_example.py::test_combined"]
+        assert "SPEC-999/REQ-003" in test_to_reqs["test_example.py::test_combined"]
 
         # Unmarked test should not appear
         assert "test_example.py::test_unmarked" not in test_to_reqs
@@ -83,7 +85,7 @@ import pytest
 class TestFeature:
     """Test class."""
 
-    @pytest.mark.req("REQ-001")
+    @pytest.mark.req("SPEC-999/REQ-001")
     def test_method(self):
         """Test method."""
         assert True
@@ -94,7 +96,7 @@ class TestFeature:
         test_to_reqs = linter.extract_requirements_from_tests(test_file)
 
         assert "test_class.py::TestFeature::test_method" in test_to_reqs
-        assert "REQ-001" in test_to_reqs["test_class.py::TestFeature::test_method"]
+        assert "SPEC-999/REQ-001" in test_to_reqs["test_class.py::TestFeature::test_method"]
 
     def test_full_coverage(self, tmp_path):
         """Test when all requirements are covered."""
@@ -102,7 +104,8 @@ class TestFeature:
         spec_dir = tmp_path / "specs"
         spec_dir.mkdir()
         (spec_dir / "feature.md").write_text(
-            """
+            """**ID**: SPEC-999
+
 **REQ-001**: Do something.
 **REQ-002**: Do something else.
 """
@@ -114,11 +117,11 @@ class TestFeature:
         (tests_dir / "test_feature.py").write_text(
             """import pytest
 
-@pytest.mark.req("REQ-001")
+@pytest.mark.req("SPEC-999/REQ-001")
 def test_req_001():
     assert True
 
-@pytest.mark.req("REQ-002")
+@pytest.mark.req("SPEC-999/REQ-002")
 def test_req_002():
     assert True
 """
@@ -139,7 +142,8 @@ def test_req_002():
         spec_dir = tmp_path / "specs"
         spec_dir.mkdir()
         (spec_dir / "feature.md").write_text(
-            """
+            """**ID**: SPEC-999
+
 **REQ-001**: Do something.
 **REQ-002**: Do something else.
 **REQ-003**: Do another thing.
@@ -152,7 +156,7 @@ def test_req_002():
         (tests_dir / "test_feature.py").write_text(
             """import pytest
 
-@pytest.mark.req("REQ-001")
+@pytest.mark.req("SPEC-999/REQ-001")
 def test_req_001():
     assert True
 """
@@ -165,8 +169,8 @@ def test_req_001():
         assert result.total_requirements == 3
         assert result.covered_requirements == 1
         assert len(result.uncovered_requirements) == 2
-        assert "REQ-002" in result.uncovered_requirements
-        assert "REQ-003" in result.uncovered_requirements
+        assert "SPEC-999/REQ-002" in result.uncovered_requirements
+        assert "SPEC-999/REQ-003" in result.uncovered_requirements
         assert result.coverage_percentage < 100.0
 
     def test_tests_without_markers(self, tmp_path):
@@ -174,7 +178,7 @@ def test_req_001():
         # Create spec
         spec_dir = tmp_path / "specs"
         spec_dir.mkdir()
-        (spec_dir / "feature.md").write_text("**REQ-001**: Do something.")
+        (spec_dir / "feature.md").write_text("**ID**: SPEC-999\n\n**REQ-001**: Do something.")
 
         # Create tests with some unmarked
         tests_dir = tmp_path / "tests"
@@ -182,7 +186,7 @@ def test_req_001():
         (tests_dir / "test_feature.py").write_text(
             """import pytest
 
-@pytest.mark.req("REQ-001")
+@pytest.mark.req("SPEC-999/REQ-001")
 def test_marked():
     assert True
 
@@ -204,8 +208,8 @@ def test_unmarked():
         # Create multiple specs
         spec_dir = tmp_path / "specs"
         spec_dir.mkdir()
-        (spec_dir / "feature1.md").write_text("**REQ-001**: Feature 1.")
-        (spec_dir / "feature2.md").write_text("**REQ-002**: Feature 2.")
+        (spec_dir / "feature1.md").write_text("**ID**: SPEC-999\n\n**REQ-001**: Feature 1.")
+        (spec_dir / "feature2.md").write_text("**ID**: SPEC-999\n\n**REQ-002**: Feature 2.")
 
         # Create tests
         tests_dir = tmp_path / "tests"
@@ -213,7 +217,7 @@ def test_unmarked():
         (tests_dir / "test_features.py").write_text(
             """import pytest
 
-@pytest.mark.req("REQ-001", "REQ-002")
+@pytest.mark.req("SPEC-999/REQ-001", "REQ-002")
 def test_both():
     assert True
 """
@@ -231,7 +235,7 @@ def test_both():
         # Create spec
         spec_dir = tmp_path / "specs"
         spec_dir.mkdir()
-        (spec_dir / "feature.md").write_text("**REQ-001**: Do something.")
+        (spec_dir / "feature.md").write_text("**ID**: SPEC-999\n\n**REQ-001**: Do something.")
 
         # Create multiple tests for same requirement
         tests_dir = tmp_path / "tests"
@@ -239,11 +243,11 @@ def test_both():
         (tests_dir / "test_feature.py").write_text(
             """import pytest
 
-@pytest.mark.req("REQ-001")
+@pytest.mark.req("SPEC-999/REQ-001")
 def test_req_001_a():
     assert True
 
-@pytest.mark.req("REQ-001")
+@pytest.mark.req("SPEC-999/REQ-001")
 def test_req_001_b():
     assert True
 """
@@ -252,8 +256,8 @@ def test_req_001_b():
         linter = SpecCoverageLinter(root_dir=tmp_path)
         result = linter.lint()
 
-        assert "REQ-001" in result.requirement_to_tests
-        assert len(result.requirement_to_tests["REQ-001"]) == 2
+        assert "SPEC-999/REQ-001" in result.requirement_to_tests
+        assert len(result.requirement_to_tests["SPEC-999/REQ-001"]) == 2
 
     def test_empty_specs_dir(self, tmp_path):
         """Test with no spec files."""
@@ -274,7 +278,7 @@ def test_req_001_b():
         # Create minimal setup
         spec_dir = tmp_path / "specs"
         spec_dir.mkdir()
-        (spec_dir / "feature.md").write_text("**REQ-001**: Do something.")
+        (spec_dir / "feature.md").write_text("**ID**: SPEC-999\n\n**REQ-001**: Do something.")
 
         tests_dir = tmp_path / "tests"
         tests_dir.mkdir()
@@ -291,7 +295,7 @@ def test_req_001_b():
         """Test that malformed test files are handled gracefully."""
         spec_dir = tmp_path / "specs"
         spec_dir.mkdir()
-        (spec_dir / "feature.md").write_text("**REQ-001**: Do something.")
+        (spec_dir / "feature.md").write_text("**ID**: SPEC-999\n\n**REQ-001**: Do something.")
 
         tests_dir = tmp_path / "tests"
         tests_dir.mkdir()
@@ -304,13 +308,13 @@ def test_req_001_b():
 
         # Should not crash, should report uncovered requirement
         assert result.total_requirements == 1
-        assert "REQ-001" in result.uncovered_requirements
+        assert "SPEC-999/REQ-001" in result.uncovered_requirements
 
     def test_complete_coverage_with_tests_without_markers(self, tmp_path):
         """Test reporting when all requirements are covered but some tests lack markers."""
         spec_dir = tmp_path / "specs"
         spec_dir.mkdir()
-        (spec_dir / "feature.md").write_text("**REQ-001**: Do something.")
+        (spec_dir / "feature.md").write_text("**ID**: SPEC-999\n\n**REQ-001**: Do something.")
 
         tests_dir = tmp_path / "tests"
         tests_dir.mkdir()
@@ -319,7 +323,7 @@ def test_req_001_b():
         (tests_dir / "test_feature.py").write_text("""
 import pytest
 
-@pytest.mark.req("REQ-001")
+@pytest.mark.req("SPEC-999/REQ-001")
 def test_requirement_one():
     pass
 
@@ -340,7 +344,7 @@ def test_helper_function():
         """Test that 100% coverage results in is_valid=True."""
         spec_dir = tmp_path / "specs"
         spec_dir.mkdir()
-        (spec_dir / "feature.md").write_text("**REQ-001**: Do something.")
+        (spec_dir / "feature.md").write_text("**ID**: SPEC-999\n\n**REQ-001**: Do something.")
 
         tests_dir = tmp_path / "tests"
         tests_dir.mkdir()
@@ -348,7 +352,7 @@ def test_helper_function():
         (tests_dir / "test_feature.py").write_text("""
 import pytest
 
-@pytest.mark.req("REQ-001")
+@pytest.mark.req("SPEC-999/REQ-001")
 def test_requirement_one():
     pass
 """)

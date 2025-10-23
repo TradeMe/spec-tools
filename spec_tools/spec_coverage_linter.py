@@ -61,6 +61,9 @@ class SpecCoverageLinter:
     # Pattern to match requirement IDs in spec files
     REQ_PATTERN = re.compile(r"\*\*([A-Z]+-\d{3})\*\*:")
 
+    # Pattern to match SPEC ID in metadata
+    SPEC_ID_PATTERN = re.compile(r"^\*\*ID\*\*:\s*(SPEC-\d+)", re.MULTILINE)
+
     def __init__(
         self,
         specs_dir: Path | None = None,
@@ -113,21 +116,45 @@ class SpecCoverageLinter:
 
         return False
 
-    def extract_requirements_from_spec(self, spec_file: Path) -> set[str]:
-        """Extract all requirement IDs from a spec file.
+    def extract_spec_id(self, spec_file: Path) -> str | None:
+        """Extract the SPEC ID from a spec file.
 
         Args:
             spec_file: Path to the spec markdown file
 
         Returns:
-            Set of requirement IDs found in the spec
+            SPEC ID if found, None otherwise
+        """
+        try:
+            content = spec_file.read_text(encoding="utf-8")
+            match = self.SPEC_ID_PATTERN.search(content)
+            return match.group(1) if match else None
+        except Exception:
+            return None
+
+    def extract_requirements_from_spec(self, spec_file: Path) -> set[str]:
+        """Extract all fully qualified requirement IDs from a spec file.
+
+        Args:
+            spec_file: Path to the spec markdown file
+
+        Returns:
+            Set of fully qualified requirement IDs (SPEC-XXX/REQ-YYY) found in the spec
         """
         requirements = set()
         content = spec_file.read_text(encoding="utf-8")
 
+        # Get the SPEC ID for this file
+        spec_id = self.extract_spec_id(spec_file)
+        if not spec_id:
+            # If no SPEC ID, skip this file
+            return requirements
+
         for match in self.REQ_PATTERN.finditer(content):
             req_id = match.group(1)
-            requirements.add(req_id)
+            # Build fully qualified requirement ID
+            fully_qualified_id = f"{spec_id}/{req_id}"
+            requirements.add(fully_qualified_id)
 
         return requirements
 

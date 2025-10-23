@@ -10,7 +10,7 @@ from spec_tools.markdown_link_validator import MarkdownLinkValidator
 class TestMarkdownLinkValidator:
     """Test suite for MarkdownLinkValidator."""
 
-    @pytest.mark.req("REQ-002")
+    @pytest.mark.req("SPEC-001/REQ-002")
     def test_find_inline_links(self, tmp_path):
         """Test extracting inline markdown links."""
         md_file = tmp_path / "test.md"
@@ -32,7 +32,7 @@ Visit [external site](https://example.com) for more info.
         assert links[2].url == "https://example.com"
         assert links[2].is_external
 
-    @pytest.mark.req("REQ-003")
+    @pytest.mark.req("SPEC-001/REQ-003")
     @pytest.mark.skip(reason="Reference-style links not yet implemented - REQ-003 uncovered")
     def test_find_reference_style_links(self, tmp_path):
         """Test extracting reference-style markdown links.
@@ -64,7 +64,7 @@ This is a [link to file][ref1] and another [link][ref2].
         assert "./other.md" in urls
         assert "https://example.com" in urls
 
-    @pytest.mark.req("REQ-004")
+    @pytest.mark.req("SPEC-001/REQ-004")
     def test_find_links_with_anchors(self, tmp_path):
         """Test extracting links with anchor fragments."""
         md_file = tmp_path / "test.md"
@@ -83,7 +83,7 @@ Jump to [section](#heading) or see [other file](./doc.md#introduction).
         assert links[1].url == "./doc.md"
         assert links[1].anchor == "introduction"
 
-    @pytest.mark.req("REQ-006")
+    @pytest.mark.req("SPEC-001/REQ-006")
     def test_validate_internal_link_exists(self, tmp_path):
         """Test validating an internal link that exists."""
         # Create target file
@@ -100,7 +100,7 @@ Jump to [section](#heading) or see [other file](./doc.md#introduction).
         assert is_valid
         assert reason == ""
 
-    @pytest.mark.req("REQ-007")
+    @pytest.mark.req("SPEC-001/REQ-007")
     def test_validate_internal_link_not_found(self, tmp_path):
         """Test validating an internal link that doesn't exist."""
         md_file = tmp_path / "source.md"
@@ -113,7 +113,7 @@ Jump to [section](#heading) or see [other file](./doc.md#introduction).
         assert not is_valid
         assert "File not found" in reason
 
-    @pytest.mark.req("REQ-005")
+    @pytest.mark.req("SPEC-001/REQ-005")
     def test_validate_internal_link_with_subdirectory(self, tmp_path):
         """Test validating internal links across subdirectories."""
         # Create directory structure
@@ -132,7 +132,7 @@ Jump to [section](#heading) or see [other file](./doc.md#introduction).
         is_valid, reason = validator.validate_internal_link(links[0])
         assert is_valid
 
-    @pytest.mark.req("REQ-009")
+    @pytest.mark.req("SPEC-001/REQ-009")
     def test_validate_anchor_in_same_file(self, tmp_path):
         """Test validating an anchor in the same file."""
         md_file = tmp_path / "doc.md"
@@ -154,7 +154,7 @@ Some config info.
         is_valid, reason = validator.validate_internal_link(links[0])
         assert is_valid
 
-    @pytest.mark.req("REQ-009")
+    @pytest.mark.req("SPEC-001/REQ-009")
     def test_validate_anchor_not_found(self, tmp_path):
         """Test validating an anchor that doesn't exist."""
         md_file = tmp_path / "doc.md"
@@ -173,7 +173,7 @@ Jump to [missing](#nonexistent).
         assert not is_valid
         assert "Anchor #nonexistent not found" in reason
 
-    @pytest.mark.req("REQ-008")
+    @pytest.mark.req("SPEC-001/REQ-008")
     def test_validate_anchor_in_different_file(self, tmp_path):
         """Test validating an anchor in a different file."""
         # Create target file with heading
@@ -196,7 +196,7 @@ Login details here.
         is_valid, reason = validator.validate_internal_link(links[0])
         assert is_valid
 
-    @pytest.mark.req("REQ-010")
+    @pytest.mark.req("SPEC-001/REQ-010")
     def test_heading_to_anchor_conversion(self):
         """Test markdown heading to anchor ID conversion."""
         validator = MarkdownLinkValidator()
@@ -207,7 +207,7 @@ Login details here.
         assert validator._heading_to_anchor("Getting Started!") == "getting-started"
         assert validator._heading_to_anchor("What's New?") == "whats-new"
 
-    @pytest.mark.req("REQ-011")
+    @pytest.mark.req("SPEC-001/REQ-011")
     def test_classify_external_link(self, tmp_path):
         """Test classifying links as external or internal."""
         md_file = tmp_path / "test.md"
@@ -226,7 +226,7 @@ Login details here.
         assert links[1].is_external
         assert not links[2].is_external
 
-    @pytest.mark.req("REQ-017", "REQ-021")
+    @pytest.mark.req("SPEC-001/REQ-017", "SPEC-001/REQ-021")
     def test_private_url_detection_domain(self, tmp_path):
         """Test detecting private URLs by domain."""
         config_file = tmp_path / ".speclinkconfig"
@@ -255,7 +255,7 @@ localhost
         assert links[1].is_private
         assert not links[2].is_private
 
-    @pytest.mark.req("REQ-017", "REQ-021")
+    @pytest.mark.req("SPEC-001/REQ-017", "SPEC-001/REQ-021")
     def test_private_url_detection_prefix(self, tmp_path):
         """Test detecting private URLs by prefix."""
         config_file = tmp_path / ".speclinkconfig"
@@ -283,7 +283,7 @@ http://127.0.0.1:
         assert links[1].is_private
         assert not links[2].is_private
 
-    @pytest.mark.req("REQ-019")
+    @pytest.mark.req("SPEC-001/REQ-019")
     def test_config_with_dash_prefix(self, tmp_path):
         """Test config file with YAML-style dash prefixes."""
         config_file = tmp_path / ".speclinkconfig"
@@ -301,7 +301,7 @@ http://127.0.0.1:
         assert "internal.company.com" in validator.private_url_patterns
         assert "https://private.example.com/" in validator.private_url_patterns
 
-    @pytest.mark.req("REQ-020")
+    @pytest.mark.req("SPEC-001/REQ-020")
     def test_no_config_file(self, tmp_path):
         """Test behavior when no config file exists."""
         validator = MarkdownLinkValidator(root_dir=tmp_path)
@@ -309,7 +309,7 @@ http://127.0.0.1:
 
         assert len(validator.private_url_patterns) == 0
 
-    @pytest.mark.req("REQ-025", "REQ-026")
+    @pytest.mark.req("SPEC-001/REQ-025", "SPEC-001/REQ-026")
     def test_get_markdown_files(self, tmp_path):
         """Test finding all markdown files."""
         # Create markdown files
@@ -329,7 +329,7 @@ http://127.0.0.1:
         assert "doc.markdown" in md_files
         assert "docs/guide.md" in md_files
 
-    @pytest.mark.req("REQ-027")
+    @pytest.mark.req("SPEC-001/REQ-027")
     def test_gitignore_respected(self, tmp_path):
         """Test that .gitignore patterns are respected."""
         # Create .gitignore
@@ -352,7 +352,7 @@ http://127.0.0.1:
         assert "test.tmp.md" not in md_files
         assert "ignored/secret.md" not in md_files
 
-    @pytest.mark.req("REQ-028")
+    @pytest.mark.req("SPEC-001/REQ-028")
     def test_gitignore_disabled(self, tmp_path):
         """Test disabling .gitignore."""
         gitignore = tmp_path / ".gitignore"
@@ -368,7 +368,7 @@ http://127.0.0.1:
         assert "included.md" in md_files
         assert "test.tmp.md" in md_files
 
-    @pytest.mark.req("REQ-012", "REQ-013")
+    @pytest.mark.req("SPEC-001/REQ-012", "SPEC-001/REQ-013")
     @patch("urllib.request.urlopen")
     def test_validate_external_link_success(self, mock_urlopen, tmp_path):
         """Test validating a successful external link."""
@@ -389,7 +389,7 @@ http://127.0.0.1:
         assert is_valid
         assert reason == ""
 
-    @pytest.mark.req("REQ-014")
+    @pytest.mark.req("SPEC-001/REQ-014")
     @patch("urllib.request.urlopen")
     def test_validate_external_link_404(self, mock_urlopen, tmp_path):
         """Test validating an external link that returns 404."""
@@ -409,7 +409,7 @@ http://127.0.0.1:
         assert not is_valid
         assert "404" in reason
 
-    @pytest.mark.req("REQ-029", "REQ-030", "REQ-033")
+    @pytest.mark.req("SPEC-001/REQ-029", "SPEC-001/REQ-030", "SPEC-001/REQ-033")
     def test_full_validation(self, tmp_path):
         """Test full validation workflow."""
         # Create some markdown files with various links
@@ -442,7 +442,7 @@ Follow these steps.
         assert result.invalid_links == 0
         assert result.is_valid
 
-    @pytest.mark.req("REQ-029", "REQ-030", "REQ-031", "REQ-034")
+    @pytest.mark.req("SPEC-001/REQ-029", "SPEC-001/REQ-030", "SPEC-001/REQ-031", "SPEC-001/REQ-034")
     def test_validation_with_invalid_links(self, tmp_path):
         """Test validation with invalid links."""
         (tmp_path / "README.md").write_text(
@@ -459,7 +459,7 @@ See [missing file](./nonexistent.md) and [bad anchor](#missing-section).
         assert not result.is_valid
         assert len(result.invalid_link_details) == 2
 
-    @pytest.mark.req("REQ-031")
+    @pytest.mark.req("SPEC-001/REQ-031")
     def test_validation_result_string(self, tmp_path):
         """Test LinkValidationResult string representation."""
         (tmp_path / "test.md").write_text("[link](./missing.md)")
@@ -474,7 +474,7 @@ See [missing file](./nonexistent.md) and [bad anchor](#missing-section).
         assert "test.md" in result_str
         assert "missing.md" in result_str
 
-    @pytest.mark.req("REQ-005")
+    @pytest.mark.req("SPEC-001/REQ-005")
     def test_link_outside_repository(self, tmp_path):
         """Test that links outside repository are rejected."""
         (tmp_path / "test.md").write_text("[escape](../../../etc/passwd)")
@@ -486,7 +486,7 @@ See [missing file](./nonexistent.md) and [bad anchor](#missing-section).
         assert not is_valid
         assert "outside repository" in reason
 
-    @pytest.mark.req("REQ-001")
+    @pytest.mark.req("SPEC-001/REQ-001")
     def test_extract_links_handles_unicode(self, tmp_path):
         """Test that link extraction handles unicode properly."""
         md_file = tmp_path / "test.md"
@@ -505,7 +505,7 @@ See [missing file](./nonexistent.md) and [bad anchor](#missing-section).
         assert links[0].text == "日本語"
         assert links[1].text == "Emoji 🎉"
 
-    @pytest.mark.req("REQ-035")
+    @pytest.mark.req("SPEC-001/REQ-035")
     def test_extract_links_handles_unreadable_file(self, tmp_path):
         """Test graceful handling of unreadable files."""
         validator = MarkdownLinkValidator(root_dir=tmp_path)
@@ -513,7 +513,7 @@ See [missing file](./nonexistent.md) and [bad anchor](#missing-section).
 
         assert len(links) == 0
 
-    @pytest.mark.req("REQ-002")
+    @pytest.mark.req("SPEC-001/REQ-002")
     def test_multiple_links_same_line(self, tmp_path):
         """Test extracting multiple links on the same line."""
         md_file = tmp_path / "test.md"
