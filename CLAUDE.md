@@ -44,18 +44,20 @@ uv add "package>=1.0.0,<2.0.0"
 
 **Syncing dependencies:**
 ```bash
-# After cloning the repository or pulling changes
-uv sync
+# After cloning the repository or pulling changes (includes dev dependencies)
+uv sync --extra dev
 
 # Sync only production dependencies
-uv sync --no-dev
+uv sync
 ```
 
 **Important:**
 - `uv add` automatically updates `pyproject.toml` and `uv.lock`
-- `uv sync` installs dependencies from `uv.lock` to ensure reproducibility
+- `uv sync --extra dev` installs both regular and development dependencies (pytest, ruff, etc.)
+- Use `uv sync --extra dev` for development work - this is what you'll almost always want
+- `uv sync` alone only installs production dependencies (use for deployments)
 - Never manually edit `uv.lock` - it's automatically managed by `uv`
-- Run `uv sync` after pulling changes that modify `uv.lock`
+- Run `uv sync --extra dev` after pulling changes that modify `uv.lock`
 
 ## Critical: Run All Linters Before Pushing
 
