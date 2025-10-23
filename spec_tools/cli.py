@@ -10,6 +10,7 @@ from .markdown_link_validator import MarkdownLinkValidator
 from .markdown_schema_validator import MarkdownSchemaValidator
 from .spec_coverage_linter import SpecCoverageLinter
 from .structure_linter import StructureLinter
+from .unique_specs_linter import UniqueSpecsLinter
 
 
 def cmd_lint(args) -> int:
@@ -199,6 +200,37 @@ def cmd_check_schema(args) -> int:
             print(result)
         elif result.is_valid:
             print(f"✓ All {result.valid_files} markdown files conform to schema")
+
+        # Return appropriate exit code
+        return 0 if result.is_valid else 1
+
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        if args.verbose:
+            raise
+        return 1
+
+
+def cmd_check_unique_specs(args) -> int:
+    """Execute the check-unique-specs command.
+
+    Args:
+        args: Parsed command-line arguments.
+
+    Returns:
+        Exit code (0 for success, 1 for failure).
+    """
+    try:
+        linter = UniqueSpecsLinter(
+            root_dir=Path(args.directory),
+            specs_dir=Path(args.specs_dir) if args.specs_dir else None,
+        )
+
+        # Run linter
+        result = linter.lint()
+
+        # Print results
+        print(result)
 
         # Return appropriate exit code
         return 0 if result.is_valid else 1
@@ -593,6 +625,59 @@ Default schema (no config file):
     )
 
     check_schema_parser.set_defaults(func=cmd_check_schema)
+
+    # Check-unique-specs command
+    check_unique_specs_parser = subparsers.add_parser(
+        "check-unique-specs",
+        help="Validate that all spec IDs and requirement IDs are unique",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Check unique specs in current directory
+  spec-tools check-unique-specs
+
+  # Check unique specs in a specific directory
+  spec-tools check-unique-specs /path/to/project
+
+  # Use custom specs directory
+  spec-tools check-unique-specs --specs-dir my-specs
+
+How it works:
+  This tool validates spec and requirement ID uniqueness by:
+  1. Extracting SPEC IDs from all spec files (e.g., SPEC-001, SPEC-002)
+  2. Verifying each SPEC ID appears in only one file
+  3. Extracting requirement IDs from each spec (e.g., REQ-001, NFR-001)
+  4. Verifying each requirement ID appears only once within its spec
+  5. Ensuring globally unique requirement IDs (SPEC-001/REQ-001)
+
+Validation rules:
+  - Each spec file must have a unique SPEC ID
+  - Within each spec, requirement IDs must be unique (no duplicate REQ-001)
+  - The combination of SPEC ID and requirement ID must be globally unique
+        """,
+    )
+
+    check_unique_specs_parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Root directory of the project (default: current directory)",
+    )
+
+    check_unique_specs_parser.add_argument(
+        "--specs-dir",
+        default=None,
+        help="Directory containing spec files (default: <directory>/specs)",
+    )
+
+    check_unique_specs_parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Verbose output",
+    )
+
+    check_unique_specs_parser.set_defaults(func=cmd_check_unique_specs)
 
     # Parse arguments
     args = parser.parse_args(argv)

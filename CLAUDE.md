@@ -78,6 +78,7 @@ uv run python -m spec_tools lint --verbose
 uv run python -m spec_tools check-structure
 uv run python -m spec_tools check-coverage
 uv run python -m spec_tools check-schema
+uv run python -m spec_tools check-unique-specs
 ```
 
 ### Quick Pre-Push Check
@@ -148,13 +149,14 @@ Remove unused imports. Ruff will flag these automatically.
 
 ### Linters
 
-The project provides five linters:
+The project provides six linters:
 
 1. **`lint`** - File allowlist validation
 2. **`check-links`** - Markdown link validation
 3. **`check-coverage`** - Spec-to-test traceability validation
 4. **`check-structure`** - Spec-to-test structure validation
 5. **`check-schema`** - Markdown schema validation
+6. **`check-unique-specs`** - Spec and requirement ID uniqueness validation
 
 ### Test Organization
 
