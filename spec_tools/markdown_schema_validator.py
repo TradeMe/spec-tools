@@ -367,6 +367,14 @@ class MarkdownSchemaValidator:
                 if ".git" in rel_path.parts:
                     continue
 
+                # Skip jobs/ directory (JTBD files have different schema)
+                if "jobs" in rel_path.parts:
+                    continue
+
+                # Skip principles.md (meta-documentation without requirements)
+                if file_path.name == "principles.md":
+                    continue
+
                 # Check if matches pattern
                 if spec.match_file(str(rel_path)):
                     matched_files.add(file_path)

@@ -86,7 +86,9 @@ class SpecCoverageLinter:
 
         A spec is considered provisional if:
         1. It's in a 'future' subdirectory, OR
-        2. Its Status metadata field is 'Provisional' or 'Planned'
+        2. It's in a 'jobs' subdirectory (JTBD files don't have requirements), OR
+        3. It's principles.md (meta-documentation without requirements), OR
+        4. Its Status metadata field is 'Provisional' or 'Planned'
 
         Args:
             spec_file: Path to the spec markdown file
@@ -94,9 +96,13 @@ class SpecCoverageLinter:
         Returns:
             True if the spec is provisional and should be excluded
         """
-        # Check if spec is in future/ directory
+        # Check if spec is in future/ or jobs/ directory
         relative_path = spec_file.relative_to(self.specs_dir)
-        if "future" in relative_path.parts:
+        if "future" in relative_path.parts or "jobs" in relative_path.parts:
+            return True
+
+        # Check if spec is principles.md (meta-documentation)
+        if spec_file.name == "principles.md":
             return True
 
         # Check Status metadata field
