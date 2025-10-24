@@ -22,3 +22,9 @@ uv.lock
 .gitignore
 .github/workflows/*.yml
 .github/workflows/*.yaml
+
+# Claude Code configuration
+.claude/hooks/session-start
+
+# Git hooks (version controlled)
+hooks/pre-commit

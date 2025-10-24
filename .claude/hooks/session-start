@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#
+# Claude Code session-start hook
+# This hook runs automatically when a Claude Code session starts
+#
+# Purpose: Install git pre-commit hooks from the version-controlled hooks/ directory
+#
+
+set -e
+
+# Get the repository root directory
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo ".")"
+
+# Paths
+HOOKS_SOURCE_DIR="${REPO_ROOT}/hooks"
+GIT_HOOKS_DIR="${REPO_ROOT}/.git/hooks"
+PRE_COMMIT_SOURCE="${HOOKS_SOURCE_DIR}/pre-commit"
+PRE_COMMIT_TARGET="${GIT_HOOKS_DIR}/pre-commit"
+
+echo "🔧 Setting up git pre-commit hooks..."
+
+# Check if the source hooks directory exists
+if [ ! -d "$HOOKS_SOURCE_DIR" ]; then
+    echo "❌ Error: hooks/ directory not found at $HOOKS_SOURCE_DIR"
+    exit 1
+fi
+
+# Check if the pre-commit hook source exists
+if [ ! -f "$PRE_COMMIT_SOURCE" ]; then
+    echo "❌ Error: pre-commit hook not found at $PRE_COMMIT_SOURCE"
+    exit 1
+fi
+
+# Create .git/hooks directory if it doesn't exist
+if [ ! -d "$GIT_HOOKS_DIR" ]; then
+    echo "⚠️  .git/hooks directory not found. Creating it..."
+    mkdir -p "$GIT_HOOKS_DIR"
+fi
+
+# Install the pre-commit hook
+echo "📋 Installing pre-commit hook..."
+cp "$PRE_COMMIT_SOURCE" "$PRE_COMMIT_TARGET"
+chmod +x "$PRE_COMMIT_TARGET"
+
+echo "✅ Git pre-commit hooks installed successfully!"
+echo ""
+echo "ℹ️  The pre-commit hook will run the following checks before each commit:"
+echo "   • Ruff linting and formatting"
+echo "   • Spec-tools validation (lint, structure, coverage, schema, unique IDs)"
+echo "   • Full test suite with coverage"
+echo ""
+echo "💡 To bypass the hook (not recommended), use: git commit --no-verify"
+echo ""
