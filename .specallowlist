@@ -24,6 +24,7 @@ uv.lock
 .github/workflows/*.yaml
 
 # Claude Code configuration
+.claude/settings.json
 .claude/hooks/session-start
 
 # Git hooks (version controlled)
