@@ -240,7 +240,6 @@ class TestEdgeCasesProject:
     def test_orphaned_tests_detected(self, project_dir):
         """Test that orphaned tests (referencing non-existent requirements) are detected."""
         linter = SpecCoverageLinter(root_dir=project_dir)
-        result = linter.lint()
 
         # Should have tests referencing non-existent requirements
         test_file = project_dir / "tests" / "test_orphaned.py"
