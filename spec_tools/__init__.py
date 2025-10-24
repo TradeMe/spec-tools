@@ -3,6 +3,7 @@
 __version__ = "0.1.0"
 
 from .linter import LintResult, SpecLinter
+from .llm_provider import LiteLLMProvider, LLMProvider
 from .markdown_link_validator import (
     Link,
     LinkValidationResult,
@@ -12,6 +13,11 @@ from .markdown_schema_validator import (
     MarkdownSchemaValidator,
     SchemaValidationResult,
     SchemaViolation,
+)
+from .semantic_test_analyzer import SemanticTestAnalyzer
+from .semantic_test_result import (
+    SemanticAnalysisResult,
+    SemanticTestAdherenceResult,
 )
 
 __all__ = [
@@ -23,5 +29,10 @@ __all__ = [
     "MarkdownSchemaValidator",
     "SchemaValidationResult",
     "SchemaViolation",
+    "LLMProvider",
+    "LiteLLMProvider",
+    "SemanticTestAnalyzer",
+    "SemanticAnalysisResult",
+    "SemanticTestAdherenceResult",
     "__version__",
 ]

@@ -6,8 +6,10 @@ from pathlib import Path
 
 from .config import load_config, merge_config_with_args
 from .linter import SpecLinter
+from .llm_provider import LiteLLMProvider
 from .markdown_link_validator import MarkdownLinkValidator
 from .markdown_schema_validator import MarkdownSchemaValidator
+from .semantic_test_analyzer import SemanticTestAnalyzer
 from .spec_coverage_linter import SpecCoverageLinter
 from .structure_linter import StructureLinter
 from .unique_specs_linter import UniqueSpecsLinter
@@ -228,6 +230,49 @@ def cmd_check_unique_specs(args) -> int:
 
         # Run linter
         result = linter.lint()
+
+        # Print results
+        print(result)
+
+        # Return appropriate exit code
+        return 0 if result.is_valid else 1
+
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        if args.verbose:
+            raise
+        return 1
+
+
+def cmd_check_semantic_test_adherence(args) -> int:
+    """Execute the check-semantic-test-adherence command.
+
+    Args:
+        args: Parsed command-line arguments.
+
+    Returns:
+        Exit code (0 for success, 1 for failure).
+    """
+    try:
+        # Create LLM provider
+        llm_provider = LiteLLMProvider(
+            provider=args.llm_provider,
+            model=args.llm_model,
+            max_retries=3,
+            timeout=60,
+        )
+
+        # Create analyzer
+        analyzer = SemanticTestAnalyzer(
+            llm_provider=llm_provider,
+            root_dir=Path(args.directory),
+            specs_dir=Path(args.specs_dir) if args.specs_dir else None,
+            tests_dir=Path(args.tests_dir) if args.tests_dir else None,
+            threshold=args.threshold,
+        )
+
+        # Run analysis
+        result = analyzer.analyze(verbose=args.verbose)
 
         # Print results
         print(result)
@@ -678,6 +723,111 @@ Validation rules:
     )
 
     check_unique_specs_parser.set_defaults(func=cmd_check_unique_specs)
+
+    # Check-semantic-test-adherence command
+    check_semantic_parser = subparsers.add_parser(
+        "check-semantic-test-adherence",
+        help="Validate that tests semantically test their linked requirements",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Check semantic test adherence in current directory (uses Groq by default)
+  spec-tools check-semantic-test-adherence
+
+  # Use a different LLM provider
+  spec-tools check-semantic-test-adherence --llm-provider anthropic
+
+  # Use a specific model
+  spec-tools check-semantic-test-adherence --llm-model groq/llama-3.3-70b-versatile
+
+  # Set a custom confidence threshold
+  spec-tools check-semantic-test-adherence --threshold 0.8
+
+  # Use custom specs and tests directories
+  spec-tools check-semantic-test-adherence --specs-dir my-specs --tests-dir my-tests
+
+How it works:
+  This tool validates that tests actually test what they claim by:
+  1. Extracting requirements from spec files with their full text
+  2. Finding tests marked with @pytest.mark.req() decorators
+  3. Using AI/LLM to analyze whether each test validates its requirement
+  4. Scoring alignment confidence (0.0 to 1.0)
+  5. Reporting tests that don't match their requirements
+
+LLM Provider Configuration:
+  Supported providers: groq, anthropic, openai, ollama, vertex_ai, bedrock
+  Default provider: groq (free tier for CI/CD)
+
+  API keys should be set via environment variables:
+    - GROQ_API_KEY
+    - ANTHROPIC_API_KEY
+    - OPENAI_API_KEY
+    - VERTEX_AI_PROJECT (for Vertex AI)
+    - AWS_ACCESS_KEY_ID (for Bedrock)
+
+Test marking format:
+  Use pytest markers to link tests to requirements:
+
+  @pytest.mark.req("SPEC-001/REQ-001")
+  def test_something():
+      '''Test for requirement REQ-001.'''
+      ...
+
+  # For tests covering multiple requirements:
+  @pytest.mark.req("SPEC-001/REQ-001", "SPEC-001/REQ-002")
+  def test_combined():
+      '''Test for requirements REQ-001 and REQ-002.'''
+      ...
+        """,
+    )
+
+    check_semantic_parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Root directory of the project (default: current directory)",
+    )
+
+    check_semantic_parser.add_argument(
+        "--specs-dir",
+        default=None,
+        help="Directory containing spec files (default: <directory>/specs)",
+    )
+
+    check_semantic_parser.add_argument(
+        "--tests-dir",
+        default=None,
+        help="Directory containing test files (default: <directory>/tests)",
+    )
+
+    check_semantic_parser.add_argument(
+        "--llm-provider",
+        default="groq",
+        choices=["groq", "anthropic", "openai", "ollama", "vertex_ai", "bedrock"],
+        help="LLM provider to use for semantic analysis (default: groq)",
+    )
+
+    check_semantic_parser.add_argument(
+        "--llm-model",
+        default=None,
+        help="LLM model name/version (defaults to provider's default model)",
+    )
+
+    check_semantic_parser.add_argument(
+        "--threshold",
+        type=float,
+        default=0.7,
+        help="Minimum confidence score for alignment (default: 0.7)",
+    )
+
+    check_semantic_parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Verbose output",
+    )
+
+    check_semantic_parser.set_defaults(func=cmd_check_semantic_test_adherence)
 
     # Parse arguments
     args = parser.parse_args(argv)

@@ -13,6 +13,7 @@ authors = [
     {name = "spec-tools contributors"}
 ]
 dependencies = [
+    "litellm>=1.78.7",
     "pathspec>=0.11.0",
     "tomli>=2.0.0; python_version < '3.11'",
 ]

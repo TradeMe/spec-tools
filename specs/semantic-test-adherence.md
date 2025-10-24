@@ -3,7 +3,7 @@
 **ID**: SPEC-003
 **Version**: 1.0
 **Date**: 2025-10-23
-**Status**: Provisional
+**Status**: Draft
 **Milestone**: milestone-001-semantic-test-adherence
 
 ## Overview
@@ -69,115 +69,120 @@ The validator uses AI/LLM-powered analysis to understand requirement intent and 
 
 ### AI/LLM Integration
 
-**REQ-021**: The system shall support multiple AI/LLM backends for semantic analysis.
+**REQ-021**: The system shall support multiple AI/LLM backends for semantic analysis using LiteLLM as the integration library for unified provider access.
 
 **REQ-022**: The system shall support the following LLM providers via configuration:
-- Anthropic Claude (via API)
+- Groq (via API) - recommended for CI/CD and free-tier usage
+- Anthropic Claude (via direct API, Vertex AI, or Bedrock)
 - OpenAI GPT models (via API)
 - Local models (via Ollama or similar)
 
-**REQ-023**: The system shall accept an API key or authentication configuration for LLM providers that require authentication.
+**REQ-023**: The system shall provide default model configurations for all supported providers, with model versions pinned in library releases and updated as better models become available.
 
-**REQ-024**: WHEN an LLM API call fails, the system shall retry up to 3 times with exponential backoff before reporting an error.
+**REQ-024**: The system shall accept an API key or authentication configuration for LLM providers that require authentication.
 
-**REQ-025**: WHEN an LLM provider is unavailable or authentication fails, the system shall report a clear error message and exit with code 1.
+**REQ-025**: WHEN an LLM API call fails, the system shall retry up to 3 times with exponential backoff before reporting an error.
 
-**REQ-026**: The system shall support a configurable prompt template for semantic analysis requests.
+**REQ-026**: WHEN an LLM provider is unavailable or authentication fails, the system shall report a clear error message and exit with code 1.
 
-**REQ-027**: The system shall include in the analysis prompt:
+**REQ-027**: The system shall support a configurable prompt template for semantic analysis requests.
+
+**REQ-028**: The system shall include in the analysis prompt:
 - The requirement ID and full text
 - The requirement context (specification section, related requirements)
 - The test function name and full source code
 - The test docstring
 - Instructions for alignment analysis
 
-**REQ-028**: The system shall limit the context sent to LLMs to avoid exceeding token limits, prioritizing the most relevant information.
+**REQ-029**: The system shall limit the context sent to LLMs to avoid exceeding token limits, prioritizing the most relevant information.
 
-**REQ-029**: WHEN multiple tests reference the same requirement, the system shall batch analyze them in a single LLM request when possible to improve efficiency.
+**REQ-030**: WHEN multiple tests reference the same requirement, the system shall batch analyze them in a single LLM request when possible to improve efficiency.
 
 ### Configuration
 
-**REQ-030**: The system shall read configuration from `[tool.spec-tools.check-semantic-test-adherence]` section in `pyproject.toml`.
+**REQ-031**: The system shall read configuration from `[tool.spec-tools.check-semantic-test-adherence]` section in `pyproject.toml`.
 
-**REQ-031**: The system shall support a `--specs-dir` command-line option to specify the directory containing specification files.
+**REQ-032**: The system shall support a `--specs-dir` command-line option to specify the directory containing specification files.
 
-**REQ-032**: WHERE the `--specs-dir` option is not provided, the system shall default to `specs/`.
+**REQ-033**: WHERE the `--specs-dir` option is not provided, the system shall default to `specs/`.
 
-**REQ-033**: The system shall support a `--tests-dir` command-line option to specify the directory containing test files.
+**REQ-034**: The system shall support a `--tests-dir` command-line option to specify the directory containing test files.
 
-**REQ-034**: WHERE the `--tests-dir` option is not provided, the system shall default to `tests/`.
+**REQ-035**: WHERE the `--tests-dir` option is not provided, the system shall default to `tests/`.
 
-**REQ-035**: The system shall support a `--llm-provider` option to specify which LLM backend to use (anthropic, openai, ollama).
+**REQ-036**: The system shall support a `--llm-provider` option to specify which LLM backend to use (groq, anthropic, openai, ollama, vertex_ai, bedrock).
 
-**REQ-036**: The system shall support a `--llm-model` option to specify the model name/version for the selected provider.
+**REQ-037**: WHERE the `--llm-provider` option is not provided, the system shall default to `groq` for free-tier usage.
 
-**REQ-037**: The system shall support a `--threshold` option to set the minimum confidence score for alignment (default: 0.7).
+**REQ-038**: The system shall support a `--llm-model` option to specify the model name/version for the selected provider.
 
-**REQ-038**: The system shall support a `--use-gitignore` flag to respect `.gitignore` patterns when discovering files.
+**REQ-039**: The system shall support a `--threshold` option to set the minimum confidence score for alignment (default: 0.7).
 
-**REQ-039**: WHERE `--use-gitignore` is enabled, the system shall use the same gitignore handling as other spec-tools commands.
+**REQ-040**: The system shall support a `--use-gitignore` flag to respect `.gitignore` patterns when discovering files.
 
-**REQ-040**: The system shall read LLM API keys from environment variables (e.g., `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`).
+**REQ-041**: WHERE `--use-gitignore` is enabled, the system shall use the same gitignore handling as other spec-tools commands.
 
-**REQ-041**: The system shall support a `--max-concurrent` option to control concurrent LLM requests (default: 5).
+**REQ-042**: The system shall read LLM API keys from environment variables (e.g., `GROQ_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `VERTEX_AI_PROJECT`, `AWS_ACCESS_KEY_ID`).
 
-**REQ-042**: The system shall support a `--cache-results` flag to cache analysis results and avoid re-analyzing unchanged test-requirement pairs.
+**REQ-043**: The system shall support a `--max-concurrent` option to control concurrent LLM requests (default: 5).
 
-**REQ-043**: WHEN `--cache-results` is enabled, the system shall invalidate cache entries when either the requirement or test source code changes.
+**REQ-044**: The system shall support a `--cache-results` flag to cache analysis results and avoid re-analyzing unchanged test-requirement pairs.
+
+**REQ-045**: WHEN `--cache-results` is enabled, the system shall invalidate cache entries when either the requirement or test source code changes.
 
 ### Reporting
 
-**REQ-044**: WHEN analysis completes, the system shall report the total number of test-requirement pairs analyzed.
+**REQ-046**: WHEN analysis completes, the system shall report the total number of test-requirement pairs analyzed.
 
-**REQ-045**: WHEN analysis completes, the system shall report the number of aligned pairs, misaligned pairs, and errors.
+**REQ-047**: WHEN analysis completes, the system shall report the number of aligned pairs, misaligned pairs, and errors.
 
-**REQ-046**: WHEN analysis completes, the system shall report the overall alignment percentage.
+**REQ-048**: WHEN analysis completes, the system shall report the overall alignment percentage.
 
-**REQ-047**: The system shall list all misaligned test-requirement pairs with:
+**REQ-049**: The system shall list all misaligned test-requirement pairs with:
 - Requirement ID and text
 - Test file, function name, and line number
 - Confidence score
 - Explanation of the misalignment
 
-**REQ-048**: WHEN the verbose option is enabled, the system shall report all test-requirement pairs, including aligned ones.
+**REQ-050**: WHEN the verbose option is enabled, the system shall report all test-requirement pairs, including aligned ones.
 
-**REQ-049**: WHEN the verbose option is enabled, the system shall include the full LLM analysis explanation for each pair.
+**REQ-051**: WHEN the verbose option is enabled, the system shall include the full LLM analysis explanation for each pair.
 
-**REQ-050**: The system shall support a `--format` option to control output format (text, json, markdown).
+**REQ-052**: The system shall support a `--format` option to control output format (text, json, markdown).
 
-**REQ-051**: WHEN `--format json` is specified, the system shall output results as structured JSON including all analysis data.
+**REQ-053**: WHEN `--format json` is specified, the system shall output results as structured JSON including all analysis data.
 
-**REQ-052**: WHEN `--format markdown` is specified, the system shall output a markdown report suitable for inclusion in documentation.
+**REQ-054**: WHEN `--format markdown` is specified, the system shall output a markdown report suitable for inclusion in documentation.
 
-**REQ-053**: IF all test-requirement pairs are aligned (above threshold), THEN the system shall exit with code 0.
+**REQ-055**: IF all test-requirement pairs are aligned (above threshold), THEN the system shall exit with code 0.
 
-**REQ-054**: IF any test-requirement pairs are misaligned (below threshold), THEN the system shall exit with code 1.
+**REQ-056**: IF any test-requirement pairs are misaligned (below threshold), THEN the system shall exit with code 1.
 
-**REQ-055**: The system shall support a `--fail-on-error` flag that causes non-zero exit when LLM errors occur (default: false).
+**REQ-057**: The system shall support a `--fail-on-error` flag that causes non-zero exit when LLM errors occur (default: false).
 
 ### Error Handling
 
-**REQ-056**: IF a specification file cannot be read, THEN the system shall report the error and continue processing other files.
+**REQ-058**: IF a specification file cannot be read, THEN the system shall report the error and continue processing other files.
 
-**REQ-057**: IF a test file cannot be parsed, THEN the system shall report the error and continue processing other files.
+**REQ-059**: IF a test file cannot be parsed, THEN the system shall report the error and continue processing other files.
 
-**REQ-058**: IF a requirement ID in a test marker does not exist in any specification file, THEN the system shall report a warning.
+**REQ-060**: IF a requirement ID in a test marker does not exist in any specification file, THEN the system shall report a warning.
 
-**REQ-059**: IF an LLM request fails after all retries, THEN the system shall report the error and mark the test-requirement pair as "error" rather than aligned or misaligned.
+**REQ-061**: IF an LLM request fails after all retries, THEN the system shall report the error and mark the test-requirement pair as "error" rather than aligned or misaligned.
 
-**REQ-060**: WHEN network errors occur during LLM API calls, the system shall include network diagnostics in the error message.
+**REQ-062**: WHEN network errors occur during LLM API calls, the system shall include network diagnostics in the error message.
 
 ### Integration
 
-**REQ-061**: The system shall use the same requirement pattern matching as the `check-coverage` tool for consistency.
+**REQ-063**: The system shall use the same requirement pattern matching as the `check-coverage` tool for consistency.
 
-**REQ-062**: The system shall use the same test marker parsing as the `check-coverage` tool for consistency.
+**REQ-064**: The system shall use the same test marker parsing as the `check-coverage` tool for consistency.
 
-**REQ-063**: The system shall respect the same `.gitignore` handling as other spec-tools commands when enabled.
+**REQ-065**: The system shall respect the same `.gitignore` handling as other spec-tools commands when enabled.
 
-**REQ-064**: The system shall support the same `--verbose` flag behavior as other spec-tools commands.
+**REQ-066**: The system shall support the same `--verbose` flag behavior as other spec-tools commands.
 
-**REQ-065**: The system shall follow the same exit code conventions as other spec-tools commands (0 for pass, 1 for fail).
+**REQ-067**: The system shall follow the same exit code conventions as other spec-tools commands (0 for pass, 1 for fail).
 
 ## Non-Functional Requirements
 

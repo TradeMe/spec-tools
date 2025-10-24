@@ -1,6 +1,6 @@
 # Specification: Spec Coverage Linter
 
-**ID**: SPEC-003
+**ID**: SPEC-004
 **Version**: 2.0
 **Date**: 2025-10-23
 **Status**: Draft
@@ -152,9 +152,9 @@ Requirements: 61/69 covered
 Tests: 65/119 linked to requirements
 
 ❌ Uncovered Requirements:
-  - SPEC-003/NFR-001
-  - SPEC-003/REQ-036
-  - SPEC-003/REQ-037
+  - SPEC-004/NFR-001
+  - SPEC-004/REQ-036
+  - SPEC-004/REQ-037
 
 ❌ Spec coverage validation FAILED
 ============================================================
@@ -204,13 +204,13 @@ Example test file using fully qualified requirement IDs:
 ```python
 import pytest
 
-@pytest.mark.req("SPEC-003/REQ-001")
+@pytest.mark.req("SPEC-004/REQ-001")
 def test_scans_specs_directory():
     """Test that the system scans the specs directory."""
     # Test implementation
     pass
 
-@pytest.mark.req("SPEC-003/REQ-007", "SPEC-003/REQ-008")
+@pytest.mark.req("SPEC-004/REQ-007", "SPEC-004/REQ-008")
 def test_extracts_multiple_requirements():
     """Test extraction of multiple requirement markers."""
     # Test implementation
@@ -219,7 +219,7 @@ def test_extracts_multiple_requirements():
 class TestCoverageAnalysis:
     """Tests for coverage analysis functionality."""
 
-    @pytest.mark.req("SPEC-003/REQ-010")
+    @pytest.mark.req("SPEC-004/REQ-010")
     def test_creates_requirement_mapping(self):
         """Test that requirement-to-test mapping is created."""
         # Test implementation
