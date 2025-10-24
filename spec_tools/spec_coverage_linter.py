@@ -5,6 +5,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from spec_tools.ast_parser import parse_markdown_file
+
 
 @dataclass
 class SpecCoverageResult:
@@ -125,6 +127,8 @@ class SpecCoverageLinter:
     def extract_spec_id(self, spec_file: Path) -> str | None:
         """Extract the SPEC ID from a spec file.
 
+        Uses the AST parser to extract the spec ID from metadata.
+
         Args:
             spec_file: Path to the spec markdown file
 
@@ -132,14 +136,16 @@ class SpecCoverageLinter:
             SPEC ID if found, None otherwise
         """
         try:
-            content = spec_file.read_text(encoding="utf-8")
-            match = self.SPEC_ID_PATTERN.search(content)
-            return match.group(1) if match else None
+            doc = parse_markdown_file(spec_file)
+            return doc.spec_id
         except Exception:
             return None
 
     def extract_requirements_from_spec(self, spec_file: Path) -> set[str]:
         """Extract all fully qualified requirement IDs from a spec file.
+
+        Uses the AST parser to properly handle code blocks and extract
+        only genuine requirements from the spec document.
 
         Args:
             spec_file: Path to the spec markdown file
@@ -147,22 +153,11 @@ class SpecCoverageLinter:
         Returns:
             Set of fully qualified requirement IDs (SPEC-XXX/REQ-YYY) found in the spec
         """
-        requirements = set()
-        content = spec_file.read_text(encoding="utf-8")
+        # Use AST parser for robust requirement extraction
+        doc = parse_markdown_file(spec_file)
 
-        # Get the SPEC ID for this file
-        spec_id = self.extract_spec_id(spec_file)
-        if not spec_id:
-            # If no SPEC ID, skip this file
-            return requirements
-
-        for match in self.REQ_PATTERN.finditer(content):
-            req_id = match.group(1)
-            # Build fully qualified requirement ID
-            fully_qualified_id = f"{spec_id}/{req_id}"
-            requirements.add(fully_qualified_id)
-
-        return requirements
+        # Get requirements, excluding those in code blocks
+        return doc.get_requirement_ids(include_code_blocks=False)
 
     def extract_requirements_from_tests(self, test_file: Path) -> dict[str, list[str]]:
         """Extract requirement markers from test functions.

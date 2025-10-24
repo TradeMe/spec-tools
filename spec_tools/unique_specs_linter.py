@@ -4,6 +4,8 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from spec_tools.ast_parser import parse_markdown_file
+
 
 @dataclass
 class UniqueSpecsResult:
@@ -76,6 +78,8 @@ class UniqueSpecsLinter:
     def extract_spec_id(self, spec_file: Path) -> str | None:
         """Extract the SPEC ID from a spec file.
 
+        Uses the AST parser to extract the spec ID from metadata.
+
         Args:
             spec_file: Path to the spec markdown file
 
@@ -83,10 +87,8 @@ class UniqueSpecsLinter:
             SPEC ID if found, None otherwise
         """
         try:
-            content = spec_file.read_text(encoding="utf-8")
-            match = self.SPEC_ID_PATTERN.search(content)
-            if match:
-                return match.group(1)
+            doc = parse_markdown_file(spec_file)
+            return doc.spec_id
         except Exception:
             pass
         return None
@@ -94,21 +96,24 @@ class UniqueSpecsLinter:
     def extract_requirements(self, spec_file: Path) -> set[str]:
         """Extract all requirement IDs from a spec file.
 
+        Uses the AST parser to properly handle code blocks and extract
+        only genuine requirements.
+
         Args:
             spec_file: Path to the spec markdown file
 
         Returns:
-            Set of requirement IDs found in the spec
+            Set of requirement IDs (not fully qualified) found in the spec
         """
-        requirements = set()
         try:
-            content = spec_file.read_text(encoding="utf-8")
-            for match in self.REQ_PATTERN.finditer(content):
-                req_id = match.group(1)
-                requirements.add(req_id)
+            doc = parse_markdown_file(spec_file)
+            # Get requirements, excluding code blocks
+            requirements = doc.get_requirement_ids(include_code_blocks=False)
+            # Extract just the REQ-XXX part (not SPEC-XXX/REQ-XXX)
+            return {req_id.split("/")[-1] for req_id in requirements}
         except Exception:
             pass
-        return requirements
+        return set()
 
     def lint(self) -> UniqueSpecsResult:
         """Run the unique specs linter.
@@ -149,13 +154,14 @@ class UniqueSpecsLinter:
             requirements = self.extract_requirements(spec_file)
             total_requirements += len(requirements)
 
-            # Check for duplicate requirements within this spec
+            # Check for duplicate requirements within this spec using AST
             req_counts: dict[str, int] = {}
             try:
-                content = spec_file.read_text(encoding="utf-8")
-                for match in self.REQ_PATTERN.finditer(content):
-                    req_id = match.group(1)
-                    req_counts[req_id] = req_counts.get(req_id, 0) + 1
+                doc = parse_markdown_file(spec_file)
+                # Count all requirements (including those in code blocks) for dup detection
+                for req in doc.requirements:
+                    if not req.is_in_code_block:  # Only count real requirements
+                        req_counts[req.req_id] = req_counts.get(req.req_id, 0) + 1
             except Exception:
                 pass
 
