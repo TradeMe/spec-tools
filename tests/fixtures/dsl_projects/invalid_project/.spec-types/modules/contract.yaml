@@ -1,0 +1,38 @@
+module:
+  name: Contract
+  version: "1.0"
+  description: "Business contract specification"
+
+  file_pattern: "^CTR-\\d{3}\\.md$"
+  location_pattern: "^specs/contracts/"
+
+  identifier:
+    pattern: "^CTR-\\d{3}$"
+    location: title
+    scope: global
+
+  sections:
+    - heading: "Purpose"
+      level: 2
+      required: true
+
+    - heading: "Parties"
+      level: 2
+      required: true
+
+    - heading: "Terms"
+      level: 2
+      required: true
+
+  references:
+    - name: supersedes
+      type: module_reference
+      target_module: Contract
+      cardinality: "0..1"
+      link_format: id_reference
+
+    - name: references
+      type: module_reference
+      target_module: ADR
+      cardinality: "0..*"
+      link_format: id_reference

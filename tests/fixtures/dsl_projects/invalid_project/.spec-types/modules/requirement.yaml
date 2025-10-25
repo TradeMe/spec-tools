@@ -1,0 +1,46 @@
+module:
+  name: Requirement
+  version: "1.0"
+  description: "Technical requirement specification"
+
+  file_pattern: "^REQ-\\d{3}\\.md$"
+  location_pattern: "^specs/requirements/"
+
+  identifier:
+    pattern: "^REQ-\\d{3}$"
+    location: title
+    scope: global
+
+  sections:
+    - heading: "Overview"
+      level: 2
+      required: true
+
+    - heading: "Acceptance Criteria"
+      level: 2
+      required: false
+
+  references:
+    - name: implements
+      type: module_reference
+      target_module: Contract
+      cardinality: "1"
+      link_format: id_reference
+      required: true
+      must_exist: true
+
+    - name: depends_on
+      type: module_reference
+      target_module: Requirement
+      cardinality: "0..*"
+      link_format: id_reference
+      allow_circular: false
+
+  classes:
+    AcceptanceCriterion:
+      heading_pattern: "^AC-\\d{2}:"
+      level: 3
+      identifier:
+        pattern: "^AC-\\d{2}$"
+        location: heading
+        scope: module_instance

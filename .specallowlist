@@ -20,6 +20,7 @@ uv.lock
 
 # DSL type definitions
 .spec-types/**/*.yaml
+tests/fixtures/**/*.yaml
 
 # Git configuration
 .gitignore

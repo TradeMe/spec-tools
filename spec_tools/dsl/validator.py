@@ -358,10 +358,16 @@ class DSLValidator:
         location = module_def.identifier.location
 
         if location == "title":
-            # Extract from document title (root heading)
+            # Extract from document title (root heading or first H1)
             root = doc_ctx.section_tree.root
+
+            # Check root section ID first
             if root.section_id:
                 return root.section_id
+
+            # If root has no ID, check first subsection (first H1)
+            if root.subsections and root.subsections[0].section_id:
+                return root.subsections[0].section_id
 
         # TODO: Support frontmatter and other locations
 
