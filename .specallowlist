@@ -18,6 +18,9 @@ pyproject.toml
 uv.lock
 .specallowlist
 
+# DSL type definitions
+.spec-types/**/*.yaml
+
 # Git configuration
 .gitignore
 .github/workflows/*.yml

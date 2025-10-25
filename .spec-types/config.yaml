@@ -1,0 +1,60 @@
+# Global DSL Configuration
+# This file defines global settings for the Markdown Specification DSL
+
+dsl_version: "1.0"
+
+# Markdown flavor: github or gitlab
+markdown_flavor: github
+
+# Allowed markdown features
+allowed_features:
+  task_lists: true
+  tables: true
+  strikethrough: true
+  math: false
+  auto_linking: true
+
+# ID resolution configuration
+id_resolution:
+  # How to resolve module IDs to files
+  module_id_to_file:
+    strategy: pattern_match
+    pattern: "{id}.md"
+    case_sensitive: false
+
+  # How to resolve class IDs to sections
+  class_id_to_section:
+    strategy: heading_search
+    search_scope: document
+
+# Link format definitions
+link_formats:
+  id_reference:
+    pattern: "^[A-Z]+-\\d{3}$"
+    resolution: id_lookup
+
+  class_reference:
+    pattern: "^(#|[A-Z]+-\\d{3}#)[A-Z]+-\\d{2}$"
+    resolution: class_lookup
+
+  external_reference:
+    pattern: "^https?://"
+    resolution: none
+
+# Validation settings
+validation:
+  max_errors: 100
+  fail_on_warning: false
+
+  severity_levels:
+    missing_required_section: error
+    missing_optional_section: warning
+    deprecated_pattern: warning
+    style_violation: info
+
+# Error reporting
+error_reporting:
+  format: human  # or: json, sarif, github_actions
+  show_context: true
+  context_lines: 3
+  color: true
