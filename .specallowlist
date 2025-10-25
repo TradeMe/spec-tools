@@ -34,3 +34,4 @@ tests/fixtures/**/*.yaml
 
 # Git hooks (version controlled)
 hooks/pre-commit
+hooks/parse_ci_workflow.py
