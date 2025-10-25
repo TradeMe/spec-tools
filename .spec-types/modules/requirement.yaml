@@ -1,0 +1,97 @@
+# Requirement Module Type Definition
+# Defines the structure and validation rules for requirement specification documents
+
+module:
+  name: Requirement
+  version: "1.0"
+  description: "Technical requirement specification using EARS format"
+
+  # File matching patterns
+  file_pattern: "^[a-z0-9-]+\\.md$"
+  location_pattern: "^specs/"
+
+  # Module identifier definition
+  identifier:
+    pattern: "^SPEC-\\d{3}$"
+    location: title  # Appears in the document title/first heading
+    scope: global    # Must be unique across all requirements globally
+    format: "SPEC-{number:03d}"
+
+  # Frontmatter (optional but validated if present)
+  frontmatter:
+    optional: true
+    allowed_keys:
+      - id
+      - version
+      - status
+      - date
+      - milestone
+    required_keys: []
+    validation:
+      status:
+        type: enum
+        values: [Draft, Provisional, Approved, Planned, Deprecated]
+      version:
+        type: string
+        pattern: "^\\d+\\.\\d+$"
+
+  # Required document structure
+  sections:
+    - heading: "Overview"
+      level: 2
+      required: true
+      content_type: text
+
+    - heading: "Requirements"
+      level: 2
+      required: false
+      content_type: text
+
+    - heading: "Non-Functional Requirements"
+      level: 2
+      required: false
+      content_type: text
+
+    - heading: "Test Coverage"
+      level: 2
+      required: false
+      content_type: text
+
+  # Allowed references from requirements to other modules
+  references:
+    - name: depends_on
+      type: module_reference
+      target_module: Requirement
+      cardinality: "0..*"
+      link_format: id_reference
+      allow_circular: false
+      must_exist: true
+      allowed_sections:
+        - "Overview"
+        - "Requirements"
+
+  # Inline class definitions (private to Requirement modules)
+  classes:
+    FunctionalRequirement:
+      heading_pattern: "^\\*\\*SPEC-\\d{3}/REQ-\\d{3}\\*\\*:"
+      level: 3
+      identifier:
+        pattern: "^SPEC-\\d{3}/REQ-\\d{3}$"
+        location: heading
+        scope: module_instance
+      fields:
+        - name: description
+          type: ears_statement
+          required: true
+
+    NonFunctionalRequirement:
+      heading_pattern: "^\\*\\*SPEC-\\d{3}/NFR-\\d{3}\\*\\*:"
+      level: 3
+      identifier:
+        pattern: "^SPEC-\\d{3}/NFR-\\d{3}$"
+        location: heading
+        scope: module_instance
+      fields:
+        - name: description
+          type: text
+          required: true
