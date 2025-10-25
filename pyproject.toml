@@ -87,3 +87,8 @@ min_coverage = 49.0
 
 [tool.spec-tools.check-schema]
 use_gitignore = true
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=7.0.0",
+]
