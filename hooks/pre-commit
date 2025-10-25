@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
 # Git pre-commit hook that runs all CI checks
-# This ensures code quality before commits are created
+# This hook dynamically reads the GitHub Actions workflow file and executes
+# the same lint and test commands that run in CI.
 #
 # This hook is installed automatically by the Claude Code session-start hook
 # To bypass this hook (not recommended), use: git commit --no-verify
@@ -16,6 +17,7 @@ echo ""
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Function to print colored status messages
@@ -31,110 +33,80 @@ print_warning() {
     echo -e "${YELLOW}⚠${NC} $1"
 }
 
+print_info() {
+    echo -e "${BLUE}ℹ${NC} $1"
+}
+
 # Check if uv is available
 if ! command -v uv &> /dev/null; then
     print_error "uv is not installed. Please install uv: https://docs.astral.sh/uv/"
     exit 1
 fi
 
+# Get repository root
+REPO_ROOT=$(git rev-parse --show-toplevel)
+WORKFLOW_FILE="$REPO_ROOT/.github/workflows/ci.yml"
+PARSER_SCRIPT="$REPO_ROOT/hooks/parse_ci_workflow.py"
+
+# Check if workflow file exists
+if [ ! -f "$WORKFLOW_FILE" ]; then
+    print_error "CI workflow file not found: $WORKFLOW_FILE"
+    exit 1
+fi
+
+# Check if parser script exists
+if [ ! -f "$PARSER_SCRIPT" ]; then
+    print_error "Workflow parser script not found: $PARSER_SCRIPT"
+    exit 1
+fi
+
+print_info "Reading checks from GitHub Actions workflow: .github/workflows/ci.yml"
+echo ""
+
 # Track overall status
 FAILED=0
 
+# Extract and run lint commands
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "📋 Code Quality Checks"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-
-# Run ruff check
-echo "🔎 Running ruff check..."
-if uv run ruff check spec_tools/ tests/; then
-    print_status "Ruff check passed"
-else
-    print_error "Ruff check failed"
-    FAILED=1
-fi
-echo ""
-
-# Run ruff format check
-echo "🎨 Running ruff format check..."
-if uv run ruff format --check spec_tools/ tests/; then
-    print_status "Ruff format check passed"
-else
-    print_error "Ruff format check failed"
-    print_warning "Run 'uv run ruff format spec_tools/ tests/' to fix formatting"
-    FAILED=1
-fi
-echo ""
-
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "📚 Spec-Tools Validation"
+echo "📋 Lint Checks (from CI)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Run file allowlist validation
-echo "📝 Validating file allowlist..."
-if uv run spec-tools lint --verbose; then
-    print_status "File allowlist validation passed"
-else
-    print_error "File allowlist validation failed"
-    FAILED=1
-fi
-echo ""
+# Read lint commands from workflow
+mapfile -t LINT_COMMANDS < <(uv run python "$PARSER_SCRIPT" --job lint)
 
-# Run spec-test structure validation
-echo "🏗️  Validating spec-test structure..."
-if uv run spec-tools check-structure; then
-    print_status "Spec-test structure validation passed"
-else
-    print_error "Spec-test structure validation failed"
-    FAILED=1
-fi
-echo ""
+# Run each lint command
+for cmd in "${LINT_COMMANDS[@]}"; do
+    echo "Running: $cmd"
+    if eval "$cmd"; then
+        print_status "Passed: $cmd"
+    else
+        print_error "Failed: $cmd"
+        FAILED=1
+    fi
+    echo ""
+done
 
-# Run spec coverage validation
-echo "📊 Validating spec coverage..."
-if uv run spec-tools check-coverage; then
-    print_status "Spec coverage validation passed"
-else
-    print_error "Spec coverage validation failed"
-    FAILED=1
-fi
-echo ""
-
-# Run spec schema validation
-echo "📐 Validating spec schema..."
-if uv run spec-tools check-schema --verbose; then
-    print_status "Spec schema validation passed"
-else
-    print_error "Spec schema validation failed"
-    FAILED=1
-fi
-echo ""
-
-# Run spec unique IDs validation
-echo "🔑 Validating unique spec IDs..."
-if uv run spec-tools check-unique-specs; then
-    print_status "Unique spec IDs validation passed"
-else
-    print_error "Unique spec IDs validation failed"
-    FAILED=1
-fi
-echo ""
-
+# Extract and run test commands
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🧪 Running Tests"
+echo "🧪 Tests (from CI)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Run tests with coverage
-echo "🧪 Running pytest with coverage..."
-if uv run pytest -v --cov --cov-report=term-missing --cov-fail-under=75; then
-    print_status "All tests passed"
-else
-    print_error "Tests failed"
-    FAILED=1
-fi
-echo ""
+# Read test commands from workflow
+mapfile -t TEST_COMMANDS < <(uv run python "$PARSER_SCRIPT" --job test)
+
+# Run each test command
+for cmd in "${TEST_COMMANDS[@]}"; do
+    echo "Running: $cmd"
+    if eval "$cmd"; then
+        print_status "Passed: $cmd"
+    else
+        print_error "Failed: $cmd"
+        FAILED=1
+    fi
+    echo ""
+done
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
