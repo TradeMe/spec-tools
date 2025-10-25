@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 
 from .config import load_config, merge_config_with_args
+from .dsl.registry import SpecTypeRegistry
+from .dsl.validator import DSLValidator
 from .linter import SpecLinter
 from .markdown_link_validator import MarkdownLinkValidator
 from .markdown_schema_validator import MarkdownSchemaValidator
@@ -234,6 +236,50 @@ def cmd_check_unique_specs(args) -> int:
 
         # Return appropriate exit code
         return 0 if result.is_valid else 1
+
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        if args.verbose:
+            raise
+        return 1
+
+
+def cmd_validate_dsl(args) -> int:
+    """Execute the validate-dsl command.
+
+    Args:
+        args: Parsed command-line arguments.
+
+    Returns:
+        Exit code (0 for success, 1 for failure).
+    """
+    try:
+        # Type definitions directory
+        type_dir = Path(args.type_dir)
+        if not type_dir.exists():
+            print(f"Error: Type definitions directory not found: {type_dir}", file=sys.stderr)
+            return 1
+
+        # Load type definitions
+        registry = SpecTypeRegistry.load_from_package(type_dir)
+
+        if args.verbose:
+            print(f"Loaded {len(registry.modules)} module type(s)")
+            print(f"Loaded {len(registry.classes)} shared class type(s)")
+            print()
+
+        # Create validator
+        validator = DSLValidator(registry)
+
+        # Run validation
+        root_path = Path(args.directory)
+        result = validator.validate(root_path)
+
+        # Print results
+        print(result)
+
+        # Return appropriate exit code
+        return 0 if result.success else 1
 
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
@@ -678,6 +724,86 @@ Validation rules:
     )
 
     check_unique_specs_parser.set_defaults(func=cmd_check_unique_specs)
+
+    # Validate-DSL command
+    validate_dsl_parser = subparsers.add_parser(
+        "validate-dsl",
+        help="Validate markdown documents against DSL type definitions",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Validate documents using type definitions in .spec-types
+  spec-tools validate-dsl
+
+  # Validate specific directory
+  spec-tools validate-dsl specs/
+
+  # Use custom type definitions directory
+  spec-tools validate-dsl --type-dir my-types/
+
+How it works:
+  The DSL validator implements a multi-pass validation architecture:
+  1. Parse markdown documents into AST
+  2. Build hierarchical section trees
+  3. Assign types based on file patterns
+  4. Validate document structure
+  5. Validate section content
+  6. Extract references (links)
+  7. Resolve and validate references
+
+Type definitions:
+  Type definitions are YAML files that describe:
+  - Module types (e.g., Requirement, Contract, ADR)
+  - Class types (reusable section patterns)
+  - Content validators (e.g., EARS, Gherkin)
+  - Reference constraints (cardinality, type checking)
+
+  Directory structure:
+    .spec-types/
+      config.yaml              # Global configuration
+      modules/
+        requirement.yaml       # Module type definitions
+        contract.yaml
+      classes/
+        test-case.yaml         # Shared class definitions
+      content-validators/
+        gherkin.yaml           # Content validators
+
+Reference validation:
+  Links are treated as typed references:
+  - [text](MODULE-ID) -> Module instance reference
+  - [text](#CLASS-ID) -> Class instance reference
+  - [text](http://...) -> External reference (not validated)
+
+  References are validated for:
+  - Target existence
+  - Type matching
+  - Cardinality constraints
+        """,
+    )
+
+    validate_dsl_parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to validate (default: current directory)",
+    )
+
+    validate_dsl_parser.add_argument(
+        "--type-dir",
+        "-t",
+        default=".spec-types",
+        help="Path to type definitions directory (default: .spec-types)",
+    )
+
+    validate_dsl_parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Verbose output",
+    )
+
+    validate_dsl_parser.set_defaults(func=cmd_validate_dsl)
 
     # Parse arguments
     args = parser.parse_args(argv)

@@ -4,6 +4,7 @@ LICENSE
 
 # Python package
 spec_tools/**/*.py
+spec_types/**/*.py
 tests/**/*.py
 
 # Test project
@@ -17,6 +18,10 @@ test-project/pyproject.toml
 pyproject.toml
 uv.lock
 .specallowlist
+
+# DSL type definitions
+.spec-types/**/*.yaml
+tests/fixtures/**/*.yaml
 
 # Git configuration
 .gitignore
