@@ -140,16 +140,16 @@ class ReferenceExtractor:
                         column=0,
                     )
 
+                    # Extract context first
+                    context = self._extract_text(token)
+
                     # Classify reference type
                     ref_type = self._classify_reference(link_target)
 
-                    # Infer relationship if possible
+                    # Infer relationship if possible (now with context)
                     relationship = self._infer_relationship(
-                        link_text, link_target, section, module_def
+                        link_text, link_target, section, module_def, context
                     )
-
-                    # Extract context
-                    context = self._extract_text(token)
 
                     references.append(
                         Reference(
@@ -214,12 +214,14 @@ class ReferenceExtractor:
         link_target: str,
         section: str | None,
         module_def: ModuleDefinition | None,
+        context: str | None = None,
     ) -> str | None:
         """
         Infer the relationship type from context.
 
         Uses heuristics based on:
         - Link text keywords
+        - Surrounding context keywords
         - Section name
         - Module definition reference constraints
 
@@ -228,22 +230,28 @@ class ReferenceExtractor:
             link_target: The link href
             section: Current section name
             module_def: Module definition
+            context: Surrounding text for better relationship detection
 
         Returns:
             Inferred relationship name or None
         """
-        # Keyword-based heuristics
+        # Keyword-based heuristics - check both link text and context
         text_lower = link_text.lower()
+        context_lower = context.lower() if context else ""
+        combined = text_lower + " " + context_lower
 
-        if any(kw in text_lower for kw in ["implements", "implementation of"]):
+        implements_keywords = ["implements", "implementation of", "satisfy", "satisfies"]
+        if any(kw in combined for kw in implements_keywords):
             return "implements"
-        if any(kw in text_lower for kw in ["depends on", "requires", "prerequisite"]):
+
+        depends_keywords = ["depends on", "requires", "prerequisite"]
+        if any(kw in combined for kw in depends_keywords):
             return "depends_on"
-        if any(kw in text_lower for kw in ["validated by", "tested by", "test case"]):
+        if any(kw in combined for kw in ["validated by", "tested by", "test case"]):
             return "validated_by"
-        if any(kw in text_lower for kw in ["supersedes", "replaces", "obsoletes"]):
+        if any(kw in combined for kw in ["supersedes", "replaces", "obsoletes"]):
             return "supersedes"
-        if any(kw in text_lower for kw in ["see also", "related to", "reference"]):
+        if any(kw in combined for kw in ["see also", "related to", "reference"]):
             return "see_also"
 
         # Section-based heuristics

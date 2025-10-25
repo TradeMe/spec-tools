@@ -244,8 +244,8 @@ class ModuleDefinition:
         if not re.match(self.file_pattern, file_path.name):
             return False
 
-        # Check location
-        if not re.match(self.location_pattern, str(file_path)):
+        # Check location (use search to match anywhere in path)
+        if not re.search(self.location_pattern, str(file_path)):
             return False
 
         return True

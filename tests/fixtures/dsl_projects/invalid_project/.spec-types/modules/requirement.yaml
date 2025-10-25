@@ -4,7 +4,7 @@ module:
   description: "Technical requirement specification"
 
   file_pattern: "^REQ-\\d{3}\\.md$"
-  location_pattern: "^specs/requirements/"
+  location_pattern: "requirements/"
 
   identifier:
     pattern: "^REQ-\\d{3}$"

@@ -4,7 +4,7 @@ module:
   description: "Architectural Decision Record"
 
   file_pattern: "^ADR-\\d{3}\\.md$"
-  location_pattern: "^specs/adrs/"
+  location_pattern: "adrs/"
 
   identifier:
     pattern: "^ADR-\\d{3}$"

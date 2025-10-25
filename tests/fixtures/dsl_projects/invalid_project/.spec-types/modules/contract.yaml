@@ -4,7 +4,7 @@ module:
   description: "Business contract specification"
 
   file_pattern: "^CTR-\\d{3}\\.md$"
-  location_pattern: "^specs/contracts/"
+  location_pattern: "contracts/"
 
   identifier:
     pattern: "^CTR-\\d{3}$"
