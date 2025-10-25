@@ -16,6 +16,7 @@ from pathlib import Path
 
 from spec_tools.ast_parser import parse_markdown_file
 from spec_tools.dsl.id_registry import IDRegistry
+from spec_tools.dsl.models import SpecModule
 from spec_tools.dsl.reference_extractor import (
     Reference,
     ReferenceExtractor,
@@ -27,8 +28,8 @@ from spec_tools.dsl.reference_resolver import (
     ReferenceResolver,
     ResolutionResult,
 )
+from spec_tools.dsl.registry import SpecTypeRegistry
 from spec_tools.dsl.section_tree import SectionTree, build_section_tree
-from spec_tools.dsl.type_definitions import ModuleDefinition, TypeDefinitionLoader
 
 
 @dataclass
@@ -144,7 +145,7 @@ class DocumentContext:
     content: str
     """Markdown content."""
 
-    module_def: ModuleDefinition | None = None
+    module_def: SpecModule | None = None
     """Matched module definition."""
 
     module_id: str | None = None
@@ -162,22 +163,20 @@ class DSLValidator:
     Main DSL validator implementing multi-pass validation.
 
     Usage:
-        loader = TypeDefinitionLoader(Path(".spec-types"))
-        loader.load_all()
-
-        validator = DSLValidator(loader)
+        registry = SpecTypeRegistry.load_from_package(Path(".spec-types"))
+        validator = DSLValidator(registry)
         result = validator.validate(Path("specs"))
     """
 
-    def __init__(self, type_loader: TypeDefinitionLoader):
+    def __init__(self, type_registry: SpecTypeRegistry):
         """
         Initialize the DSL validator.
 
         Args:
-            type_loader: Loaded type definitions
+            type_registry: Type registry with loaded spec definitions
         """
-        self.type_loader = type_loader
-        self.registry = IDRegistry()
+        self.type_registry = type_registry
+        self.id_registry = IDRegistry()
         self.documents: dict[Path, DocumentContext] = {}
         self.errors: list[ValidationError] = []
         self.warnings: list[ValidationError] = []
@@ -194,7 +193,7 @@ class DSLValidator:
             Validation result
         """
         # Reset state
-        self.registry = IDRegistry()
+        self.id_registry = IDRegistry()
         self.documents = {}
         self.errors = []
         self.warnings = []
@@ -212,8 +211,8 @@ class DSLValidator:
             self._assign_type_and_register(doc_ctx)
 
         # Check for duplicate IDs
-        if self.registry.has_duplicates():
-            for error_data in self.registry.get_all_duplicate_errors():
+        if self.id_registry.has_duplicates():
+            for error_data in self.id_registry.get_all_duplicate_errors():
                 self._add_duplicate_error(error_data)
 
         # Pass 4: Structural validation
@@ -225,7 +224,7 @@ class DSLValidator:
         # TODO: Implement content validation once content validators are ready
 
         # Pass 6: Reference extraction
-        ref_extractor = ReferenceExtractor(self.type_loader.config)
+        ref_extractor = ReferenceExtractor(self.type_registry.config)
         for doc_ctx in self.documents.values():
             doc_ctx.references = ref_extractor.extract_references(
                 doc_ctx.file_path,
@@ -235,7 +234,7 @@ class DSLValidator:
             )
 
         # Pass 7: Reference resolution
-        ref_resolver = ReferenceResolver(self.registry)
+        ref_resolver = ReferenceResolver(self.id_registry)
         all_references: list[Reference] = []
 
         for doc_ctx in self.documents.values():
@@ -300,7 +299,7 @@ class DSLValidator:
     def _assign_type_and_register(self, doc_ctx: DocumentContext) -> None:
         """Pass 3: Assign module type and register IDs."""
         # Find matching module definition
-        module_def = self.type_loader.get_module_for_file(doc_ctx.file_path)
+        module_def = self.type_registry.get_module_for_file(doc_ctx.file_path)
 
         if not module_def:
             # No matching type definition - this might be ok
@@ -337,7 +336,7 @@ class DSLValidator:
             doc_ctx.module_id = module_id
 
             # Register in ID registry
-            success = self.registry.register_module(
+            success = self.id_registry.register_module(
                 module_id=module_id,
                 module_type=module_def.name,
                 file_path=doc_ctx.file_path,
@@ -348,9 +347,7 @@ class DSLValidator:
                 # Duplicate ID - will be reported later
                 pass
 
-    def _extract_module_id(
-        self, doc_ctx: DocumentContext, module_def: ModuleDefinition
-    ) -> str | None:
+    def _extract_module_id(self, doc_ctx: DocumentContext, module_def: SpecModule) -> str | None:
         """Extract module ID from document based on identifier definition."""
         if not module_def.identifier or not doc_ctx.section_tree:
             return None

@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 from .config import load_config, merge_config_with_args
-from .dsl.type_definitions import TypeDefinitionLoader
+from .dsl.registry import SpecTypeRegistry
 from .dsl.validator import DSLValidator
 from .linter import SpecLinter
 from .markdown_link_validator import MarkdownLinkValidator
@@ -261,17 +261,15 @@ def cmd_validate_dsl(args) -> int:
             return 1
 
         # Load type definitions
-        loader = TypeDefinitionLoader(type_dir)
-        loader.load_all()
+        registry = SpecTypeRegistry.load_from_package(type_dir)
 
         if args.verbose:
-            print(f"Loaded {len(loader.modules)} module type(s)")
-            print(f"Loaded {len(loader.classes)} shared class type(s)")
-            print(f"Loaded {len(loader.content_validators)} content validator(s)")
+            print(f"Loaded {len(registry.modules)} module type(s)")
+            print(f"Loaded {len(registry.classes)} shared class type(s)")
             print()
 
         # Create validator
-        validator = DSLValidator(loader)
+        validator = DSLValidator(registry)
 
         # Run validation
         root_path = Path(args.directory)

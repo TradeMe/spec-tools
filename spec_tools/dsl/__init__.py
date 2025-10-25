@@ -2,13 +2,20 @@
 DSL (Domain-Specific Language) for markdown specification validation.
 
 This package implements a comprehensive type system for markdown documents,
-enabling schema-based validation with ID-based reference resolution.
-
-The DSL now uses Pydantic models for type definitions, providing type safety,
-IDE support, and composability. The old YAML-based system is deprecated.
+enabling schema-based validation with ID-based reference resolution using
+Pydantic models.
 """
 
-# New Pydantic-based models
+# Layer-specific models
+from spec_tools.dsl.layers import (
+    LAYER_MODULES,
+    AcceptanceCriterion,
+    ArchitectureDecisionModule,
+    JobModule,
+    RequirementModule,
+)
+
+# Pydantic-based models
 from spec_tools.dsl.models import (
     Cardinality,
     GlobalConfig,
@@ -21,14 +28,6 @@ from spec_tools.dsl.models import (
 )
 from spec_tools.dsl.registry import SpecTypeRegistry
 from spec_tools.dsl.section_tree import SectionNode, SectionTree, build_section_tree
-
-# Old YAML-based models (deprecated, kept for backward compatibility)
-from spec_tools.dsl.type_definitions import (
-    ClassDefinition,
-    ModuleDefinition,
-    ReferenceDefinition,
-    TypeDefinitionLoader,
-)
 from spec_tools.dsl.validator import DSLValidator, ValidationResult
 
 __all__ = [
@@ -36,7 +35,7 @@ __all__ = [
     "SectionNode",
     "SectionTree",
     "build_section_tree",
-    # New Pydantic models
+    # Pydantic models
     "Cardinality",
     "GlobalConfig",
     "IdentifierSpec",
@@ -46,11 +45,12 @@ __all__ = [
     "SpecModule",
     "ValidationError",
     "SpecTypeRegistry",
-    # Old models (deprecated)
-    "ModuleDefinition",
-    "ClassDefinition",
-    "ReferenceDefinition",
-    "TypeDefinitionLoader",
+    # Layer-specific models
+    "JobModule",
+    "RequirementModule",
+    "ArchitectureDecisionModule",
+    "AcceptanceCriterion",
+    "LAYER_MODULES",
     # Validator
     "DSLValidator",
     "ValidationResult",

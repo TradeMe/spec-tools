@@ -12,8 +12,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from spec_tools.dsl.id_registry import ClassInstance, IDRegistry, ModuleInstance
+from spec_tools.dsl.models import Reference as ReferenceDefinition
+from spec_tools.dsl.models import SpecModule
 from spec_tools.dsl.reference_extractor import Reference
-from spec_tools.dsl.type_definitions import ModuleDefinition, ReferenceDefinition
 
 
 @dataclass
@@ -79,7 +80,7 @@ class ReferenceResolver:
         self.registry = registry
 
     def resolve_reference(
-        self, reference: Reference, module_def: ModuleDefinition | None = None
+        self, reference: Reference, module_def: SpecModule | None = None
     ) -> ResolutionResult:
         """
         Resolve a single reference.
@@ -109,7 +110,7 @@ class ReferenceResolver:
             )
 
     def _resolve_module_reference(
-        self, reference: Reference, module_def: ModuleDefinition | None
+        self, reference: Reference, module_def: SpecModule | None
     ) -> ResolutionResult:
         """Resolve a module reference (link to another document by ID)."""
         # Extract target ID
@@ -153,7 +154,7 @@ class ReferenceResolver:
         )
 
     def _resolve_class_reference(
-        self, reference: Reference, module_def: ModuleDefinition | None
+        self, reference: Reference, module_def: SpecModule | None
     ) -> ResolutionResult:
         """Resolve a class reference (link to a section by ID)."""
         # Extract target ID
@@ -208,7 +209,7 @@ class ReferenceResolver:
     def validate_cardinality(
         self,
         module_id: str,
-        module_def: ModuleDefinition,
+        module_def: SpecModule,
         references: list[Reference],
     ) -> list[CardinalityViolation]:
         """
@@ -306,8 +307,8 @@ class ReferenceResolver:
             return (class_id, module_id)
 
     def _find_reference_definition(
-        self, module_def: ModuleDefinition, relationship: str
-    ) -> ReferenceDefinition | None:
+        self, module_def: SpecModule, relationship: str
+    ) -> Reference | None:
         """Find a reference definition by relationship name."""
         for ref_def in module_def.references:
             if ref_def.name == relationship:

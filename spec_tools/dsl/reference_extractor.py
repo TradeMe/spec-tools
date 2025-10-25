@@ -14,7 +14,7 @@ from markdown_it import MarkdownIt
 from markdown_it.token import Token
 
 from spec_tools.ast_parser import Position
-from spec_tools.dsl.type_definitions import GlobalConfig, ModuleDefinition
+from spec_tools.dsl.models import GlobalConfig, SpecModule
 
 
 @dataclass
@@ -71,7 +71,7 @@ class ReferenceExtractor:
         file_path: Path,
         content: str,
         module_id: str | None,
-        module_def: ModuleDefinition | None,
+        module_def: SpecModule | None,
     ) -> list[Reference]:
         """
         Extract all references from a markdown document.
@@ -117,7 +117,7 @@ class ReferenceExtractor:
         file_path: Path,
         module_id: str | None,
         section: str | None,
-        module_def: ModuleDefinition | None,
+        module_def: SpecModule | None,
     ) -> list[Reference]:
         """Extract references from an inline token (which may contain links)."""
         references = []
@@ -213,7 +213,7 @@ class ReferenceExtractor:
         link_text: str,
         link_target: str,
         section: str | None,
-        module_def: ModuleDefinition | None,
+        module_def: SpecModule | None,
         context: str | None = None,
     ) -> str | None:
         """
