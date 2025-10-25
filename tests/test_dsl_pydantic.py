@@ -118,25 +118,25 @@ class TestSpecTypeRegistry:
         """Test loading built-in types."""
         registry = SpecTypeRegistry.load_builtin_types()
 
+        assert "Job" in registry.modules
         assert "Requirement" in registry.modules
-        assert "Contract" in registry.modules
         assert "ADR" in registry.modules
 
     def test_get_module_for_file(self):
         """Test finding module for a file."""
         registry = SpecTypeRegistry.load_builtin_types()
 
+        # Should match Job
+        job_file = Path("tests/fixtures/specs/jobs/JOB-001.md")
+        module = registry.get_module_for_file(job_file)
+        assert module is not None
+        assert module.name == "Job"
+
         # Should match Requirement
-        req_file = Path("tests/fixtures/requirements/REQ-001.md")
+        req_file = Path("tests/fixtures/specs/requirements/REQ-001.md")
         module = registry.get_module_for_file(req_file)
         assert module is not None
         assert module.name == "Requirement"
-
-        # Should match Contract
-        contract_file = Path("tests/fixtures/contracts/CTR-001.md")
-        module = registry.get_module_for_file(contract_file)
-        assert module is not None
-        assert module.name == "Contract"
 
         # Should not match anything
         other_file = Path("tests/fixtures/other/file.md")
@@ -147,6 +147,27 @@ class TestSpecTypeRegistry:
 class TestBuiltinTypes:
     """Test built-in type definitions."""
 
+    def test_job_module(self):
+        """Test Job module definition."""
+        from spec_tools.dsl.builtin_types import JobModule
+
+        module = JobModule()
+
+        assert module.name == "Job"
+        assert module.file_pattern == r"^JOB-\d{3}\.md$"
+        assert module.location_pattern == r"specs/jobs/"
+
+        # Should have identifier
+        assert module.identifier is not None
+        assert module.identifier.pattern == r"JOB-\d{3}"
+
+        # Should have required sections
+        assert len(module.sections) > 0
+        assert any(s.required for s in module.sections)
+
+        # Jobs don't reference other modules (top level)
+        assert len(module.references) == 0
+
     def test_requirement_module(self):
         """Test Requirement module definition."""
         from spec_tools.dsl.builtin_types import RequirementModule
@@ -155,7 +176,7 @@ class TestBuiltinTypes:
 
         assert module.name == "Requirement"
         assert module.file_pattern == r"^REQ-\d{3}\.md$"
-        assert module.location_pattern == r"requirements/"
+        assert module.location_pattern == r"specs/requirements/"
 
         # Should have identifier
         assert module.identifier is not None
@@ -165,18 +186,13 @@ class TestBuiltinTypes:
         assert len(module.sections) > 0
         assert any(s.required for s in module.sections)
 
-        # Should have references
+        # Should have references (must reference Jobs)
         assert len(module.references) > 0
-
-    def test_contract_module(self):
-        """Test Contract module definition."""
-        from spec_tools.dsl.builtin_types import ContractModule
-
-        module = ContractModule()
-
-        assert module.name == "Contract"
-        assert module.file_pattern == r"^CTR-\d{3}\.md$"
-        assert module.location_pattern == r"contracts/"
+        # Should have "addresses" reference to Job
+        addresses_ref = next((r for r in module.references if r.name == "addresses"), None)
+        assert addresses_ref is not None
+        assert addresses_ref.target_type == "Job"
+        assert addresses_ref.cardinality.min >= 1  # Must reference at least one Job
 
     def test_adr_module(self):
         """Test ADR module definition."""
@@ -186,7 +202,7 @@ class TestBuiltinTypes:
 
         assert module.name == "ADR"
         assert module.file_pattern == r"^ADR-\d{3}\.md$"
-        assert module.location_pattern == r"adrs/"
+        assert module.location_pattern == r"specs/architecture/"
 
 
 class TestPythonPackageLoading:
@@ -221,6 +237,21 @@ class TestPythonPackageLoading:
 class TestFileMatching:
     """Test file matching logic."""
 
+    def test_job_file_matching(self):
+        """Test that job files match correctly."""
+        from spec_tools.dsl.builtin_types import JobModule
+
+        module = JobModule()
+
+        # Should match
+        assert module.matches_file(Path("specs/jobs/JOB-001.md"))
+        assert module.matches_file(Path("project/specs/jobs/JOB-999.md"))
+
+        # Should not match
+        assert not module.matches_file(Path("specs/jobs/job-001.md"))  # lowercase
+        assert not module.matches_file(Path("specs/jobs/JOB-1.md"))  # wrong format
+        assert not module.matches_file(Path("specs/requirements/JOB-001.md"))  # wrong location
+
     def test_requirement_file_matching(self):
         """Test that requirement files match correctly."""
         from spec_tools.dsl.builtin_types import RequirementModule
@@ -228,24 +259,24 @@ class TestFileMatching:
         module = RequirementModule()
 
         # Should match
-        assert module.matches_file(Path("requirements/REQ-001.md"))
-        assert module.matches_file(Path("project/requirements/REQ-999.md"))
+        assert module.matches_file(Path("specs/requirements/REQ-001.md"))
+        assert module.matches_file(Path("project/specs/requirements/REQ-999.md"))
 
         # Should not match
-        assert not module.matches_file(Path("requirements/req-001.md"))  # lowercase
-        assert not module.matches_file(Path("requirements/REQ-1.md"))  # wrong format
-        assert not module.matches_file(Path("contracts/REQ-001.md"))  # wrong location
+        assert not module.matches_file(Path("specs/requirements/req-001.md"))  # lowercase
+        assert not module.matches_file(Path("specs/requirements/REQ-1.md"))  # wrong format
+        assert not module.matches_file(Path("specs/jobs/REQ-001.md"))  # wrong location
 
-    def test_contract_file_matching(self):
-        """Test that contract files match correctly."""
-        from spec_tools.dsl.builtin_types import ContractModule
+    def test_adr_file_matching(self):
+        """Test that ADR files match correctly."""
+        from spec_tools.dsl.builtin_types import ArchitectureDecisionModule
 
-        module = ContractModule()
+        module = ArchitectureDecisionModule()
 
         # Should match
-        assert module.matches_file(Path("contracts/CTR-001.md"))
-        assert module.matches_file(Path("project/contracts/CTR-999.md"))
+        assert module.matches_file(Path("specs/architecture/ADR-001.md"))
+        assert module.matches_file(Path("project/specs/architecture/ADR-999.md"))
 
         # Should not match
-        assert not module.matches_file(Path("contracts/ctr-001.md"))  # lowercase
-        assert not module.matches_file(Path("requirements/CTR-001.md"))  # wrong location
+        assert not module.matches_file(Path("specs/architecture/adr-001.md"))  # lowercase
+        assert not module.matches_file(Path("specs/requirements/ADR-001.md"))  # wrong location

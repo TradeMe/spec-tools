@@ -4,6 +4,7 @@ LICENSE
 
 # Python package
 spec_tools/**/*.py
+spec_types/**/*.py
 tests/**/*.py
 
 # Test project
