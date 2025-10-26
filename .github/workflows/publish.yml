@@ -1,23 +1,33 @@
-name: Publish to PyPI
+name: Publish
 
 on:
+  push:
+    branches: [ main ]
   release:
     types: [published]
   workflow_dispatch:
     inputs:
-      test_pypi:
-        description: 'Publish to TestPyPI instead of PyPI'
-        required: false
-        type: boolean
-        default: true
+      target:
+        description: 'Publish target'
+        required: true
+        type: choice
+        options:
+          - testpypi
+          - pypi
+        default: testpypi
 
 jobs:
   build:
     name: Build distribution
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      is-prerelease: ${{ steps.version.outputs.is-prerelease }}
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Install uv
       uses: astral-sh/setup-uv@v3
@@ -38,10 +48,43 @@ jobs:
         uv run ruff check spec_tools/ tests/
         uv run ruff format --check spec_tools/ tests/
 
-    - name: Build package
+    - name: Determine version
+      id: version
       run: |
-        uv pip install flit
-        uv run flit build
+        BASE_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+        echo "Base version from pyproject.toml: $BASE_VERSION"
+
+        if [[ "${{ github.event_name }}" == "release" ]]; then
+          # For releases, use the version as-is
+          VERSION="$BASE_VERSION"
+          IS_PRERELEASE="false"
+          echo "Using release version: $VERSION"
+        elif [[ "${{ github.event_name }}" == "push" ]]; then
+          # For pushes to main, create a dev version
+          COMMIT_SHORT=$(git rev-parse --short HEAD)
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          VERSION="${BASE_VERSION}.dev${COMMIT_COUNT}+${COMMIT_SHORT}"
+          IS_PRERELEASE="true"
+          echo "Using dev version: $VERSION"
+        else
+          # For manual dispatch, use version as-is
+          VERSION="$BASE_VERSION"
+          IS_PRERELEASE="false"
+          echo "Using manual dispatch version: $VERSION"
+        fi
+
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "is-prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+
+    - name: Update version for dev builds
+      if: github.event_name == 'push'
+      run: |
+        # Temporarily update version in pyproject.toml for build
+        sed -i 's/^version = .*/version = "${{ steps.version.outputs.version }}"/' pyproject.toml
+        echo "Updated pyproject.toml version to: ${{ steps.version.outputs.version }}"
+
+    - name: Build package
+      run: uv run flit build
 
     - name: Store distribution packages
       uses: actions/upload-artifact@v4
@@ -51,14 +94,16 @@ jobs:
 
   publish-to-pypi:
     name: Publish to PyPI
-    if: github.event_name == 'release' && github.event.action == 'published'
+    if: |
+      (github.event_name == 'release' && github.event.action == 'published') ||
+      (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: pypi
       url: https://pypi.org/p/spec-tools
     permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
+      id-token: write
 
     steps:
     - name: Download distributions
@@ -72,14 +117,16 @@ jobs:
 
   publish-to-testpypi:
     name: Publish to TestPyPI
-    if: github.event_name == 'workflow_dispatch' && inputs.test_pypi
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi')
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: testpypi
       url: https://test.pypi.org/p/spec-tools
     permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
+      id-token: write
 
     steps:
     - name: Download distributions
@@ -92,3 +139,33 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
+
+    - name: Comment on commit
+      if: github.event_name == 'push'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const version = '${{ needs.build.outputs.version }}';
+          const message = `🚀 Published development version \`${version}\` to [TestPyPI](https://test.pypi.org/project/spec-tools/${version}/)
+
+          Install with:
+          \`\`\`bash
+          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-tools==${version}
+          \`\`\``;
+
+          // Find the PR that was merged
+          const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            commit_sha: context.sha
+          });
+
+          if (prs.length > 0) {
+            // Comment on the PR
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prs[0].number,
+              body: message
+            });
+          }

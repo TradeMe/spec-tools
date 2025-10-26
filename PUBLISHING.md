@@ -1,12 +1,107 @@
 # Publishing spec-tools to PyPI
 
-This document explains how to publish spec-tools to PyPI.
+This document explains how to publish spec-tools to PyPI using our automated release workflows.
 
 ## Overview
 
-The project uses automated publishing via GitHub Actions with PyPI Trusted Publishing (OIDC). This is the recommended and most secure method for publishing packages.
+The project uses a fully automated publishing system with multiple safeguards:
 
-## Prerequisites
+- **Automatic TestPyPI Publishing**: Every merge to `main` automatically publishes a dev version to TestPyPI
+- **Version Control Enforcement**: CI checks prevent version changes outside the release process
+- **Release Workflow**: Automated workflow prepares release PRs with proper version and changelog updates
+- **Trusted Publishing**: Uses OIDC for secure authentication (no API tokens needed)
+
+## Publishing Workflows
+
+### 1. Development Versions (Automatic)
+
+Every merge to `main` automatically:
+- Creates a development version (e.g., `0.1.0.dev123+abc1234`)
+- Publishes to TestPyPI
+- Comments on the PR with installation instructions
+
+No manual action required! This allows immediate testing of merged changes.
+
+**Installation:**
+```bash
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-tools
+```
+
+### 2. Official Releases
+
+Official releases follow a structured process enforced by CI:
+
+#### Step 1: Prepare Release
+
+Use the "Prepare Release" workflow to create a release PR:
+
+1. Go to **Actions** → **Prepare Release** → **Run workflow**
+2. Enter the version number (e.g., `0.2.0`, `1.0.0-alpha.1`)
+3. Click **Run workflow**
+
+The workflow will:
+- ✅ Validate the version format (semantic versioning)
+- ✅ Check the version doesn't already exist
+- ✅ Update `pyproject.toml` with the new version
+- ✅ Update `CHANGELOG.md` with the release date
+- ✅ Create a release branch (`release/v0.2.0`)
+- ✅ Create a PR labeled with `release`
+- ✅ Populate the PR with a release checklist
+
+#### Step 2: Review and Merge
+
+1. Review the automatically created release PR
+2. Verify all CI checks pass
+3. Merge the PR
+
+**After merging:**
+- A dev version is published to TestPyPI for final testing
+
+#### Step 3: Create GitHub Release
+
+1. Go to **Releases** → **Draft a new release**
+2. Create a new tag matching the version (e.g., `v0.2.0`)
+3. Set the release title to the version (e.g., `v0.2.0`)
+4. Copy release notes from `CHANGELOG.md`
+5. Click **Publish release**
+
+**After publishing:**
+- The official version is automatically published to PyPI
+- The package is available via `pip install spec-tools`
+
+## Version Enforcement
+
+The project prevents accidental version changes with CI checks:
+
+### Version Check Workflow
+
+Runs on every PR that modifies `pyproject.toml`:
+
+- ❌ **Blocks** version changes without the `release` label
+- ✅ **Validates** version format (semantic versioning)
+- ✅ **Requires** `CHANGELOG.md` to be updated
+
+**To bypass (not recommended):**
+- Add the `release` label to your PR
+- Only do this for emergency hotfixes or special cases
+
+## Version Numbering
+
+Follow [Semantic Versioning](https://semver.org/):
+
+- **MAJOR** version (1.0.0): Incompatible API changes
+- **MINOR** version (0.1.0): New functionality, backwards compatible
+- **PATCH** version (0.0.1): Bug fixes, backwards compatible
+
+**Pre-release versions:**
+- Alpha: `0.2.0-alpha.1`
+- Beta: `0.2.0-beta.1`
+- Release Candidate: `0.2.0-rc.1`
+
+**Development versions (automatic):**
+- `0.1.0.dev123+abc1234` (automatically generated from commit count and hash)
+
+## Prerequisites (One-Time Setup)
 
 ### 1. Set up PyPI Trusted Publishing
 
@@ -16,12 +111,12 @@ The project uses automated publishing via GitHub Actions with PyPI Trusted Publi
 2. Navigate to your account settings → Publishing
 3. Add a new "pending publisher" with these details:
    - **PyPI Project Name**: `spec-tools`
-   - **Owner**: `TradeMe` (GitHub organization/user)
+   - **Owner**: `TradeMe`
    - **Repository name**: `spec-tools`
    - **Workflow name**: `publish.yml`
    - **Environment name**: `pypi`
 
-**For TestPyPI (testing):**
+**For TestPyPI (automatic dev versions):**
 
 1. Go to [TestPyPI](https://test.pypi.org) and log in
 2. Navigate to your account settings → Publishing
@@ -34,90 +129,104 @@ The project uses automated publishing via GitHub Actions with PyPI Trusted Publi
 2. Create two environments:
    - **pypi**: For production releases to PyPI
    - **testpypi**: For test releases to TestPyPI
-3. (Optional) Add protection rules:
+3. (Optional) Add protection rules to `pypi`:
    - Require reviewers before deployment
    - Restrict to specific branches (e.g., `main`)
 
-## Publishing Workflow
+### 3. Create the `release` Label
 
-### Automated Publishing (Recommended)
+1. Go to Issues → Labels
+2. Create a new label:
+   - **Name**: `release`
+   - **Description**: Marks PRs that are allowed to change the version
+   - **Color**: Your choice (suggest: purple or gold)
 
-#### Publishing to PyPI (Production)
+## Changelog Management
 
-1. **Ensure all tests pass**:
-   ```bash
-   uv run pytest tests/ -v --cov
-   uv run ruff check spec_tools/ tests/
-   uv run ruff format --check spec_tools/ tests/
-   ```
+We use [Keep a Changelog](https://keepachangelog.com/) format.
 
-2. **Update version** in `pyproject.toml`:
-   ```toml
-   version = "0.2.0"  # Update to new version
-   ```
+### During Development
 
-3. **Commit and push changes**:
-   ```bash
-   git add pyproject.toml
-   git commit -m "chore: Bump version to 0.2.0"
-   git push
-   ```
+Add changes to the `[Unreleased]` section as you make them:
 
-4. **Create a GitHub Release**:
-   - Go to GitHub → Releases → Create a new release
-   - Create a new tag (e.g., `v0.2.0`)
-   - Write release notes describing changes
-   - Click "Publish release"
+```markdown
+## [Unreleased]
 
-5. **Monitor the workflow**:
-   - The `publish.yml` workflow will automatically trigger
-   - It will build, test, and publish to PyPI
-   - Check the Actions tab for progress
+### Added
+- New feature X
 
-#### Testing with TestPyPI
+### Changed
+- Modified behavior of Y
 
-To test the publishing process before making a production release:
+### Fixed
+- Bug in Z
+```
 
-1. Go to GitHub Actions → Publish to PyPI workflow
-2. Click "Run workflow"
-3. Check "Publish to TestPyPI instead of PyPI"
-4. Click "Run workflow"
+### During Release
 
-This allows you to verify the package builds and publishes correctly without affecting the production PyPI package.
+The "Prepare Release" workflow automatically:
+- Moves `[Unreleased]` content to a versioned section
+- Adds the release date
+- Updates version links at the bottom
 
-### Manual Publishing
+**No manual changelog editing needed for releases!**
 
-If you need to publish manually (not recommended for production):
+## Testing Releases
+
+### Test a Development Version
+
+After merging any PR to `main`:
+
+```bash
+# Install from TestPyPI
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-tools
+
+# Verify version
+spec-tools --version
+```
+
+### Test a Release Before Publishing
+
+After merging a release PR:
+
+```bash
+# Install the dev version that was just published
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-tools==<version>.devXXX
+
+# Run tests
+spec-tools lint
+spec-tools check-coverage
+```
+
+If everything looks good, proceed with creating the GitHub release.
+
+## Manual Publishing (Emergency Only)
+
+If automated publishing fails, you can publish manually:
 
 1. **Install build tools**:
    ```bash
-   uv pip install flit twine
+   uv sync --extra dev
    ```
 
-2. **Build the package**:
+2. **Update version and changelog manually**:
+   - Edit `pyproject.toml`
+   - Edit `CHANGELOG.md`
+   - Commit changes
+
+3. **Build the package**:
    ```bash
    uv run flit build
    ```
 
-   This creates distribution files in the `dist/` directory:
-   - `spec_tools-<version>.tar.gz` (source distribution)
-   - `spec_tools-<version>-py3-none-any.whl` (wheel)
+4. **Install twine**:
+   ```bash
+   uv pip install twine
+   ```
 
-3. **Check the distribution**:
+5. **Check the distribution**:
    ```bash
    uv run twine check dist/*
-   ```
-
-4. **Publish to TestPyPI** (optional, for testing):
-   ```bash
-   uv run twine upload --repository testpypi dist/*
-   ```
-
-   You'll need a TestPyPI API token. Create one at https://test.pypi.org/manage/account/token/
-
-5. **Test installation from TestPyPI**:
-   ```bash
-   pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-tools
    ```
 
 6. **Publish to PyPI**:
@@ -127,60 +236,71 @@ If you need to publish manually (not recommended for production):
 
    You'll need a PyPI API token. Create one at https://pypi.org/manage/account/token/
 
-## Version Numbering
-
-Follow [Semantic Versioning](https://semver.org/):
-
-- **MAJOR** version (1.0.0): Incompatible API changes
-- **MINOR** version (0.1.0): New functionality, backwards compatible
-- **PATCH** version (0.0.1): Bug fixes, backwards compatible
-
-Examples:
-- `0.1.0` → `0.1.1`: Bug fix
-- `0.1.0` → `0.2.0`: New feature
-- `0.9.0` → `1.0.0`: First stable release or breaking changes
-
 ## Pre-Release Checklist
 
-Before publishing a new version:
+Before running "Prepare Release":
 
-- [ ] All tests pass (`uv run pytest tests/ -v`)
-- [ ] All linters pass (`uv run ruff check && uv run ruff format --check`)
-- [ ] Project linters pass (if applicable to changes):
-  - [ ] `uv run spec-tools lint`
-  - [ ] `uv run spec-tools check-structure`
-  - [ ] `uv run spec-tools check-coverage`
-  - [ ] `uv run spec-tools check-schema`
-- [ ] Version number updated in `pyproject.toml`
-- [ ] README.md is up to date
-- [ ] CHANGELOG or release notes prepared
-- [ ] All changes committed and pushed
-- [ ] (Optional) Test with TestPyPI first
+- [ ] All features for this release are merged to `main`
+- [ ] All tests passing on `main`
+- [ ] All linters passing on `main`
+- [ ] `CHANGELOG.md` has all changes documented in `[Unreleased]`
+- [ ] Documentation is up to date
+- [ ] Version number follows semantic versioning
 
 ## Post-Release Tasks
 
-After a successful release:
+After publishing a release:
 
 1. **Verify installation**:
    ```bash
    pip install --upgrade spec-tools
-   spec-tools --help
+   spec-tools --version
    ```
 
 2. **Check PyPI page**:
    - Visit https://pypi.org/project/spec-tools/
    - Verify metadata, description, and links are correct
 
-3. **Announce the release** (optional):
-   - Update documentation
-   - Post on relevant channels
-   - Share release notes
+3. **Update GitHub milestones** (if used):
+   - Close the milestone for this release
+   - Create a milestone for the next release
+
+4. **Announce the release** (optional):
+   - Share release notes on relevant channels
+   - Update external documentation
+
+## Common Workflows
+
+### Release a Patch Version (Bug Fix)
+
+```bash
+# 1. Run Prepare Release workflow with version 0.1.1
+# 2. Review and merge the PR
+# 3. Create GitHub release with tag v0.1.1
+```
+
+### Release a Minor Version (New Features)
+
+```bash
+# 1. Run Prepare Release workflow with version 0.2.0
+# 2. Review and merge the PR
+# 3. Create GitHub release with tag v0.2.0
+```
+
+### Release a Pre-release (Alpha/Beta)
+
+```bash
+# 1. Run Prepare Release workflow with version 0.2.0-alpha.1
+# 2. Review and merge the PR
+# 3. Create GitHub release with tag v0.2.0-alpha.1
+# 4. Mark the release as "pre-release" on GitHub
+```
 
 ## Troubleshooting
 
 ### Build Fails
 
-- Check that all tests pass locally
+- Check that all tests pass locally: `uv run pytest tests/ -v`
 - Ensure `pyproject.toml` is valid
 - Verify all required files are included
 
@@ -190,26 +310,34 @@ After a successful release:
 - Verify the PyPI trusted publisher is configured correctly
 - Check that the workflow name and environment match exactly
 - Ensure the GitHub environment exists and has correct permissions
-
-**Authentication errors (manual publishing):**
-- Generate a new API token
-- Use `__token__` as the username
-- Paste the token (including `pypi-` prefix) as the password
+- Check the workflow logs for specific error messages
 
 **Version conflicts:**
-- You cannot republish the same version
-- Increment the version number in `pyproject.toml`
-- Delete local `dist/` directory before rebuilding
+- You cannot republish the same version to PyPI
+- For development versions, the commit hash makes each unique
+- For releases, increment the version number
 
-### Package Not Found After Publishing
+### Version Check Fails on PR
 
-- Wait a few minutes for PyPI to update its index
-- Try `pip install --upgrade spec-tools`
-- Check the PyPI page to confirm it's published
+This is expected! Version changes are only allowed through the release process:
+
+**Solutions:**
+- Use the "Prepare Release" workflow for releases
+- If you need to change version for other reasons, add the `release` label
+- Revert the version change if it was accidental
+
+### CHANGELOG Not Updated
+
+The version check requires changelog updates for releases:
+
+**Solution:**
+- Add your changes to the `[Unreleased]` section in `CHANGELOG.md`
+- The "Prepare Release" workflow will move them to the versioned section
 
 ## Additional Resources
 
+- [Keep a Changelog](https://keepachangelog.com/)
+- [Semantic Versioning](https://semver.org/)
 - [PyPI Trusted Publishing Guide](https://docs.pypi.org/trusted-publishers/)
 - [GitHub Actions PyPI Publish Action](https://github.com/pypa/gh-action-pypi-publish)
 - [Packaging Python Projects](https://packaging.python.org/en/latest/tutorials/packaging-projects/)
-- [Flit Documentation](https://flit.pypa.io/)
