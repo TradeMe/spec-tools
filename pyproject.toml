@@ -2,15 +2,46 @@
 requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
+[tool.flit.module]
+name = "spec_tools"
+
 [project]
-name = "spec-tools"
+name = "sdd-tools"
 version = "0.1.0"
-description = "Tools for spec-driven development"
+description = "Tools for spec-driven development - validate specifications, test coverage, file structure, and documentation links"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "spec-tools contributors"}
+]
+keywords = [
+    "spec",
+    "specification",
+    "testing",
+    "validation",
+    "linting",
+    "documentation",
+    "traceability",
+    "requirements",
+    "test-coverage",
+    "markdown",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Documentation",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Environment :: Console",
+    "Typing :: Typed",
 ]
 dependencies = [
     "markdown-it-py>=4.0.0",
@@ -20,11 +51,18 @@ dependencies = [
     "tomli>=2.0.0; python_version < '3.11'",
 ]
 
+[project.urls]
+Homepage = "https://github.com/TradeMe/spec-tools"
+Repository = "https://github.com/TradeMe/spec-tools"
+Issues = "https://github.com/TradeMe/spec-tools/issues"
+Changelog = "https://github.com/TradeMe/spec-tools/releases"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "ruff>=0.1.0",
+    "flit>=3.12.0",
 ]
 
 [project.scripts]
