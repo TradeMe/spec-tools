@@ -29,45 +29,65 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 
 ### 2. Official Releases
 
-Official releases follow a structured process enforced by CI:
+Official releases use a Claude Code-assisted process with full automation.
 
-#### Step 1: Prepare Release
+#### The Process (Your Steps)
 
-Use the "Prepare Release" workflow to create a release PR:
+**You do exactly 2 things:**
 
-1. Go to **Actions** → **Prepare Release** → **Run workflow**
-2. Enter the version number (e.g., `0.2.0`, `1.0.0-alpha.1`)
-3. Click **Run workflow**
+1. **Request a release** in a Claude Code session:
+   ```
+   "Make a release for version 0.2.0"
+   ```
+   or just:
+   ```
+   "Make a release"
+   ```
 
-The workflow will:
-- ✅ Validate the version format (semantic versioning)
-- ✅ Check the version doesn't already exist
-- ✅ Update `pyproject.toml` with the new version
-- ✅ Update `CHANGELOG.md` with the release date
-- ✅ Create a release branch (`release/v0.2.0`)
-- ✅ Create a PR labeled with `release`
-- ✅ Populate the PR with a release checklist
+2. **Merge the PR** that Claude creates (after reviewing it)
 
-#### Step 2: Review and Merge
+That's it! Everything else is automated.
 
-1. Review the automatically created release PR
-2. Verify all CI checks pass
+#### What Happens Behind the Scenes
+
+**Claude Code does:**
+- ✅ Updates `pyproject.toml` with the new version
+- ✅ Updates `CHANGELOG.md` with the release date
+- ✅ Moves unreleased changes to the version section
+- ✅ Creates a release branch (`release/v0.2.0`)
+- ✅ Commits the changes with proper message
+- ✅ Creates a PR labeled with `release`
+- ✅ Adds a comprehensive PR description
+
+**After you merge the PR:**
+- ✅ GitHub release is automatically created with tag `v0.2.0`
+- ✅ Release notes are extracted from `CHANGELOG.md`
+- ✅ Package is automatically published to PyPI
+- ✅ Pre-release flag is set for alpha/beta/rc versions
+
+**The only manual step is reviewing and merging the PR!**
+
+#### Example Session
+
+```
+You: "Make a release for version 0.2.0"
+
+Claude: ✅ Release PR created: https://github.com/TradeMe/spec-tools/pull/123
+
+Next steps:
+1. Review the PR (especially CHANGELOG.md)
+2. Wait for CI to pass
 3. Merge the PR
 
-**After merging:**
-- A dev version is published to TestPyPI for final testing
+After merge, automatically:
+- GitHub release created
+- Package published to PyPI
+- Installation: pip install --upgrade spec-tools
 
-#### Step 3: Create GitHub Release
+You: *reviews and merges PR*
 
-1. Go to **Releases** → **Draft a new release**
-2. Create a new tag matching the version (e.g., `v0.2.0`)
-3. Set the release title to the version (e.g., `v0.2.0`)
-4. Copy release notes from `CHANGELOG.md`
-5. Click **Publish release**
-
-**After publishing:**
-- The official version is automatically published to PyPI
-- The package is available via `pip install spec-tools`
+[GitHub Actions automatically creates release and publishes to PyPI]
+```
 
 ## Version Enforcement
 
@@ -200,9 +220,20 @@ spec-tools check-coverage
 
 If everything looks good, proceed with creating the GitHub release.
 
+## Alternative: Manual Workflow (Without Claude)
+
+If you need to create a release without Claude Code, you can use the manual workflow:
+
+1. Go to **Actions** → **Prepare Release** → **Run workflow**
+2. Enter the version number
+3. Review and merge the PR it creates
+4. The release is automatically created and published
+
+This is functionally equivalent to the Claude-assisted process, just requires clicking through the GitHub UI.
+
 ## Manual Publishing (Emergency Only)
 
-If automated publishing fails, you can publish manually:
+If automated publishing fails completely, you can publish manually:
 
 1. **Install build tools**:
    ```bash
@@ -273,28 +304,32 @@ After publishing a release:
 
 ### Release a Patch Version (Bug Fix)
 
-```bash
-# 1. Run Prepare Release workflow with version 0.1.1
-# 2. Review and merge the PR
-# 3. Create GitHub release with tag v0.1.1
+```
+You: "Make a release for version 0.1.1"
+Claude: [creates PR]
+You: [merge PR]
+System: [auto-creates release and publishes]
 ```
 
 ### Release a Minor Version (New Features)
 
-```bash
-# 1. Run Prepare Release workflow with version 0.2.0
-# 2. Review and merge the PR
-# 3. Create GitHub release with tag v0.2.0
+```
+You: "Make a release for version 0.2.0"
+Claude: [creates PR]
+You: [merge PR]
+System: [auto-creates release and publishes]
 ```
 
 ### Release a Pre-release (Alpha/Beta)
 
-```bash
-# 1. Run Prepare Release workflow with version 0.2.0-alpha.1
-# 2. Review and merge the PR
-# 3. Create GitHub release with tag v0.2.0-alpha.1
-# 4. Mark the release as "pre-release" on GitHub
 ```
+You: "Make a release for version 0.2.0-alpha.1"
+Claude: [creates PR]
+You: [merge PR]
+System: [auto-creates release as pre-release and publishes]
+```
+
+Pre-release versions are automatically detected and marked appropriately.
 
 ## Troubleshooting
 
