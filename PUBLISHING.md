@@ -24,8 +24,10 @@ No manual action required! This allows immediate testing of merged changes.
 
 **Installation:**
 ```bash
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-tools
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sdd-tools
 ```
+
+**Note:** The package name on PyPI is `sdd-tools` (not `spec-tools`) due to a name collision.
 
 ### 2. Official Releases
 
@@ -82,7 +84,7 @@ Next steps:
 After merge, automatically:
 - GitHub release created
 - Package published to PyPI
-- Installation: pip install --upgrade spec-tools
+- Installation: pip install --upgrade sdd-tools
 
 You: *reviews and merges PR*
 
@@ -199,9 +201,9 @@ After merging any PR to `main`:
 
 ```bash
 # Install from TestPyPI
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-tools
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sdd-tools
 
-# Verify version
+# Verify version (command is still spec-tools)
 spec-tools --version
 ```
 
@@ -211,9 +213,9 @@ After merging a release PR:
 
 ```bash
 # Install the dev version that was just published
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-tools==<version>.devXXX
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sdd-tools==<version>.devXXX
 
-# Run tests
+# Run tests (command is still spec-tools)
 spec-tools lint
 spec-tools check-coverage
 ```
@@ -284,12 +286,12 @@ After publishing a release:
 
 1. **Verify installation**:
    ```bash
-   pip install --upgrade spec-tools
-   spec-tools --version
+   pip install --upgrade sdd-tools
+   spec-tools --version  # Command is still spec-tools
    ```
 
 2. **Check PyPI page**:
-   - Visit https://pypi.org/project/spec-tools/
+   - Visit https://pypi.org/project/sdd-tools/
    - Verify metadata, description, and links are correct
 
 3. **Update GitHub milestones** (if used):

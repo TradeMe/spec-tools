@@ -2,8 +2,11 @@
 requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
+[tool.flit.module]
+name = "spec_tools"
+
 [project]
-name = "spec-tools"
+name = "sdd-tools"
 version = "0.1.0"
 description = "Tools for spec-driven development - validate specifications, test coverage, file structure, and documentation links"
 readme = "README.md"

@@ -2,15 +2,21 @@
 
 This guide walks through the one-time manual setup required before spec-tools can be published to PyPI.
 
+## Important Notes
+
+**Package Name:** The PyPI package is published as `sdd-tools` (not `spec-tools`) due to a name collision on PyPI. The repository and local project name remain `spec-tools`. There will be a future task to rename everything consistently.
+
+**Installation:** Users will install with `pip install sdd-tools`
+
 ## Overview
 
 You need to configure:
-1. PyPI Trusted Publishing (for production releases)
-2. TestPyPI Trusted Publishing (for dev versions and testing)
-3. GitHub Environments
-4. GitHub Labels
+1. PyPI Trusted Publishing (for production releases) - **Required**
+2. TestPyPI Trusted Publishing (for dev versions and testing) - **Optional** (skip until account recovered)
+3. GitHub Environments - **Required**
+4. GitHub Labels - **Required**
 
-**Time required:** ~10-15 minutes
+**Time required:** ~5-10 minutes (without TestPyPI)
 
 ## Step 1: Set Up PyPI Trusted Publishing
 
@@ -30,7 +36,7 @@ If you don't have one:
 
 Fill in these details:
 ```
-PyPI Project Name:    spec-tools
+PyPI Project Name:    sdd-tools
 Owner:                TradeMe
 Repository name:      spec-tools
 Workflow name:        publish.yml
@@ -39,7 +45,7 @@ Environment name:     pypi
 
 5. Click **Add**
 
-**Important:** The project name must be exactly `spec-tools`. PyPI will reserve this name for you until the first publish.
+**Important:** The project name must be exactly `sdd-tools`. PyPI will reserve this name for you until the first publish.
 
 ### 1.3 What This Does
 
@@ -49,16 +55,20 @@ This tells PyPI:
 - Only when using the `pypi` GitHub environment
 - No API tokens needed - uses OIDC for secure authentication
 
-## Step 2: Set Up TestPyPI Trusted Publishing
+## Step 2: Set Up TestPyPI Trusted Publishing (Optional)
 
-### 2.1 Create TestPyPI Account
+**Status:** Currently optional - skip this step until your TestPyPI account is recovered.
+
+The workflow is configured with `continue-on-error: true` so TestPyPI failures won't block releases. You can set this up later without affecting production releases.
+
+### 2.1 Create TestPyPI Account (When Ready)
 
 TestPyPI is separate from PyPI:
 1. Go to https://test.pypi.org/account/register/
 2. Create your account (can use same email as PyPI)
 3. Verify your email
 
-### 2.2 Configure Trusted Publisher for TestPyPI
+### 2.2 Configure Trusted Publisher for TestPyPI (When Ready)
 
 1. Go to https://test.pypi.org and log in
 2. Click your username → **Account settings**
@@ -67,7 +77,7 @@ TestPyPI is separate from PyPI:
 
 Fill in these details:
 ```
-PyPI Project Name:    spec-tools
+PyPI Project Name:    sdd-tools
 Owner:                TradeMe
 Repository name:      spec-tools
 Workflow name:        publish.yml
@@ -76,12 +86,14 @@ Environment name:     testpypi
 
 5. Click **Add**
 
-### 2.3 What This Does
+### 2.3 What This Does (When Configured)
 
 TestPyPI is used for:
 - Automatic dev versions (every merge to main)
 - Testing releases before publishing to PyPI
 - Verifying the package builds correctly
+
+**Until configured:** The workflow will skip TestPyPI publishing and continue successfully.
 
 ## Step 3: Configure GitHub Environments
 
@@ -115,6 +127,8 @@ TestPyPI is used for:
 **No protection rules needed** - this is for automatic testing
 
 5. Click **Save protection rules** (or just leave it empty)
+
+**Note:** Create this environment even if TestPyPI isn't configured yet. The workflow needs it to exist (it will just fail gracefully with `continue-on-error`).
 
 ### 3.3 What This Does
 
@@ -153,14 +167,16 @@ The `release` label:
 ### 5.1 Check PyPI Configuration
 
 1. Go to https://pypi.org → Your account → Publishing
-2. You should see `spec-tools` in "Pending publishers"
+2. You should see `sdd-tools` in "Pending publishers"
 3. Status should show waiting for first publish
 
-### 5.2 Check TestPyPI Configuration
+### 5.2 Check TestPyPI Configuration (Optional - Skip if Not Set Up)
 
 1. Go to https://test.pypi.org → Your account → Publishing
-2. You should see `spec-tools` in "Pending publishers"
+2. You should see `sdd-tools` in "Pending publishers"
 3. Status should show waiting for first publish
+
+**If skipped:** TestPyPI will fail gracefully and won't block releases.
 
 ### 5.3 Check GitHub Environments
 
@@ -176,7 +192,9 @@ The `release` label:
 
 ## Step 6: Test the Setup
 
-### 6.1 Test with a Dev Version (Automatic)
+### 6.1 Test with a Dev Version (Automatic - Optional)
+
+**If TestPyPI is configured:**
 
 The easiest test is to merge any PR to `main`:
 
@@ -184,9 +202,13 @@ The easiest test is to merge any PR to `main`:
 2. Merge it to `main`
 3. Watch the "Publish" workflow run in Actions
 4. It should publish a dev version to TestPyPI
-5. Check https://test.pypi.org/project/spec-tools/
+5. Check https://test.pypi.org/project/sdd-tools/
 
 If successful, you'll see a version like `0.1.0.dev123+abc1234`
+
+**If TestPyPI is NOT configured:**
+
+The workflow will still run successfully - the TestPyPI job will fail gracefully (shown as yellow/skipped) and won't block the workflow.
 
 ### 6.2 Test with a Release (When Ready)
 
@@ -197,9 +219,12 @@ When you're ready for your first release:
 3. Watch for:
    - "Create Release" workflow creates GitHub release
    - "Publish" workflow publishes to PyPI
-4. Check https://pypi.org/project/spec-tools/
+4. Check https://pypi.org/project/sdd-tools/
 
-If successful, your package is live!
+If successful, your package is live and users can install with:
+```bash
+pip install sdd-tools
+```
 
 ## Troubleshooting
 
@@ -217,14 +242,9 @@ If successful, your package is live!
 
 ### "Project name already taken" on PyPI
 
-**Problem:** Someone else registered `spec-tools` on PyPI
+**Problem:** Someone else registered your desired name on PyPI
 
-**Solutions:**
-1. Choose a different name (e.g., `trademe-spec-tools`)
-2. Update everywhere:
-   - `pyproject.toml` name field
-   - PyPI trusted publisher configuration
-   - All documentation references
+**Solution:** We're already using `sdd-tools` due to the `spec-tools` name collision. This is already configured correctly.
 
 ### GitHub Environment Not Found
 
@@ -295,33 +315,37 @@ Trusted Publishing (OIDC):
 Once everything is configured:
 
 1. **Every PR merged to main:**
-   - Dev version published to TestPyPI automatically
+   - Dev version published to TestPyPI automatically (if TestPyPI is configured)
    - Can test immediately with:
      ```bash
-     pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-tools
+     pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sdd-tools
      ```
+   - If TestPyPI not configured: workflow succeeds anyway, just skips that step
 
 2. **When you say "make a release":**
    - Claude creates release PR
    - You merge the PR
    - GitHub release created automatically
    - Package published to PyPI automatically
-   - Available via: `pip install spec-tools`
+   - Available via: `pip install sdd-tools`
 
 ## Summary Checklist
 
-Before your first release, verify:
+**Required before first release:**
 
 - [ ] PyPI account created
-- [ ] PyPI trusted publisher configured for `spec-tools`
-- [ ] TestPyPI account created
-- [ ] TestPyPI trusted publisher configured for `spec-tools`
+- [ ] PyPI trusted publisher configured for `sdd-tools`
 - [ ] GitHub `pypi` environment created (with protection)
-- [ ] GitHub `testpypi` environment created
+- [ ] GitHub `testpypi` environment created (even if not using yet)
 - [ ] GitHub `release` label created
+
+**Optional (can do later):**
+
+- [ ] TestPyPI account created/recovered
+- [ ] TestPyPI trusted publisher configured for `sdd-tools`
 - [ ] First test: merge a PR and check TestPyPI
 
-That's it! You're ready to publish to PyPI.
+That's it! You're ready to publish to PyPI even without TestPyPI configured.
 
 ## Getting Help
 

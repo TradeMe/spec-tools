@@ -101,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/spec-tools
+      url: https://pypi.org/p/sdd-tools
     permissions:
       id-token: write
 
@@ -116,15 +116,16 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
 
   publish-to-testpypi:
-    name: Publish to TestPyPI
+    name: Publish to TestPyPI (Optional)
     if: |
       github.event_name == 'push' ||
       (github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi')
     needs: build
     runs-on: ubuntu-latest
+    continue-on-error: true  # Don't fail the workflow if TestPyPI is not configured
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/spec-tools
+      url: https://test.pypi.org/p/sdd-tools
     permissions:
       id-token: write
 
@@ -143,14 +144,15 @@ jobs:
     - name: Comment on commit
       if: github.event_name == 'push'
       uses: actions/github-script@v7
+      continue-on-error: true  # Don't fail if commenting fails
       with:
         script: |
           const version = '${{ needs.build.outputs.version }}';
-          const message = `🚀 Published development version \`${version}\` to [TestPyPI](https://test.pypi.org/project/spec-tools/${version}/)
+          const message = `🚀 Published development version \`${version}\` to [TestPyPI](https://test.pypi.org/project/sdd-tools/${version}/)
 
           Install with:
           \`\`\`bash
-          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-tools==${version}
+          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sdd-tools==${version}
           \`\`\``;
 
           // Find the PR that was merged
