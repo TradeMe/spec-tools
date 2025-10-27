@@ -101,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/sdd-tools
+      url: https://pypi.org/p/spec-check
     permissions:
       id-token: write
 
@@ -125,7 +125,7 @@ jobs:
     continue-on-error: true  # Don't fail the workflow if TestPyPI is not configured
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/sdd-tools
+      url: https://test.pypi.org/p/spec-check
     permissions:
       id-token: write
 
@@ -148,11 +148,11 @@ jobs:
       with:
         script: |
           const version = '${{ needs.build.outputs.version }}';
-          const message = `🚀 Published development version \`${version}\` to [TestPyPI](https://test.pypi.org/project/sdd-tools/${version}/)
+          const message = `🚀 Published development version \`${version}\` to [TestPyPI](https://test.pypi.org/project/spec-check/${version}/)
 
           Install with:
           \`\`\`bash
-          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sdd-tools==${version}
+          pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-check==${version}
           \`\`\``;
 
           // Find the PR that was merged

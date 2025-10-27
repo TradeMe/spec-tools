@@ -1,6 +1,6 @@
-# spec-tools
+# spec-check
 
-[![CI](https://github.com/calvingiles/spec-tools/workflows/CI/badge.svg)](https://github.com/calvingiles/spec-tools/actions)
+[![CI](https://github.com/TradeMe/spec-check/workflows/CI/badge.svg)](https://github.com/TradeMe/spec-check/actions)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
 Tools for spec-driven development - a toolkit for managing and validating project specifications and files.
@@ -57,21 +57,21 @@ Key features:
 ### Using uv (recommended)
 
 ```bash
-uv pip install spec-tools
+uv pip install spec-check
 ```
 
 ### Using pip
 
 ```bash
-pip install spec-tools
+pip install spec-check
 ```
 
 ### Development installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/calvingiles/spec-tools.git
-cd spec-tools
+git clone https://github.com/TradeMe/spec-check.git
+cd spec-check
 
 # Install with uv
 uv venv
@@ -80,43 +80,43 @@ uv pip install -e ".[dev]"
 
 ## Configuration
 
-spec-tools can be configured via `pyproject.toml` for seamless integration with Python projects. This allows you to set default options without needing to pass command-line arguments every time.
+spec-check can be configured via `pyproject.toml` for seamless integration with Python projects. This allows you to set default options without needing to pass command-line arguments every time.
 
 ### pyproject.toml Configuration
 
-Add a `[tool.spec-tools]` section to your `pyproject.toml`:
+Add a `[tool.spec-check]` section to your `pyproject.toml`:
 
 ```toml
-[tool.spec-tools.lint]
+[tool.spec-check.lint]
 allowlist = ".specallowlist"
 use_gitignore = true
 
-[tool.spec-tools.check-links]
+[tool.spec-check.check-links]
 config = ".speclinkconfig"
 timeout = 15
 max_concurrent = 5
 check_external = true
 use_gitignore = true
 
-[tool.spec-tools.check-schema]
+[tool.spec-check.check-schema]
 config = ".specschemaconfig"
 use_gitignore = true
 ```
 
 ### Configuration Options
 
-#### Lint Command (`[tool.spec-tools.lint]`)
+#### Lint Command (`[tool.spec-check.lint]`)
 - `allowlist` (string): Path to allowlist file (default: `.specallowlist`)
 - `use_gitignore` (boolean): Respect .gitignore patterns (default: `true`)
 
-#### Check Links Command (`[tool.spec-tools.check-links]`)
+#### Check Links Command (`[tool.spec-check.check-links]`)
 - `config` (string): Path to config file for private URLs (default: `.speclinkconfig`)
 - `timeout` (integer): Timeout for external URL requests in seconds (default: `10`)
 - `max_concurrent` (integer): Maximum concurrent external URL requests (default: `10`)
 - `check_external` (boolean): Validate external URLs (default: `true`)
 - `use_gitignore` (boolean): Respect .gitignore patterns (default: `true`)
 
-#### Check Schema Command (`[tool.spec-tools.check-schema]`)
+#### Check Schema Command (`[tool.spec-check.check-schema]`)
 - `config` (string): Path to schema config file (default: `.specschemaconfig`)
 - `use_gitignore` (boolean): Respect .gitignore patterns (default: `true`)
 
@@ -159,19 +159,19 @@ Then run the linter:
 
 ```bash
 # Lint the current directory
-spec-tools lint
+spec-check lint
 
 # Lint a specific directory
-spec-tools lint /path/to/project
+spec-check lint /path/to/project
 
 # Use a custom allowlist file
-spec-tools lint --allowlist .myallowlist
+spec-check lint --allowlist .myallowlist
 
 # Don't respect .gitignore patterns
-spec-tools lint --no-gitignore
+spec-check lint --no-gitignore
 
 # Verbose output
-spec-tools lint --verbose
+spec-check lint --verbose
 ```
 
 ### Exit Codes
@@ -184,7 +184,7 @@ This makes it easy to integrate into CI/CD pipelines:
 ```yaml
 # .github/workflows/ci.yml
 - name: Validate file allowlist
-  run: spec-tools lint
+  run: spec-check lint
 ```
 
 ### Check Links Command
@@ -193,25 +193,25 @@ Validate all hyperlinks in your markdown documentation:
 
 ```bash
 # Check links in current directory
-spec-tools check-links
+spec-check check-links
 
 # Check links in a specific directory
-spec-tools check-links /path/to/docs
+spec-check check-links /path/to/docs
 
 # Skip external URL validation (faster)
-spec-tools check-links --no-external
+spec-check check-links --no-external
 
 # Use a custom config file for private URLs
-spec-tools check-links --config .myconfigfile
+spec-check check-links --config .myconfigfile
 
 # Set timeout for external URLs (default: 10 seconds)
-spec-tools check-links --timeout 30
+spec-check check-links --timeout 30
 
 # Limit concurrent requests (default: 10)
-spec-tools check-links --max-concurrent 5
+spec-check check-links --max-concurrent 5
 
 # Verbose output
-spec-tools check-links --verbose
+spec-check check-links --verbose
 ```
 
 #### Private URL Configuration
@@ -242,7 +242,7 @@ http://127.0.0.1:
 ```yaml
 # .github/workflows/ci.yml
 - name: Validate documentation links
-  run: spec-tools check-links --no-external  # Skip external URLs in CI
+  run: spec-check check-links --no-external  # Skip external URLs in CI
 ```
 
 ### Check Coverage Command
@@ -251,13 +251,13 @@ Ensure all spec requirements have corresponding tests:
 
 ```bash
 # Check coverage in current directory
-spec-tools check-coverage
+spec-check check-coverage
 
 # Check coverage in a specific directory
-spec-tools check-coverage /path/to/project
+spec-check check-coverage /path/to/project
 
 # Use custom specs and tests directories
-spec-tools check-coverage --specs-dir my-specs --tests-dir my-tests
+spec-check check-coverage --specs-dir my-specs --tests-dir my-tests
 ```
 
 #### Marking Tests with Requirements
@@ -286,7 +286,7 @@ def test_reference_style_links():
 ```yaml
 # .github/workflows/ci.yml
 - name: Validate spec coverage
-  run: spec-tools check-coverage
+  run: spec-check check-coverage
 ```
 
 ### Check Structure Command
@@ -295,13 +295,13 @@ Validate spec-to-test structure alignment:
 
 ```bash
 # Check structure in current directory
-spec-tools check-structure
+spec-check check-structure
 
 # Check structure in a specific directory
-spec-tools check-structure /path/to/project
+spec-check check-structure /path/to/project
 
 # Use custom specs and tests directories
-spec-tools check-structure --specs-dir my-specs --tests-dir my-tests
+spec-check check-structure --specs-dir my-specs --tests-dir my-tests
 ```
 
 #### Structure Conventions
@@ -317,7 +317,7 @@ This allows unit tests without corresponding specs while ensuring all specs have
 ```yaml
 # .github/workflows/ci.yml
 - name: Validate spec structure
-  run: spec-tools check-structure
+  run: spec-check check-structure
 ```
 
 ## Pattern Syntax
@@ -415,7 +415,7 @@ flit build
 
 ## Roadmap
 
-Future tools planned for spec-tools:
+Future tools planned for spec-check:
 
 - **spec-graph**: Visualize dependencies between spec files
 - **spec-init**: Initialize new spec-driven projects

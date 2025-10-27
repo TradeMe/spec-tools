@@ -88,8 +88,8 @@ jobs:
           # Update the link references at the bottom
           echo ""
           PREV_VERSION=$(sed -n 's/^## \[\([0-9][^]]*\)\].*/\1/p' CHANGELOG.md | head -2 | tail -1)
-          echo "[Unreleased]: https://github.com/TradeMe/spec-tools/compare/v$VERSION...HEAD"
-          echo "[$VERSION]: https://github.com/TradeMe/spec-tools/compare/v$PREV_VERSION...v$VERSION"
+          echo "[Unreleased]: https://github.com/TradeMe/spec-check/compare/v$VERSION...HEAD"
+          echo "[$VERSION]: https://github.com/TradeMe/spec-check/compare/v$PREV_VERSION...v$VERSION"
           sed -n '/^\[[0-9]/p' CHANGELOG.md | grep -v "^\[Unreleased\]" | grep -v "^\[$VERSION\]"
         } > CHANGELOG.md.tmp
 

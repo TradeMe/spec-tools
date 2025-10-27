@@ -25,27 +25,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - Initial Release
 
 ### Added
-- File allowlist linter (`spec-tools lint`)
+- File allowlist linter (`spec-check lint`)
   - Validates all files match gitignore-style patterns
   - Respects `.gitignore` by default
   - Supports complex patterns including character classes
-- Markdown link validator (`spec-tools check-links`)
+- Markdown link validator (`spec-check check-links`)
   - Validates internal links and anchors
   - Checks external URLs for accessibility
   - Supports private URL patterns
   - Concurrent external URL checking
-- Spec coverage validator (`spec-tools check-coverage`)
+- Spec coverage validator (`spec-check check-coverage`)
   - Extracts requirements from spec files
   - Validates test coverage using pytest markers
   - Reports coverage percentage and uncovered requirements
-- Structure validator (`spec-tools check-structure`)
+- Structure validator (`spec-check check-structure`)
   - Enforces consistent spec-to-test structure alignment
   - Supports flexible naming conventions
   - Allows unit tests without corresponding specs
-- Unique spec ID validator (`spec-tools check-unique-specs`)
+- Unique spec ID validator (`spec-check check-unique-specs`)
   - Validates spec IDs are unique across files
   - Validates requirement IDs are unique within specs
-- Markdown schema validator (`spec-tools check-schema`)
+- Markdown schema validator (`spec-check check-schema`)
   - Validates markdown files against configurable schemas
   - Supports EARS requirement validation
   - Configurable metadata and heading requirements
@@ -53,5 +53,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CLI with comprehensive help text
 - Support for Python 3.10, 3.11, 3.12, 3.13
 
-[Unreleased]: https://github.com/TradeMe/spec-tools/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/TradeMe/spec-tools/releases/tag/v0.1.0
+[Unreleased]: https://github.com/TradeMe/spec-check/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/TradeMe/spec-check/releases/tag/v0.1.0

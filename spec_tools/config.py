@@ -15,7 +15,7 @@ else:
 
 
 class Config:
-    """Configuration container for spec-tools settings."""
+    """Configuration container for spec-check settings."""
 
     def __init__(self, config_dict: dict[str, Any] | None = None):
         """Initialize configuration.
@@ -130,8 +130,9 @@ def load_config(root_dir: Path | None = None) -> Config:
         with open(pyproject_path, "rb") as f:
             data = tomllib.load(f)
 
-        # Extract tool.spec-tools section
-        tool_config = data.get("tool", {}).get("spec-tools", {})
+        # Extract tool.spec-check section (with fallback to spec-tools for backward compatibility)
+        tool = data.get("tool", {})
+        tool_config = tool.get("spec-check", tool.get("spec-tools", {}))
         return Config(tool_config)
     except Exception:
         # If there's any error reading the file, return empty config

@@ -207,10 +207,10 @@ The CI runs the following checks:
 **Linting:**
 - `ruff check` (code quality)
 - `ruff format --check` (formatting)
-- `spec-tools lint` (file allowlist)
-- `spec-tools check-structure` (spec-test structure)
-- `spec-tools check-coverage` (requirement coverage)
-- `spec-tools check-schema` (markdown schema)
+- `spec-check lint` (file allowlist)
+- `spec-check check-structure` (spec-test structure)
+- `spec-check check-coverage` (requirement coverage)
+- `spec-check check-schema` (markdown schema)
 
 All of these must pass for CI to succeed.
 
