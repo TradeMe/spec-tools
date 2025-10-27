@@ -5,25 +5,25 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "test-project"
 version = "0.1.0"
-description = "Test project for spec-tools"
+description = "Test project for spec-check"
 requires-python = ">=3.8"
 
 [project.optional-dependencies]
 dev = [
-    "spec-tools",
+    "spec-check",
 ]
 
-[tool.spec-tools.lint]
+[tool.spec-check.lint]
 allowlist = ".specallowlist"
 use_gitignore = true
 
-[tool.spec-tools.check-links]
+[tool.spec-check.check-links]
 config = ".speclinkconfig"
 timeout = 15
 max_concurrent = 5
 check_external = true
 use_gitignore = true
 
-[tool.spec-tools.check-schema]
+[tool.spec-check.check-schema]
 config = ".specschemaconfig"
 use_gitignore = true

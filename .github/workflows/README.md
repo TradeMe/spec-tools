@@ -1,6 +1,6 @@
 # GitHub Actions Workflows
 
-This directory contains all CI/CD workflows for spec-tools.
+This directory contains all CI/CD workflows for spec-check.
 
 ## Workflows Overview
 
@@ -11,7 +11,7 @@ This directory contains all CI/CD workflows for spec-tools.
 
 **Jobs:**
 - **test**: Runs pytest on Python 3.10, 3.11, 3.12, 3.13 with coverage
-- **lint**: Runs ruff check/format and all spec-tools linters
+- **lint**: Runs ruff check/format and all spec-check linters
 
 **When it fails:** Fix the code - all checks must pass before merging
 
@@ -109,7 +109,7 @@ This directory contains all CI/CD workflows for spec-tools.
 **What happens next:**
 - GitHub release triggers `publish.yml`
 - Package is published to PyPI
-- Users can install with `pip install spec-tools`
+- Users can install with `pip install spec-check`
 
 ---
 
@@ -151,7 +151,7 @@ create-release.yml: Creates GitHub release v0.2.0
     ↓                    ↓
 publish.yml: Publishes to PyPI
     ↓
-Package available: pip install spec-tools
+Package available: pip install spec-check
 
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -192,8 +192,8 @@ Two environments must be configured in GitHub Settings:
 
 Must be configured on both PyPI and TestPyPI:
 
-- Project name: `spec-tools`
-- Repository: `TradeMe/spec-tools`
+- Project name: `spec-check`
+- Repository: `TradeMe/spec-check`
 - Workflow: `publish.yml`
 - Environments: `pypi` and `testpypi`
 

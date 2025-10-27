@@ -1,6 +1,6 @@
 # Test Project
 
-This is a test project to verify spec-tools works with pyproject.toml configuration.
+This is a test project to verify spec-check works with pyproject.toml configuration.
 
 ## Features
 

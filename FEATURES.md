@@ -1,13 +1,13 @@
-# Spec-Tools Features and Roadmap
+# Spec-Check Features and Roadmap
 
-This document tracks implemented features and planned milestones for the spec-tools project.
+This document tracks implemented features and planned milestones for the spec-check project.
 
 ## Released Features
 
 ### Release 0.1.0 (Current)
 
 #### File Allowlist Validation (`lint`)
-- **Command**: `spec-tools lint`
+- **Command**: `spec-check lint`
 - **Specification**: N/A (core utility)
 - **Description**: Validates that all files in a repository match patterns in an allowlist
 - **Key Features**:
@@ -17,7 +17,7 @@ This document tracks implemented features and planned milestones for the spec-to
   - Configuration via `.specallowlist` or `pyproject.toml`
 
 #### Markdown Link Validation (`check-links`)
-- **Command**: `spec-tools check-links`
+- **Command**: `spec-check check-links`
 - **Specification**: SPEC-001 (40 requirements)
 - **Description**: Validates hyperlinks in markdown files
 - **Key Features**:
@@ -29,7 +29,7 @@ This document tracks implemented features and planned milestones for the spec-to
   - Configuration via `.speclinkconfig` or `pyproject.toml`
 
 #### Spec-to-Test Coverage Validation (`check-coverage`)
-- **Command**: `spec-tools check-coverage`
+- **Command**: `spec-check check-coverage`
 - **Specification**: N/A (core utility)
 - **Description**: Ensures 100% traceability between specifications and tests
 - **Key Features**:
@@ -40,7 +40,7 @@ This document tracks implemented features and planned milestones for the spec-to
   - Lists tests without requirement markers
 
 #### Spec-to-Test Structure Validation (`check-structure`)
-- **Command**: `spec-tools check-structure`
+- **Command**: `spec-check check-structure`
 - **Specification**: N/A (core utility)
 - **Description**: Enforces consistent spec-to-test file structure alignment
 - **Key Features**:
@@ -51,7 +51,7 @@ This document tracks implemented features and planned milestones for the spec-to
   - Configuration via `pyproject.toml`
 
 #### Markdown Schema Validation (`check-schema`)
-- **Command**: `spec-tools check-schema`
+- **Command**: `spec-check check-schema`
 - **Specification**: SPEC-002 (59 requirements)
 - **Description**: Validates markdown files against a defined structural schema
 - **Key Features**:
@@ -91,7 +91,7 @@ Future milestone specifications are stored in `specs/future/` with `Status: Prov
 **Target**: TBD
 
 #### Semantic Test-Adherence Check (`check-semantic-test-adherence`)
-- **Command**: `spec-tools check-semantic-test-adherence`
+- **Command**: `spec-check check-semantic-test-adherence`
 - **Specification**: SPEC-003 (`specs/future/semantic-test-adherence.md`)
 - **Description**: Validates that tests marked with requirement IDs actually test the behavior specified in those requirements
 - **Key Features** (planned):

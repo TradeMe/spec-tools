@@ -64,13 +64,13 @@ jobs:
       run: uv run ruff format --check spec_tools/ tests/
 
     - name: Validate file allowlist
-      run: uv run spec-tools lint --verbose
+      run: uv run spec-check lint --verbose
 
     - name: Validate spec-test structure
-      run: uv run spec-tools check-structure
+      run: uv run spec-check check-structure
 
     - name: Validate spec coverage
-      run: uv run spec-tools check-coverage
+      run: uv run spec-check check-coverage
 
     - name: Validate spec schema
-      run: uv run spec-tools check-schema --verbose
+      run: uv run spec-check check-schema --verbose

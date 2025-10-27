@@ -6,14 +6,14 @@ build-backend = "flit_core.buildapi"
 name = "spec_tools"
 
 [project]
-name = "sdd-tools"
+name = "spec-check"
 version = "0.1.0"
 description = "Tools for spec-driven development - validate specifications, test coverage, file structure, and documentation links"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-    {name = "spec-tools contributors"}
+    {name = "spec-check contributors"}
 ]
 keywords = [
     "spec",
@@ -52,10 +52,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/TradeMe/spec-tools"
-Repository = "https://github.com/TradeMe/spec-tools"
-Issues = "https://github.com/TradeMe/spec-tools/issues"
-Changelog = "https://github.com/TradeMe/spec-tools/releases"
+Homepage = "https://github.com/TradeMe/spec-check"
+Repository = "https://github.com/TradeMe/spec-check"
+Issues = "https://github.com/TradeMe/spec-check/issues"
+Changelog = "https://github.com/TradeMe/spec-check/releases"
 
 [project.optional-dependencies]
 dev = [
@@ -66,6 +66,7 @@ dev = [
 ]
 
 [project.scripts]
+spec-check = "spec_tools.cli:main"
 spec-tools = "spec_tools.cli:main"
 spec-lint = "spec_tools.cli:main"
 
@@ -115,13 +116,13 @@ exclude_lines = [
     "if TYPE_CHECKING:",
 ]
 
-# spec-tools configuration (dogfooding our own tool!)
-[tool.spec-tools.lint]
+# spec-check configuration (dogfooding our own tool!)
+[tool.spec-check.lint]
 allowlist = ".specallowlist"
 use_gitignore = true
 
-[tool.spec-tools.check-coverage]
+[tool.spec-check.check-coverage]
 min_coverage = 49.0
 
-[tool.spec-tools.check-schema]
+[tool.spec-check.check-schema]
 use_gitignore = true

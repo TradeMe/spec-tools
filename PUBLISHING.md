@@ -1,6 +1,6 @@
-# Publishing spec-tools to PyPI
+# Publishing spec-check to PyPI
 
-This document explains how to publish spec-tools to PyPI using our automated release workflows.
+This document explains how to publish spec-check to PyPI using our automated release workflows.
 
 ## Overview
 
@@ -24,10 +24,10 @@ No manual action required! This allows immediate testing of merged changes.
 
 **Installation:**
 ```bash
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sdd-tools
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-check
 ```
 
-**Note:** The package name on PyPI is `sdd-tools` (not `spec-tools`) due to a name collision.
+**Note:** The package name on PyPI is `spec-check` (not `spec-check`) due to a name collision.
 
 ### 2. Official Releases
 
@@ -74,7 +74,7 @@ That's it! Everything else is automated.
 ```
 You: "Make a release for version 0.2.0"
 
-Claude: ✅ Release PR created: https://github.com/TradeMe/spec-tools/pull/123
+Claude: ✅ Release PR created: https://github.com/TradeMe/spec-check/pull/123
 
 Next steps:
 1. Review the PR (especially CHANGELOG.md)
@@ -84,7 +84,7 @@ Next steps:
 After merge, automatically:
 - GitHub release created
 - Package published to PyPI
-- Installation: pip install --upgrade sdd-tools
+- Installation: pip install --upgrade spec-check
 
 You: *reviews and merges PR*
 
@@ -132,9 +132,9 @@ Follow [Semantic Versioning](https://semver.org/):
 1. Go to [PyPI](https://pypi.org) and log in
 2. Navigate to your account settings → Publishing
 3. Add a new "pending publisher" with these details:
-   - **PyPI Project Name**: `spec-tools`
+   - **PyPI Project Name**: `spec-check`
    - **Owner**: `TradeMe`
-   - **Repository name**: `spec-tools`
+   - **Repository name**: `spec-check`
    - **Workflow name**: `publish.yml`
    - **Environment name**: `pypi`
 
@@ -201,10 +201,10 @@ After merging any PR to `main`:
 
 ```bash
 # Install from TestPyPI
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sdd-tools
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-check
 
-# Verify version (command is still spec-tools)
-spec-tools --version
+# Verify version (command is still spec-check)
+spec-check --version
 ```
 
 ### Test a Release Before Publishing
@@ -213,11 +213,11 @@ After merging a release PR:
 
 ```bash
 # Install the dev version that was just published
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ sdd-tools==<version>.devXXX
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ spec-check==<version>.devXXX
 
-# Run tests (command is still spec-tools)
-spec-tools lint
-spec-tools check-coverage
+# Run tests (command is still spec-check)
+spec-check lint
+spec-check check-coverage
 ```
 
 If everything looks good, proceed with creating the GitHub release.
@@ -286,12 +286,12 @@ After publishing a release:
 
 1. **Verify installation**:
    ```bash
-   pip install --upgrade sdd-tools
-   spec-tools --version  # Command is still spec-tools
+   pip install --upgrade spec-check
+   spec-check --version  # Command is still spec-check
    ```
 
 2. **Check PyPI page**:
-   - Visit https://pypi.org/project/sdd-tools/
+   - Visit https://pypi.org/project/spec-check/
    - Verify metadata, description, and links are correct
 
 3. **Update GitHub milestones** (if used):

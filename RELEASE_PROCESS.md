@@ -66,8 +66,8 @@ Before:
 ## [0.1.0] - 2025-01-15
 ...
 
-[Unreleased]: https://github.com/TradeMe/spec-tools/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/TradeMe/spec-tools/releases/tag/v0.1.0
+[Unreleased]: https://github.com/TradeMe/spec-check/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/TradeMe/spec-check/releases/tag/v0.1.0
 ```
 
 After (for version 0.2.0 on 2025-10-26):
@@ -85,9 +85,9 @@ After (for version 0.2.0 on 2025-10-26):
 ## [0.1.0] - 2025-01-15
 ...
 
-[Unreleased]: https://github.com/TradeMe/spec-tools/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/TradeMe/spec-tools/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/TradeMe/spec-tools/releases/tag/v0.1.0
+[Unreleased]: https://github.com/TradeMe/spec-check/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/TradeMe/spec-check/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/TradeMe/spec-check/releases/tag/v0.1.0
 ```
 
 **Critical:** The content under the version header becomes the GitHub release notes!
@@ -146,7 +146,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for details.
 ## Installation After Release
 
 \`\`\`bash
-pip install --upgrade spec-tools
+pip install --upgrade spec-check
 \`\`\`
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)" \
@@ -176,7 +176,7 @@ Tell the user:
 - Package published to PyPI
 - PR commented with release link
 
-You can then install with: `pip install --upgrade spec-tools`
+You can then install with: `pip install --upgrade spec-check`
 ```
 
 ## Common Scenarios
@@ -185,7 +185,7 @@ You can then install with: `pip install --upgrade spec-tools`
 
 Same process, just use version like `0.2.0-alpha.1`. The automation will:
 - Mark the GitHub release as "pre-release"
-- Still publish to PyPI (users can opt-in with `pip install spec-tools==0.2.0-alpha.1`)
+- Still publish to PyPI (users can opt-in with `pip install spec-check==0.2.0-alpha.1`)
 
 ### Patch Release
 
@@ -238,6 +238,6 @@ After the user merges and the release is published, you can:
 
 1. Verify the release was created: Check GitHub releases
 2. Verify PyPI publishing: Check Actions > Publish workflow
-3. Test installation: `pip install --upgrade spec-tools==VERSION`
+3. Test installation: `pip install --upgrade spec-check==VERSION`
 
 The user might ask you to verify - if so, check the GitHub releases page and workflow runs.
