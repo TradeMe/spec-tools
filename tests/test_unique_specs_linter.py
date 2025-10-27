@@ -2,7 +2,7 @@
 
 import pytest
 
-from spec_tools.unique_specs_linter import UniqueSpecsLinter
+from spec_check.unique_specs_linter import UniqueSpecsLinter
 
 
 @pytest.mark.req("REQ-001")

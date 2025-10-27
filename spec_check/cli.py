@@ -298,7 +298,7 @@ def main(argv: list | None = None) -> int:
         Exit code (0 for success, 1 for failure).
     """
     parser = argparse.ArgumentParser(
-        prog="spec-tools",
+        prog="spec-check",
         description="Tools for spec-driven development",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -320,16 +320,16 @@ def main(argv: list | None = None) -> int:
         epilog="""
 Examples:
   # Lint the current directory
-  spec-tools lint
+  spec-check lint
 
   # Lint a specific directory
-  spec-tools lint /path/to/project
+  spec-check lint /path/to/project
 
   # Use a custom allowlist file
-  spec-tools lint --allowlist .myallowlist
+  spec-check lint --allowlist .myallowlist
 
   # Don't use .gitignore patterns
-  spec-tools lint --no-gitignore
+  spec-check lint --no-gitignore
 
 Allowlist file format:
   The allowlist file uses gitignore-style glob patterns.
@@ -390,19 +390,19 @@ Allowlist file format:
         epilog="""
 Examples:
   # Check links in current directory
-  spec-tools check-links
+  spec-check check-links
 
   # Check links in a specific directory
-  spec-tools check-links /path/to/docs
+  spec-check check-links /path/to/docs
 
   # Use a custom config file
-  spec-tools check-links --config .myconfigfile
+  spec-check check-links --config .myconfigfile
 
   # Skip external URL validation
-  spec-tools check-links --no-external
+  spec-check check-links --no-external
 
   # Set timeout for external URLs
-  spec-tools check-links --timeout 30
+  spec-check check-links --timeout 30
 
 Configuration file format (.speclinkconfig):
   The config file lists private URL patterns to skip validation.
@@ -485,13 +485,13 @@ Link validation rules:
         epilog="""
 Examples:
   # Check spec coverage in current directory
-  spec-tools check-coverage
+  spec-check check-coverage
 
   # Check coverage in a specific directory
-  spec-tools check-coverage /path/to/project
+  spec-check check-coverage /path/to/project
 
   # Use custom specs and tests directories
-  spec-tools check-coverage --specs-dir my-specs --tests-dir my-tests
+  spec-check check-coverage --specs-dir my-specs --tests-dir my-tests
 
 How it works:
   This tool validates spec-to-test traceability by:
@@ -559,13 +559,13 @@ Test marking format:
         epilog="""
 Examples:
   # Check structure in current directory
-  spec-tools check-structure
+  spec-check check-structure
 
   # Check structure in a specific directory
-  spec-tools check-structure /path/to/project
+  spec-check check-structure /path/to/project
 
   # Use custom specs and tests directories
-  spec-tools check-structure --specs-dir my-specs --tests-dir my-tests
+  spec-check check-structure --specs-dir my-specs --tests-dir my-tests
 
 How it works:
   This tool validates spec-to-test structure alignment by:
@@ -621,13 +621,13 @@ Structure conventions:
         epilog="""
 Examples:
   # Check schema in current directory
-  spec-tools check-schema
+  spec-check check-schema
 
   # Check schema in a specific directory
-  spec-tools check-schema /path/to/specs
+  spec-check check-schema /path/to/specs
 
   # Use a custom config file
-  spec-tools check-schema --config .myschemaconfig
+  spec-check check-schema --config .myschemaconfig
 
 Schema validation includes:
   - Required and optional metadata fields
@@ -680,13 +680,13 @@ Default schema (no config file):
         epilog="""
 Examples:
   # Check unique specs in current directory
-  spec-tools check-unique-specs
+  spec-check check-unique-specs
 
   # Check unique specs in a specific directory
-  spec-tools check-unique-specs /path/to/project
+  spec-check check-unique-specs /path/to/project
 
   # Use custom specs directory
-  spec-tools check-unique-specs --specs-dir my-specs
+  spec-check check-unique-specs --specs-dir my-specs
 
 How it works:
   This tool validates spec and requirement ID uniqueness by:
@@ -733,13 +733,13 @@ Validation rules:
         epilog="""
 Examples:
   # Validate documents using type definitions in .spec-types
-  spec-tools validate-dsl
+  spec-check validate-dsl
 
   # Validate specific directory
-  spec-tools validate-dsl specs/
+  spec-check validate-dsl specs/
 
   # Use custom type definitions directory
-  spec-tools validate-dsl --type-dir my-types/
+  spec-check validate-dsl --type-dir my-types/
 
 How it works:
   The DSL validator implements a multi-pass validation architecture:

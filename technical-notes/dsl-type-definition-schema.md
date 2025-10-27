@@ -700,6 +700,6 @@ To migrate existing specs to DSL format:
 
 The system should provide a migration tool:
 ```bash
-spec-tools migrate-to-dsl --analyze  # Report what needs changing
-spec-tools migrate-to-dsl --convert  # Auto-convert where possible
+spec-check migrate-to-dsl --analyze  # Report what needs changing
+spec-check migrate-to-dsl --convert  # Auto-convert where possible
 ```

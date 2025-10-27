@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from spec_tools.markdown_schema_validator import (
+from spec_check.markdown_schema_validator import (
     EARSValidator,
     MarkdownParser,
     MarkdownSchemaValidator,
@@ -954,8 +954,8 @@ No metadata fields.
         """Test that the validator uses minimal dependencies, specifically pathspec."""
         # Verify pathspec is used (it should be available and is the main dependency)
         # Verify pathspec is imported in the module
-        import spec_tools.markdown_schema_validator as msv_module
-        from spec_tools.markdown_schema_validator import MarkdownSchemaValidator
+        import spec_check.markdown_schema_validator as msv_module
+        from spec_check.markdown_schema_validator import MarkdownSchemaValidator
 
         assert hasattr(msv_module, "pathspec")
 

@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from spec_tools.ast_parser import parse_markdown_file
+from spec_check.ast_parser import parse_markdown_file
 
 
 @dataclass

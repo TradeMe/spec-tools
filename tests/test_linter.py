@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from spec_tools.linter import SpecLinter
+from spec_check.linter import SpecLinter
 
 
 class TestSpecLinter:

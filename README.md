@@ -125,7 +125,7 @@ use_gitignore = true
 Configuration values are resolved in the following order (highest to lowest precedence):
 
 1. **Command-line arguments** (e.g., `--timeout 30`)
-2. **pyproject.toml configuration** (e.g., `timeout = 15` in `[tool.spec-tools.check-links]`)
+2. **pyproject.toml configuration** (e.g., `timeout = 15` in `[tool.spec-check.check-links]`)
 3. **Built-in defaults**
 
 This means you can set project defaults in `pyproject.toml` and override them on the command line when needed.
@@ -142,7 +142,7 @@ Create a `.specallowlist` file in your project root with gitignore-style pattern
 docs/**/*.rst
 
 # Source code
-spec_tools/**/*.py
+spec_check/**/*.py
 tests/**/*.py
 
 # Configuration files
@@ -392,17 +392,17 @@ source .venv/bin/activate
 pytest tests/ -v
 
 # Run tests with coverage
-pytest tests/ -v --cov=spec_tools --cov-report=term-missing
+pytest tests/ -v --cov=spec_check --cov-report=term-missing
 ```
 
 ### Linting
 
 ```bash
 # Check code with ruff
-ruff check spec_tools/ tests/
+ruff check spec_check/ tests/
 
 # Format code with ruff
-ruff format spec_tools/ tests/
+ruff format spec_check/ tests/
 ```
 
 ### Building

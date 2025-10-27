@@ -97,7 +97,7 @@ The validator uses AI/LLM-powered analysis to understand requirement intent and 
 
 ### Configuration
 
-**REQ-030**: The system shall read configuration from `[tool.spec-tools.check-semantic-test-adherence]` section in `pyproject.toml`.
+**REQ-030**: The system shall read configuration from `[tool.spec-check.check-semantic-test-adherence]` section in `pyproject.toml`.
 
 **REQ-031**: The system shall support a `--specs-dir` command-line option to specify the directory containing specification files.
 
@@ -115,7 +115,7 @@ The validator uses AI/LLM-powered analysis to understand requirement intent and 
 
 **REQ-038**: The system shall support a `--use-gitignore` flag to respect `.gitignore` patterns when discovering files.
 
-**REQ-039**: WHERE `--use-gitignore` is enabled, the system shall use the same gitignore handling as other spec-tools commands.
+**REQ-039**: WHERE `--use-gitignore` is enabled, the system shall use the same gitignore handling as other spec-check commands.
 
 **REQ-040**: The system shall read LLM API keys from environment variables (e.g., `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`).
 
@@ -173,11 +173,11 @@ The validator uses AI/LLM-powered analysis to understand requirement intent and 
 
 **REQ-062**: The system shall use the same test marker parsing as the `check-coverage` tool for consistency.
 
-**REQ-063**: The system shall respect the same `.gitignore` handling as other spec-tools commands when enabled.
+**REQ-063**: The system shall respect the same `.gitignore` handling as other spec-check commands when enabled.
 
-**REQ-064**: The system shall support the same `--verbose` flag behavior as other spec-tools commands.
+**REQ-064**: The system shall support the same `--verbose` flag behavior as other spec-check commands.
 
-**REQ-065**: The system shall follow the same exit code conventions as other spec-tools commands (0 for pass, 1 for fail).
+**REQ-065**: The system shall follow the same exit code conventions as other spec-check commands (0 for pass, 1 for fail).
 
 ## Non-Functional Requirements
 
@@ -217,7 +217,7 @@ The validator uses AI/LLM-powered analysis to understand requirement intent and 
 
 **TEST-009**: The test suite shall verify error handling for missing requirements, parse failures, and LLM errors.
 
-**TEST-010**: The test suite shall verify integration with existing spec-tools configuration patterns.
+**TEST-010**: The test suite shall verify integration with existing spec-check configuration patterns.
 
 ## Future Enhancements
 

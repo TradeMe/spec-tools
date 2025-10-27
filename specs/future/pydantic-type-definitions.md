@@ -230,8 +230,8 @@ class RequirementModule(SpecModule):
 
 ### Phase 1: Implement Pydantic Models (This Spec)
 
-1. Create Pydantic base models in `spec_tools/dsl/models.py`
-2. Create type registry in `spec_tools/dsl/registry.py`
+1. Create Pydantic base models in `spec_check/dsl/models.py`
+2. Create type registry in `spec_check/dsl/registry.py`
 3. Update type loader to import Python modules
 4. Update validator to use Pydantic models
 

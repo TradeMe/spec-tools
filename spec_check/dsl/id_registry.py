@@ -8,7 +8,7 @@ This is built during Pass 3 (Type Assignment) and used during Pass 7
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from spec_tools.ast_parser import Position
+from spec_check.ast_parser import Position
 
 
 @dataclass

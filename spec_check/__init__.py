@@ -1,4 +1,4 @@
-"""spec-tools: Tools for spec-driven development."""
+"""spec-check: Tools for spec-driven development."""
 
 __version__ = "0.1.0"
 

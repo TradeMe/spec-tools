@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from spec_tools.markdown_link_validator import MarkdownLinkValidator
+from spec_check.markdown_link_validator import MarkdownLinkValidator
 
 
 class TestMarkdownLinkValidator:

@@ -179,7 +179,7 @@ def test_parse_requirement_id_handles_malformed_input():
 
 **Purpose:** The actual Python code that fulfills the requirements.
 
-**Location:** `spec_tools/*.py`
+**Location:** `spec_check/*.py`
 
 **Key Characteristics:**
 - **Implements requirements:** Code behavior must satisfy all requirements
@@ -268,7 +268,7 @@ spec-tools/
 │   ├── test_markdown_schema_validator.py  # Requirement + unit tests
 │   └── test_spec_coverage_linter.py       # Requirement + unit tests
 │
-└── spec_tools/                             # Layer 5: Implementation
+└── spec_check/                             # Layer 5: Implementation
     ├── markdown_link_validator.py
     ├── markdown_schema_validator.py
     └── spec_coverage_linter.py
@@ -418,7 +418,7 @@ Validates file organization:
    - Cover edge cases
    - No requirement markers needed
 
-5. **Implement Code** (`spec_tools/feature_name.py`)
+5. **Implement Code** (`spec_check/feature_name.py`)
    - Fulfill all requirements
    - Pass all tests
    - Optional: Comment with requirement IDs
@@ -485,7 +485,7 @@ Check `specs/jobs/*.md` files. Each specification has a corresponding jobs file 
 Configure `min_coverage` in `pyproject.toml`:
 
 ```toml
-[tool.spec-tools.check-coverage]
+[tool.spec-check.check-coverage]
 min_coverage = 85.0  # Allow gradual improvement
 ```
 

@@ -3,7 +3,7 @@ requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
 [tool.flit.module]
-name = "spec_tools"
+name = "spec_check"
 
 [project]
 name = "spec-check"
@@ -66,9 +66,9 @@ dev = [
 ]
 
 [project.scripts]
-spec-check = "spec_tools.cli:main"
-spec-tools = "spec_tools.cli:main"
-spec-lint = "spec_tools.cli:main"
+spec-check = "spec_check.cli:main"
+spec-tools = "spec_check.cli:main"
+spec-lint = "spec_check.cli:main"
 
 # Ruff linter configuration
 [tool.ruff]
@@ -88,7 +88,7 @@ select = [
 ignore = []
 
 [tool.ruff.lint.isort]
-known-first-party = ["spec_tools"]
+known-first-party = ["spec_check"]
 
 # Pytest configuration
 [tool.pytest.ini_options]
@@ -102,7 +102,7 @@ markers = [
 
 # Coverage configuration
 [tool.coverage.run]
-source = ["spec_tools"]
+source = ["spec_check"]
 omit = ["*/tests/*", "*/__pycache__/*"]
 
 [tool.coverage.report]

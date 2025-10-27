@@ -14,22 +14,22 @@ Implements the multi-pass validation architecture:
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from spec_tools.ast_parser import parse_markdown_file
-from spec_tools.dsl.id_registry import IDRegistry
-from spec_tools.dsl.models import SpecModule
-from spec_tools.dsl.reference_extractor import (
+from spec_check.ast_parser import parse_markdown_file
+from spec_check.dsl.id_registry import IDRegistry
+from spec_check.dsl.models import SpecModule
+from spec_check.dsl.reference_extractor import (
     Reference,
     ReferenceExtractor,
     build_reference_graph,
     detect_circular_references,
 )
-from spec_tools.dsl.reference_resolver import (
+from spec_check.dsl.reference_resolver import (
     CardinalityViolation,
     ReferenceResolver,
     ResolutionResult,
 )
-from spec_tools.dsl.registry import SpecTypeRegistry
-from spec_tools.dsl.section_tree import SectionTree, build_section_tree
+from spec_check.dsl.registry import SpecTypeRegistry
+from spec_check.dsl.section_tree import SectionTree, build_section_tree
 
 
 @dataclass

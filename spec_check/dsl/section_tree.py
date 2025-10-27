@@ -10,7 +10,7 @@ This is Pass 2 of the multi-pass validation architecture.
 from dataclasses import dataclass, field
 from typing import Any
 
-from spec_tools.ast_parser import MarkdownDocument, Position
+from spec_check.ast_parser import MarkdownDocument, Position
 
 
 @dataclass

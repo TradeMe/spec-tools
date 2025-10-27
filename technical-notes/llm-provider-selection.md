@@ -303,7 +303,7 @@ const response = await openai.chat.completions.create({
 
 ```python
 # Configuration in pyproject.toml
-[tool.spec-tools.check-semantic-test-adherence]
+[tool.spec-check.check-semantic-test-adherence]
 llm_provider = "groq"  # or "anthropic", "vertex", "bedrock", "openai"
 llm_model = "llama-3.3-70b-versatile"  # provider-specific model name
 threshold = 0.7

@@ -12,7 +12,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-from spec_tools.ast_parser import MarkdownDocument
+from spec_check.ast_parser import MarkdownDocument
 
 
 class Cardinality(BaseModel):
