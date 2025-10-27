@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from spec_tools.config import Config, find_pyproject_toml, load_config, merge_config_with_args
+from spec_check.config import Config, find_pyproject_toml, load_config, merge_config_with_args
 
 
 class MockArgs:

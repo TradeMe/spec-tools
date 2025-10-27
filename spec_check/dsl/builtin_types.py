@@ -12,7 +12,7 @@ These types enforce the three-layer hierarchy where:
 3. ADRs document decisions that implement Requirements
 """
 
-from spec_tools.dsl.layers import (
+from spec_check.dsl.layers import (
     AcceptanceCriterion,
     ArchitectureDecisionModule,
     JobModule,

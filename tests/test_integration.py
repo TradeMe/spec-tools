@@ -9,11 +9,11 @@ from pathlib import Path
 
 import pytest
 
-from spec_tools.markdown_link_validator import MarkdownLinkValidator
-from spec_tools.markdown_schema_validator import MarkdownSchemaValidator
-from spec_tools.spec_coverage_linter import SpecCoverageLinter
-from spec_tools.structure_linter import StructureLinter
-from spec_tools.unique_specs_linter import UniqueSpecsLinter
+from spec_check.markdown_link_validator import MarkdownLinkValidator
+from spec_check.markdown_schema_validator import MarkdownSchemaValidator
+from spec_check.spec_coverage_linter import SpecCoverageLinter
+from spec_check.structure_linter import StructureLinter
+from spec_check.unique_specs_linter import UniqueSpecsLinter
 
 # Get the fixtures directory
 FIXTURES_DIR = Path(__file__).parent / "fixtures" / "projects"

@@ -7,7 +7,7 @@ This document provides guidelines for AI-assisted development sessions on this p
 **This project uses [uv](https://docs.astral.sh/uv/) for all Python operations. You MUST use `uv` commands:**
 
 ✅ **ALWAYS DO:**
-- Run commands with `uv run`: `uv run pytest`, `uv run ruff`, `uv run python -m spec_tools`
+- Run commands with `uv run`: `uv run pytest`, `uv run ruff`, `uv run python -m spec_check`
 - Add dependencies with `uv add <package>`
 - Sync dependencies with `uv sync`
 - Let `uv` manage the virtual environment automatically
@@ -65,20 +65,20 @@ uv sync
 
 ```bash
 # 1. Run ruff linting
-uv run ruff check spec_tools/ tests/
+uv run ruff check spec_check/ tests/
 
 # 2. Run ruff formatting (this is the most commonly missed step!)
-uv run ruff format spec_tools/ tests/
+uv run ruff format spec_check/ tests/
 
 # 3. Run tests
 uv run pytest tests/ -v
 
 # 4. Run all project linters
-uv run python -m spec_tools lint --verbose
-uv run python -m spec_tools check-structure
-uv run python -m spec_tools check-coverage
-uv run python -m spec_tools check-schema
-uv run python -m spec_tools check-unique-specs
+uv run python -m spec_check lint --verbose
+uv run python -m spec_check check-structure
+uv run python -m spec_check check-coverage
+uv run python -m spec_check check-schema
+uv run python -m spec_check check-unique-specs
 ```
 
 ### Quick Pre-Push Check
@@ -86,13 +86,13 @@ uv run python -m spec_tools check-unique-specs
 Run this single command to catch most issues:
 
 ```bash
-uv run ruff check spec_tools/ tests/ && \
-uv run ruff format --check spec_tools/ tests/ && \
+uv run ruff check spec_check/ tests/ && \
+uv run ruff format --check spec_check/ tests/ && \
 uv run pytest tests/ -q && \
 echo "✅ All checks passed!"
 ```
 
-If `ruff format --check` fails, run `uv run ruff format spec_tools/ tests/` to fix formatting issues.
+If `ruff format --check` fails, run `uv run ruff format spec_check/ tests/` to fix formatting issues.
 
 ## Python Version Requirements
 
@@ -173,8 +173,8 @@ The project provides six linters:
 **Solution:**
 ```bash
 # Always run BOTH ruff commands:
-uv run ruff check --fix spec_tools/ tests/
-uv run ruff format spec_tools/ tests/
+uv run ruff check --fix spec_check/ tests/
+uv run ruff format spec_check/ tests/
 ```
 
 ### Issue: Type Annotation Errors
@@ -193,7 +193,7 @@ uv run ruff format spec_tools/ tests/
 
 **Solution:** Remove the unused imports. Ruff can fix these automatically:
 ```bash
-uv run ruff check --fix spec_tools/ tests/
+uv run ruff check --fix spec_check/ tests/
 ```
 
 ## CI/CD Pipeline
@@ -240,8 +240,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ### Before Pushing
 
 **Critical checklist:**
-- [ ] Run `uv run ruff check spec_tools/ tests/`
-- [ ] Run `uv run ruff format spec_tools/ tests/`
+- [ ] Run `uv run ruff check spec_check/ tests/`
+- [ ] Run `uv run ruff format spec_check/ tests/`
 - [ ] Run `uv run pytest tests/ -v`
 - [ ] Run project linters if relevant to changes
 - [ ] Verify all checks pass
@@ -258,7 +258,7 @@ uv run pytest tests/ -v
 uv run pytest tests/test_linter.py -v
 
 # Run with coverage
-uv run pytest tests/ -v --cov=spec_tools --cov-report=term-missing
+uv run pytest tests/ -v --cov=spec_check --cov-report=term-missing
 
 # Quick run (quiet mode)
 uv run pytest tests/ -q
@@ -284,7 +284,7 @@ When merging branches:
 1. Fetch and merge main first: `git fetch origin main && git merge origin/main`
 2. Resolve conflicts carefully, preserving all features
 3. Run full linter suite after merge
-4. Fix any ruff formatting issues: `uv run ruff format spec_tools/ tests/`
+4. Fix any ruff formatting issues: `uv run ruff format spec_check/ tests/`
 5. Run tests to verify merge: `uv run pytest tests/ -v`
 6. Commit merge with descriptive message
 

@@ -212,8 +212,8 @@ One label must exist:
 ### Run tests locally
 ```bash
 uv run pytest tests/ -v
-uv run ruff check spec_tools/ tests/
-uv run ruff format --check spec_tools/ tests/
+uv run ruff check spec_check/ tests/
+uv run ruff format --check spec_check/ tests/
 ```
 
 ### Prepare a release (Claude Code)

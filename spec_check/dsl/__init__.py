@@ -7,7 +7,7 @@ Pydantic models.
 """
 
 # Layer-specific models
-from spec_tools.dsl.layers import (
+from spec_check.dsl.layers import (
     LAYER_MODULES,
     AcceptanceCriterion,
     ArchitectureDecisionModule,
@@ -16,7 +16,7 @@ from spec_tools.dsl.layers import (
 )
 
 # Pydantic-based models
-from spec_tools.dsl.models import (
+from spec_check.dsl.models import (
     Cardinality,
     GlobalConfig,
     IdentifierSpec,
@@ -26,9 +26,9 @@ from spec_tools.dsl.models import (
     SpecModule,
     ValidationError,
 )
-from spec_tools.dsl.registry import SpecTypeRegistry
-from spec_tools.dsl.section_tree import SectionNode, SectionTree, build_section_tree
-from spec_tools.dsl.validator import DSLValidator, ValidationResult
+from spec_check.dsl.registry import SpecTypeRegistry
+from spec_check.dsl.section_tree import SectionNode, SectionTree, build_section_tree
+from spec_check.dsl.validator import DSLValidator, ValidationResult
 
 __all__ = [
     # Section tree

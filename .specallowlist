@@ -3,7 +3,7 @@
 LICENSE
 
 # Python package
-spec_tools/**/*.py
+spec_check/**/*.py
 spec_types/**/*.py
 tests/**/*.py
 

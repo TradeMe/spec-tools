@@ -11,7 +11,7 @@ import importlib.util
 import sys
 from pathlib import Path
 
-from spec_tools.dsl.models import GlobalConfig, SpecClass, SpecModule
+from spec_check.dsl.models import GlobalConfig, SpecClass, SpecModule
 
 
 class SpecTypeRegistry:
@@ -211,7 +211,7 @@ class SpecTypeRegistry:
         Returns:
             Registry with built-in types (Requirement, Contract, ADR)
         """
-        from spec_tools.dsl.builtin_types import BUILTIN_MODULES
+        from spec_check.dsl.builtin_types import BUILTIN_MODULES
 
         registry = cls()
         for module in BUILTIN_MODULES.values():

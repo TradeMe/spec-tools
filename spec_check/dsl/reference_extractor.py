@@ -13,8 +13,8 @@ from pathlib import Path
 from markdown_it import MarkdownIt
 from markdown_it.token import Token
 
-from spec_tools.ast_parser import Position
-from spec_tools.dsl.models import GlobalConfig, SpecModule
+from spec_check.ast_parser import Position
+from spec_check.dsl.models import GlobalConfig, SpecModule
 
 
 @dataclass

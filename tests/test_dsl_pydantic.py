@@ -9,8 +9,8 @@ from pathlib import Path
 
 import pytest
 
-from spec_tools.dsl.models import Cardinality, IdentifierSpec, SpecModule
-from spec_tools.dsl.registry import SpecTypeRegistry
+from spec_check.dsl.models import Cardinality, IdentifierSpec, SpecModule
+from spec_check.dsl.registry import SpecTypeRegistry
 
 
 class TestPydanticModels:
@@ -58,7 +58,7 @@ class TestPydanticModels:
 
     def test_spec_module_requires_section(self):
         """Test that modules must have at least one required section."""
-        from spec_tools.dsl.models import SectionSpec
+        from spec_check.dsl.models import SectionSpec
 
         # Valid: has required section
         module1 = SpecModule(
@@ -92,7 +92,7 @@ class TestSpecTypeRegistry:
 
     def test_register_module(self):
         """Test registering a module."""
-        from spec_tools.dsl.builtin_types import RequirementModule
+        from spec_check.dsl.builtin_types import RequirementModule
 
         registry = SpecTypeRegistry()
         module = RequirementModule()
@@ -104,7 +104,7 @@ class TestSpecTypeRegistry:
 
     def test_register_duplicate_module_fails(self):
         """Test that registering duplicate module names fails."""
-        from spec_tools.dsl.builtin_types import RequirementModule
+        from spec_check.dsl.builtin_types import RequirementModule
 
         registry = SpecTypeRegistry()
         module = RequirementModule()
@@ -149,7 +149,7 @@ class TestBuiltinTypes:
 
     def test_job_module(self):
         """Test Job module definition."""
-        from spec_tools.dsl.builtin_types import JobModule
+        from spec_check.dsl.builtin_types import JobModule
 
         module = JobModule()
 
@@ -170,7 +170,7 @@ class TestBuiltinTypes:
 
     def test_requirement_module(self):
         """Test Requirement module definition."""
-        from spec_tools.dsl.builtin_types import RequirementModule
+        from spec_check.dsl.builtin_types import RequirementModule
 
         module = RequirementModule()
 
@@ -196,7 +196,7 @@ class TestBuiltinTypes:
 
     def test_adr_module(self):
         """Test ADR module definition."""
-        from spec_tools.dsl.builtin_types import ArchitectureDecisionModule
+        from spec_check.dsl.builtin_types import ArchitectureDecisionModule
 
         module = ArchitectureDecisionModule()
 
@@ -239,7 +239,7 @@ class TestFileMatching:
 
     def test_job_file_matching(self):
         """Test that job files match correctly."""
-        from spec_tools.dsl.builtin_types import JobModule
+        from spec_check.dsl.builtin_types import JobModule
 
         module = JobModule()
 
@@ -254,7 +254,7 @@ class TestFileMatching:
 
     def test_requirement_file_matching(self):
         """Test that requirement files match correctly."""
-        from spec_tools.dsl.builtin_types import RequirementModule
+        from spec_check.dsl.builtin_types import RequirementModule
 
         module = RequirementModule()
 
@@ -269,7 +269,7 @@ class TestFileMatching:
 
     def test_adr_file_matching(self):
         """Test that ADR files match correctly."""
-        from spec_tools.dsl.builtin_types import ArchitectureDecisionModule
+        from spec_check.dsl.builtin_types import ArchitectureDecisionModule
 
         module = ArchitectureDecisionModule()
 

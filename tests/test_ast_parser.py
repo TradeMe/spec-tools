@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from spec_tools.ast_parser import SpecExtractor, parse_markdown_file
+from spec_check.ast_parser import SpecExtractor, parse_markdown_file
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures" / "projects"
 

@@ -5,7 +5,7 @@ This package defines the layer-specific Pydantic models used to validate
 the spec-tools project's own specifications.
 """
 
-from spec_tools.dsl.models import (
+from spec_check.dsl.models import (
     Cardinality,
     GlobalConfig,
     IdentifierSpec,

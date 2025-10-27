@@ -4,7 +4,7 @@ Type definitions for the valid project test fixture.
 This demonstrates using Python/Pydantic for type definitions instead of YAML.
 """
 
-from spec_tools.dsl.models import (
+from spec_check.dsl.models import (
     Cardinality,
     GlobalConfig,
     IdentifierSpec,

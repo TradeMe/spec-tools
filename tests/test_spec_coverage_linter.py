@@ -1,6 +1,6 @@
 """Tests for the spec coverage linter."""
 
-from spec_tools.spec_coverage_linter import SpecCoverageLinter
+from spec_check.spec_coverage_linter import SpecCoverageLinter
 
 
 class TestSpecCoverageLinter:

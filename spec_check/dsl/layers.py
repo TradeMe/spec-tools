@@ -9,7 +9,7 @@ This module provides Pydantic models for different specification layers:
 Each layer has specific structural requirements and validation rules.
 """
 
-from spec_tools.dsl.models import (
+from spec_check.dsl.models import (
     Cardinality,
     IdentifierSpec,
     Reference,

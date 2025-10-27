@@ -11,10 +11,10 @@ Resolves references against the ID registry and validates:
 from dataclasses import dataclass
 from pathlib import Path
 
-from spec_tools.dsl.id_registry import ClassInstance, IDRegistry, ModuleInstance
-from spec_tools.dsl.models import Reference as ReferenceDefinition
-from spec_tools.dsl.models import SpecModule
-from spec_tools.dsl.reference_extractor import Reference
+from spec_check.dsl.id_registry import ClassInstance, IDRegistry, ModuleInstance
+from spec_check.dsl.models import Reference as ReferenceDefinition
+from spec_check.dsl.models import SpecModule
+from spec_check.dsl.reference_extractor import Reference
 
 
 @dataclass

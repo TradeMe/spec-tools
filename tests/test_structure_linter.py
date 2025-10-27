@@ -1,6 +1,6 @@
 """Tests for the structure linter."""
 
-from spec_tools.structure_linter import StructureLinter
+from spec_check.structure_linter import StructureLinter
 
 
 class TestStructureLinter:

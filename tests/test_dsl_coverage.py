@@ -4,13 +4,13 @@ Additional DSL tests to increase coverage to 75%.
 
 from pathlib import Path
 
-from spec_tools.ast_parser import Position, parse_markdown_file
-from spec_tools.dsl.id_registry import ClassInstance, IDRegistry, ModuleInstance
-from spec_tools.dsl.models import GlobalConfig
-from spec_tools.dsl.reference_extractor import ReferenceExtractor
-from spec_tools.dsl.registry import SpecTypeRegistry
-from spec_tools.dsl.section_tree import build_section_tree
-from spec_tools.dsl.validator import DSLValidator
+from spec_check.ast_parser import Position, parse_markdown_file
+from spec_check.dsl.id_registry import ClassInstance, IDRegistry, ModuleInstance
+from spec_check.dsl.models import GlobalConfig
+from spec_check.dsl.reference_extractor import ReferenceExtractor
+from spec_check.dsl.registry import SpecTypeRegistry
+from spec_check.dsl.section_tree import build_section_tree
+from spec_check.dsl.validator import DSLValidator
 
 
 class TestIDRegistry:
@@ -295,7 +295,7 @@ class TestModelCreation:
 
     def test_cardinality_str_representation(self):
         """Test string representation of Cardinality."""
-        from spec_tools.dsl.models import Cardinality
+        from spec_check.dsl.models import Cardinality
 
         card = Cardinality(min=1, max=5)
         s = str(card)
@@ -304,7 +304,7 @@ class TestModelCreation:
 
     def test_identifier_spec_creation(self):
         """Test creating IdentifierSpec."""
-        from spec_tools.dsl.models import IdentifierSpec
+        from spec_check.dsl.models import IdentifierSpec
 
         id_spec = IdentifierSpec(pattern=r"REQ-\d+", location="title", scope="global")
 
@@ -313,7 +313,7 @@ class TestModelCreation:
 
     def test_section_spec_creation(self):
         """Test creating SectionSpec."""
-        from spec_tools.dsl.models import SectionSpec
+        from spec_check.dsl.models import SectionSpec
 
         sec_spec = SectionSpec(heading="Overview", heading_level=2, required=True)
 
