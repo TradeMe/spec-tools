@@ -125,7 +125,7 @@ use_gitignore = true
 Configuration values are resolved in the following order (highest to lowest precedence):
 
 1. **Command-line arguments** (e.g., `--timeout 30`)
-2. **pyproject.toml configuration** (e.g., `timeout = 15` in `[tool.spec-tools.check-links]`)
+2. **pyproject.toml configuration** (e.g., `timeout = 15` in `[tool.spec-check.check-links]`)
 3. **Built-in defaults**
 
 This means you can set project defaults in `pyproject.toml` and override them on the command line when needed.

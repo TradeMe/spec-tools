@@ -58,7 +58,7 @@ def test_find_pyproject_toml():
 
         # Create pyproject.toml in root
         pyproject_path = tmp_path / "pyproject.toml"
-        pyproject_path.write_text("[tool.spec-tools]\n")
+        pyproject_path.write_text("[tool.spec-check]\n")
 
         # Should find it from nested directory
         found = find_pyproject_toml(nested_dir)
@@ -86,11 +86,11 @@ def test_load_config():
         # Write a test pyproject.toml
         pyproject_path.write_text(
             """
-[tool.spec-tools.lint]
+[tool.spec-check.lint]
 allowlist = "custom.txt"
 use_gitignore = false
 
-[tool.spec-tools.check-links]
+[tool.spec-check.check-links]
 timeout = 20
 max_concurrent = 5
 """

@@ -10,7 +10,7 @@
 
 This specification defines a domain-specific language (DSL) for defining and validating structured markdown specifications. The system provides a schema layer for markdown documents, enabling machine-enforceable structure while preserving the human-readability and standard tooling compatibility of markdown.
 
-This represents a significant evolution of spec-tools from a validation toolkit into a comprehensive specification management system with formal type definitions, multi-pass AST validation, and extensible content validators.
+This represents a significant evolution of spec-check from a validation toolkit into a comprehensive specification management system with formal type definitions, multi-pass AST validation, and extensible content validators.
 
 ## Problem Statement
 

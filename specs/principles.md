@@ -485,7 +485,7 @@ Check `specs/jobs/*.md` files. Each specification has a corresponding jobs file 
 Configure `min_coverage` in `pyproject.toml`:
 
 ```toml
-[tool.spec-tools.check-coverage]
+[tool.spec-check.check-coverage]
 min_coverage = 85.0  # Allow gradual improvement
 ```
 

@@ -1,8 +1,8 @@
 """
-Type definitions for spec-tools project specifications.
+Type definitions for spec-check project specifications.
 
 This package defines the layer-specific Pydantic models used to validate
-the spec-tools project's own specifications.
+the spec-check project's own specifications.
 """
 
 from spec_check.dsl.models import (

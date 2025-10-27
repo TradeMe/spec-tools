@@ -58,7 +58,7 @@ This specification defines the requirements for a spec coverage linter tool that
 
 ### Configuration
 
-**REQ-014** [Related to [SPEC-003/JOB-004](jobs/spec-coverage-linter.md#spec-003job-004-configure-coverage-thresholds)]: The system shall support loading configuration from `pyproject.toml` under the section `[tool.spec-tools.check-coverage]`.
+**REQ-014** [Related to [SPEC-003/JOB-004](jobs/spec-coverage-linter.md#spec-003job-004-configure-coverage-thresholds)]: The system shall support loading configuration from `pyproject.toml` under the section `[tool.spec-check.check-coverage]`.
 
 **REQ-015** [Related to [SPEC-003/JOB-004](jobs/spec-coverage-linter.md#spec-003job-004-configure-coverage-thresholds)]: The system shall accept a `min_coverage` configuration option to specify the minimum acceptable coverage percentage.
 
@@ -123,7 +123,7 @@ This specification defines the requirements for a spec coverage linter tool that
 The spec coverage linter supports configuration via `pyproject.toml`:
 
 ```toml
-[tool.spec-tools.check-coverage]
+[tool.spec-check.check-coverage]
 min_coverage = 88.4  # Minimum acceptable coverage percentage (0-100)
 ```
 
@@ -139,7 +139,7 @@ min_coverage = 88.4  # Minimum acceptable coverage percentage (0-100)
 ### Running with Default 100% Coverage
 
 ```bash
-spec-tools check-coverage
+spec-check check-coverage
 ```
 
 Expected output when coverage is below 100%:
@@ -166,12 +166,12 @@ Exit code: 1
 
 With `pyproject.toml`:
 ```toml
-[tool.spec-tools.check-coverage]
+[tool.spec-check.check-coverage]
 min_coverage = 85.0
 ```
 
 ```bash
-spec-tools check-coverage
+spec-check check-coverage
 ```
 
 Expected output:
@@ -192,7 +192,7 @@ Exit code: 0
 ### Overriding via Command Line
 
 ```bash
-spec-tools check-coverage --min-coverage 90.0
+spec-check check-coverage --min-coverage 90.0
 ```
 
 This overrides any pyproject.toml configuration.

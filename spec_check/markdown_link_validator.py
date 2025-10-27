@@ -421,7 +421,7 @@ class MarkdownLinkValidator:
             try:
                 # Use HEAD request first (faster)
                 req = urllib.request.Request(link.url, method="HEAD")
-                req.add_header("User-Agent", "spec-tools-link-validator/0.1.0")
+                req.add_header("User-Agent", "spec-check-link-validator/0.1.0")
 
                 with urllib.request.urlopen(req, timeout=self.timeout) as response:
                     if 200 <= response.status < 400:

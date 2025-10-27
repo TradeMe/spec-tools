@@ -1,1 +1,1 @@
-"""Tests for spec-tools."""
+"""Tests for spec-check."""
