@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Release workflow now automatically publishes to PyPI in the same workflow
 - Added `pull-requests: write` permission to enable PR commenting
 - Eliminated manual intervention requirement for PyPI publishing
+- Fixed AttributeError in DSL validator where `section_def.level` was incorrectly used instead of `section_def.heading_level` (#25)
 
 ### Changed
 - Merged release creation and PyPI publishing into single workflow for reliability

@@ -251,6 +251,42 @@ Gains
         result = validator.validate(tmp_path / "specs")
         assert result is not None
 
+    def test_validate_missing_required_section(self, tmp_path):
+        """Test validating a spec with missing required sections.
+
+        This test reproduces issue #25 where validator.py incorrectly
+        accesses section_def.level instead of section_def.heading_level.
+        """
+        (tmp_path / "specs" / "jobs").mkdir(parents=True)
+
+        # Create a Job spec missing the required "Context" section
+        job_file = tmp_path / "specs" / "jobs" / "JOB-999.md"
+        job_file.write_text("""# JOB-999: Test Job Missing Context
+
+## Job Story
+Story content
+
+## Pains
+Pains content
+
+## Gains
+Gains content
+""")
+
+        registry = SpecTypeRegistry.load_builtin_types()
+        validator = DSLValidator(registry)
+
+        # This should trigger the code path that accesses section_def.level
+        # Before the fix, this raises AttributeError: 'SectionSpec' object has no attribute 'level'
+        result = validator.validate(tmp_path / "specs")
+
+        assert result is not None
+        # Should have errors for missing required section
+        assert len(result.errors) > 0
+        # Check that one of the errors is about missing Context section
+        error_messages = [e.message for e in result.errors]
+        assert any("Context" in msg for msg in error_messages)
+
 
 class TestRegistryLoading:
     """Test registry loading."""
