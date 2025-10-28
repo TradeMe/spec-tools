@@ -537,7 +537,7 @@ class MarkdownSchemaValidator:
         except Exception as e:
             violations.append(
                 SchemaViolation(
-                    file_path=str(file_path.relative_to(self.root_dir)),
+                    file_path=str(file_path.resolve().relative_to(self.root_dir.resolve())),
                     line_number=1,
                     severity="error",
                     message=f"Failed to parse file: {e}",

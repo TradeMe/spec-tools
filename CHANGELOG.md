@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2025-10-28
+
 ### Added
 - PyPI publishing configuration with automated workflows
 - Comprehensive PyPI metadata (keywords, classifiers, project URLs)
@@ -17,14 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Version check workflow to prevent unauthorized version changes
 - Automated TestPyPI publishing for PRs
 - Pre-release publishing support
-
-### Changed
-- Development status updated to Alpha
-- Added flit as dev dependency for building distributions
-
-## [0.1.0] - Initial Release
-
-### Added
 - File allowlist linter (`spec-check lint`)
   - Validates all files match gitignore-style patterns
   - Respects `.gitignore` by default
@@ -52,6 +46,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuration via `pyproject.toml`
 - CLI with comprehensive help text
 - Support for Python 3.10, 3.11, 3.12, 3.13
+
+### Changed
+- Development status updated to Alpha
+- Added flit as dev dependency for building distributions
 
 [Unreleased]: https://github.com/TradeMe/spec-check/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/TradeMe/spec-check/releases/tag/v0.1.0

@@ -72,8 +72,11 @@ echo "📋 Lint Checks (from CI)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Read lint commands from workflow
-mapfile -t LINT_COMMANDS < <(uv run python "$PARSER_SCRIPT" --job lint)
+# Read lint commands from workflow (bash 3.2 compatible)
+LINT_COMMANDS=()
+while IFS= read -r line; do
+    LINT_COMMANDS+=("$line")
+done < <(uv run python "$PARSER_SCRIPT" --job lint)
 
 # Run each lint command
 for cmd in "${LINT_COMMANDS[@]}"; do
@@ -93,8 +96,11 @@ echo "🧪 Tests (from CI)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Read test commands from workflow
-mapfile -t TEST_COMMANDS < <(uv run python "$PARSER_SCRIPT" --job test)
+# Read test commands from workflow (bash 3.2 compatible)
+TEST_COMMANDS=()
+while IFS= read -r line; do
+    TEST_COMMANDS+=("$line")
+done < <(uv run python "$PARSER_SCRIPT" --job test)
 
 # Run each test command
 for cmd in "${TEST_COMMANDS[@]}"; do
