@@ -287,6 +287,67 @@ Gains content
         error_messages = [e.message for e in result.errors]
         assert any("Context" in msg for msg in error_messages)
 
+    def test_reference_cardinality_validation(self, tmp_path):
+        """Test validating reference cardinality constraints.
+
+        This test reproduces issue #28 where reference_resolver.py calls
+        ref_def.validate_count() and ref_def.parse_cardinality() which
+        don't exist on the Reference model.
+
+        The Requirement module requires at least one "addresses" reference
+        to a Job (cardinality min=1). This test creates a Requirement without
+        any Job references, triggering cardinality validation.
+        """
+        (tmp_path / "specs" / "jobs").mkdir(parents=True)
+        (tmp_path / "specs" / "requirements").mkdir(parents=True)
+
+        # Create a Job spec
+        job_file = tmp_path / "specs" / "jobs" / "JOB-001.md"
+        job_file.write_text("""# JOB-001: Test Job
+
+## Context
+Context content
+
+## Job Story
+Story content
+
+## Pains
+Pains content
+
+## Gains
+Gains content
+""")
+
+        # Create a Requirement spec with missing "addresses" reference
+        # This violates the cardinality constraint (min=1)
+        req_file = tmp_path / "specs" / "requirements" / "REQ-001.md"
+        req_file.write_text("""# REQ-001: Test Requirement
+
+## Overview
+This requirement doesn't address any jobs, violating cardinality.
+
+## Specification
+Some spec content.
+
+## Acceptance Criteria
+- Criterion 1
+""")
+
+        registry = SpecTypeRegistry.load_builtin_types()
+        validator = DSLValidator(registry)
+
+        # This should trigger cardinality validation code path
+        # Before the fix, this raises:
+        # AttributeError: 'Reference' object has no attribute 'validate_count'
+        result = validator.validate(tmp_path / "specs")
+
+        assert result is not None
+        # Should detect the cardinality violation
+        assert len(result.errors) > 0
+        error_messages = [e.message for e in result.errors]
+        # Should have an error about missing "addresses" reference
+        assert any("addresses" in msg.lower() for msg in error_messages)
+
 
 class TestRegistryLoading:
     """Test registry loading."""
