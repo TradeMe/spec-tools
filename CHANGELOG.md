@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Release workflow now automatically publishes to PyPI in the same workflow
+- Added `pull-requests: write` permission to enable PR commenting
+- Eliminated manual intervention requirement for PyPI publishing
+
+### Changed
+- Merged release creation and PyPI publishing into single workflow for reliability
+- Improved PR comments to show publishing status
+
 ## [0.1.0] - 2025-10-28
 
 ### Added

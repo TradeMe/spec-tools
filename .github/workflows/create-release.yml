@@ -1,4 +1,4 @@
-name: Create Release
+name: Create Release and Publish
 
 on:
   pull_request:
@@ -12,6 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
+      id-token: write  # Required for PyPI trusted publishing
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release-created: ${{ steps.check.outputs.exists == 'false' }}
 
     steps:
     - uses: actions/checkout@v4
@@ -82,7 +87,7 @@ jobs:
           **Release:** ${release.data.html_url}
           **Pre-release:** ${isPrerelease}
 
-          The release has been created and will automatically trigger PyPI publishing.
+          The package will now be built and published to PyPI.
           `);
           await core.summary.write();
 
@@ -94,7 +99,79 @@ jobs:
           const version = '${{ steps.version.outputs.version }}';
           const message = `🎉 Release [v${version}](https://github.com/${context.repo.owner}/${context.repo.repo}/releases/tag/v${version}) has been created!
 
-          The package is now being published to PyPI. Check the [Publish workflow](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/publish.yml) for progress.`;
+          Building and publishing to PyPI now...`;
+
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.payload.pull_request.number,
+            body: message
+          });
+
+  build:
+    name: Build distribution
+    needs: create-release
+    if: needs.create-release.outputs.release-created == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: main
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: "latest"
+
+    - name: Set up Python
+      run: uv python install 3.13
+
+    - name: Install dependencies
+      run: uv sync --extra dev
+
+    - name: Build package
+      run: uv run flit build
+
+    - name: Store distribution packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+
+  publish-to-pypi:
+    name: Publish to PyPI
+    needs: [create-release, build]
+    if: needs.create-release.outputs.release-created == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/spec-check
+    permissions:
+      id-token: write
+      pull-requests: write
+
+    steps:
+    - name: Download distributions
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+
+    - name: Comment on PR with success
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const version = '${{ needs.create-release.outputs.version }}';
+          const message = `🚀 Successfully published version \`${version}\` to [PyPI](https://pypi.org/project/spec-check/${version}/)!
+
+          Install with:
+          \`\`\`bash
+          pip install spec-check==${version}
+          \`\`\``;
 
           await github.rest.issues.createComment({
             owner: context.repo.owner,
