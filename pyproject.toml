@@ -7,7 +7,7 @@ name = "spec_check"
 
 [project]
 name = "spec-check"
-version = "0.1.0"
+version = "0.1.1"
 description = "Tools for spec-driven development - validate specifications, test coverage, file structure, and documentation links"
 readme = "README.md"
 requires-python = ">=3.10"
