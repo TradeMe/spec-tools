@@ -348,6 +348,71 @@ Some spec content.
         # Should have an error about missing "addresses" reference
         assert any("addresses" in msg.lower() for msg in error_messages)
 
+    def test_file_path_reference_resolution(self, tmp_path):
+        """Test resolving cross-document references using file paths.
+
+        This test reproduces issue #36 where validate-dsl cannot resolve
+        references that use relative file paths instead of module IDs.
+
+        ADR documents often link to each other using standard markdown
+        file path links like './011-deployment-architecture.md' which should
+        resolve to module ID 'ADR-011'.
+        """
+        (tmp_path / "specs" / "architecture").mkdir(parents=True)
+
+        # Create first ADR with a known module ID (using correct pattern ADR-NNN.md)
+        adr_011 = tmp_path / "specs" / "architecture" / "ADR-011.md"
+        adr_011.write_text("""# ADR-011: Deployment Architecture
+
+## Status
+Accepted
+
+## Context
+Deployment architecture decisions.
+
+## Decision
+Use cloud infrastructure.
+
+## Consequences
+Improved scalability.
+""")
+
+        # Create second ADR that references the first using a file path
+        adr_015 = tmp_path / "specs" / "architecture" / "ADR-015.md"
+        adr_015.write_text("""# ADR-015: Developer Access Control Strategy
+
+## Status
+Accepted
+
+## Context
+Access control strategy.
+
+## Decision
+Implement RBAC.
+
+## Adheres To
+- [ADR-011: Deployment Architecture](./ADR-011.md)
+
+## Consequences
+Better security.
+""")
+
+        registry = SpecTypeRegistry.load_builtin_types()
+        validator = DSLValidator(registry)
+
+        # Before the fix, this fails with:
+        # Module reference './ADR-011' not found
+        result = validator.validate(tmp_path / "specs")
+
+        assert result is not None
+
+        # The file path reference should resolve successfully
+        # Check that there's no error about './ADR-011' not being found
+        error_messages = [e.message for e in result.errors]
+        assert not any("'./ADR-011'" in msg for msg in error_messages), (
+            f"File path reference should resolve, but got errors: {error_messages}"
+        )
+
 
 class TestRegistryLoading:
     """Test registry loading."""

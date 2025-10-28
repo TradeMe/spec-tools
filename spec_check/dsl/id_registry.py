@@ -173,6 +173,37 @@ class IDRegistry:
         """Get a class instance by ID."""
         return self.classes.get(class_id)
 
+    def get_module_by_file(self, file_path: Path) -> ModuleInstance | None:
+        """
+        Get a module instance by its file path.
+
+        This enables resolving cross-document references that use relative file paths
+        instead of module IDs (e.g., './011-deployment-architecture.md' → 'ADR-011').
+
+        Args:
+            file_path: Absolute or relative path to the module file
+
+        Returns:
+            ModuleInstance if found, None otherwise
+        """
+        # Resolve to absolute path for comparison
+        try:
+            target_path = file_path.resolve()
+        except (OSError, RuntimeError):
+            # Path doesn't exist or can't be resolved
+            return None
+
+        # Search all registered modules for matching file path
+        for module in self.modules.values():
+            try:
+                if module.file_path.resolve() == target_path:
+                    return module
+            except (OSError, RuntimeError):
+                # Module file path can't be resolved, skip it
+                continue
+
+        return None
+
     def find_class_in_module(self, class_id: str, module_id: str) -> ClassInstance | None:
         """
         Find a class instance within a specific module.
