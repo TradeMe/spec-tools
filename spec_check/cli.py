@@ -4,6 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from . import __version__
 from .config import load_config, merge_config_with_args
 from .dsl.registry import SpecTypeRegistry
 from .dsl.validator import DSLValidator
@@ -306,7 +307,7 @@ def main(argv: list | None = None) -> int:
     parser.add_argument(
         "--version",
         action="version",
-        version="%(prog)s 0.1.0",
+        version=f"%(prog)s {__version__}",
     )
 
     # Create subparsers for different tools

@@ -1,6 +1,12 @@
 """spec-check: Tools for spec-driven development."""
 
-__version__ = "0.1.0"
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("spec-check")
+except PackageNotFoundError:
+    # Package not installed, use a default for development
+    __version__ = "0.0.0-dev"
 
 from .linter import LintResult, SpecLinter
 from .markdown_link_validator import (
