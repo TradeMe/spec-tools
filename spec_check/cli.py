@@ -255,14 +255,19 @@ def cmd_validate_dsl(args) -> int:
         Exit code (0 for success, 1 for failure).
     """
     try:
-        # Type definitions directory
-        type_dir = Path(args.type_dir)
-        if not type_dir.exists():
-            print(f"Error: Type definitions directory not found: {type_dir}", file=sys.stderr)
-            return 1
-
         # Load type definitions
-        registry = SpecTypeRegistry.load_from_package(type_dir)
+        if args.builtin_types:
+            # Use built-in types (Job, Requirement, ADR)
+            registry = SpecTypeRegistry.load_builtin_types()
+            if args.verbose:
+                print("Using built-in type definitions (Job, Requirement, ADR)")
+        else:
+            # Load from custom type directory
+            type_dir = Path(args.type_dir)
+            if not type_dir.exists():
+                print(f"Error: Type definitions directory not found: {type_dir}", file=sys.stderr)
+                return 1
+            registry = SpecTypeRegistry.load_from_package(type_dir)
 
         if args.verbose:
             print(f"Loaded {len(registry.modules)} module type(s)")
@@ -733,14 +738,17 @@ Validation rules:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Validate documents using type definitions in .spec-types
+  # Validate using built-in types (Job, Requirement, ADR)
+  spec-check validate-dsl --builtin-types specs/
+
+  # Validate documents using type definitions in spec_types/
   spec-check validate-dsl
 
   # Validate specific directory
   spec-check validate-dsl specs/
 
   # Use custom type definitions directory
-  spec-check validate-dsl --type-dir my-types/
+  spec-check validate-dsl --type-dir my_types/
 
 How it works:
   The DSL validator implements a multi-pass validation architecture:
@@ -760,7 +768,7 @@ Type definitions:
   - Reference constraints (cardinality, type checking)
 
   Directory structure:
-    .spec-types/
+    spec_types/
       config.yaml              # Global configuration
       modules/
         requirement.yaml       # Module type definitions
@@ -793,8 +801,15 @@ Reference validation:
     validate_dsl_parser.add_argument(
         "--type-dir",
         "-t",
-        default=".spec-types",
-        help="Path to type definitions directory (default: .spec-types)",
+        default="spec_types",
+        help="Path to type definitions directory (default: spec_types)",
+    )
+
+    validate_dsl_parser.add_argument(
+        "--builtin-types",
+        "-b",
+        action="store_true",
+        help="Use built-in types (Job, Requirement, ADR) instead of custom types",
     )
 
     validate_dsl_parser.add_argument(
