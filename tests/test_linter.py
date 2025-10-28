@@ -223,6 +223,50 @@ class TestSpecLinter:
         assert result.is_valid
         assert result.total_files == 1
 
+    def test_vcs_directories_auto_ignored(self, tmp_path):
+        """Test that VCS directories are automatically ignored.
+
+        This test reproduces issue #31 where .git (and other VCS directories)
+        should be automatically ignored regardless of .gitignore contents.
+
+        Standard file linters (ripgrep, fd, tree) automatically ignore VCS
+        directories like .git/, .hg/, .svn/, .bzr/ regardless of .gitignore.
+        spec-check should do the same.
+        """
+        # Create VCS directories
+        (tmp_path / ".git").mkdir()
+        (tmp_path / ".git" / "config").write_text("git config")
+
+        (tmp_path / ".hg").mkdir()
+        (tmp_path / ".hg" / "hgrc").write_text("hg config")
+
+        (tmp_path / ".svn").mkdir()
+        (tmp_path / ".svn" / "entries").write_text("svn entries")
+
+        (tmp_path / ".bzr").mkdir()
+        (tmp_path / ".bzr" / "branch.conf").write_text("bzr config")
+
+        # Also create VCS control files (edge case - .git as file not directory)
+        (tmp_path / "submodule" / ".git").mkdir(parents=True)
+        (tmp_path / "submodule" / ".git").rmdir()  # Remove dir
+        (tmp_path / "submodule" / ".git").write_text("gitdir: ../.git")  # Write as file
+
+        # Create regular files
+        (tmp_path / "README.md").write_text("# README")
+        (tmp_path / ".specallowlist").write_text("**/*.md\n")
+
+        linter = SpecLinter(root_dir=tmp_path, use_gitignore=False)
+        result = linter.lint()
+
+        # Should only see README.md, not any VCS files
+        # The submodule/.git file should also be ignored
+        assert result.is_valid, f"Expected valid, but got unmatched: {result.unmatched_files}"
+        assert result.total_files == 1, f"Expected 1 file, got {result.total_files}"
+        assert result.matched_files == 1
+        assert len(result.unmatched_files) == 0, (
+            f"VCS files should be auto-ignored, but found: {result.unmatched_files}"
+        )
+
     def test_result_string_representation(self, tmp_path):
         """Test the string representation of LintResult."""
         (tmp_path / "test.md").write_text("# Test")
