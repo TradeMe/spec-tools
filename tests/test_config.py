@@ -62,7 +62,7 @@ def test_find_pyproject_toml():
 
         # Should find it from nested directory
         found = find_pyproject_toml(nested_dir)
-        assert found == pyproject_path
+        assert found.resolve() == pyproject_path.resolve()
 
 
 def test_find_pyproject_toml_not_found():
