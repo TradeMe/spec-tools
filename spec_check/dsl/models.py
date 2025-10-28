@@ -182,6 +182,31 @@ class Reference(BaseModel):
     must_exist: bool = Field(default=True, description="Target must exist in the document set")
     allow_circular: bool = Field(default=True, description="Allow circular references")
 
+    def validate_count(self, count: int) -> bool:
+        """
+        Validate that a count satisfies the cardinality constraint.
+
+        Args:
+            count: The actual number of references found
+
+        Returns:
+            True if count satisfies the cardinality constraint, False otherwise
+        """
+        if count < self.cardinality.min:
+            return False
+        if self.cardinality.max is not None and count > self.cardinality.max:
+            return False
+        return True
+
+    def parse_cardinality(self) -> tuple[int, int | None]:
+        """
+        Extract min and max values from the cardinality constraint.
+
+        Returns:
+            Tuple of (min, max) where max may be None for unbounded
+        """
+        return (self.cardinality.min, self.cardinality.max)
+
 
 class SpecClass(BaseModel):
     """

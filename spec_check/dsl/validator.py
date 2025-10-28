@@ -439,7 +439,7 @@ class DSLValidator:
     def _add_cardinality_error(self, violation: CardinalityViolation) -> None:
         """Add cardinality violation error."""
         ref_def = violation.reference_def
-        target = ref_def.target_module or ref_def.target_class
+        target = ref_def.target_type
         self.errors.append(
             ValidationError(
                 error_type="cardinality_violation",
