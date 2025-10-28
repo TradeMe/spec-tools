@@ -64,10 +64,11 @@ That's it! Everything else is automated.
 **After you merge the PR:**
 - ✅ GitHub release is automatically created with tag `v0.2.0`
 - ✅ Release notes are extracted from `CHANGELOG.md`
-- ✅ Package is automatically published to PyPI
+- ✅ Package is automatically built and published to PyPI in the same workflow
 - ✅ Pre-release flag is set for alpha/beta/rc versions
+- ✅ PR receives a comment when publishing completes successfully
 
-**The only manual step is reviewing and merging the PR!**
+**The only manual step is reviewing and merging the PR! Everything else is fully automated.**
 
 #### Example Session
 
@@ -88,7 +89,7 @@ After merge, automatically:
 
 You: *reviews and merges PR*
 
-[GitHub Actions automatically creates release and publishes to PyPI]
+[GitHub Actions automatically creates release, builds package, and publishes to PyPI - all in one workflow]
 ```
 
 ## Version Enforcement
@@ -353,6 +354,12 @@ Pre-release versions are automatically detected and marked appropriately.
 - You cannot republish the same version to PyPI
 - For development versions, the commit hash makes each unique
 - For releases, increment the version number
+
+**Release created but package not published:**
+- This should not happen with the current workflow (post v0.1.0)
+- The workflow now builds and publishes in a single job chain
+- If you see this, check the workflow run logs for errors
+- Verify the `pypi` environment is configured in GitHub settings
 
 ### Version Check Fails on PR
 
