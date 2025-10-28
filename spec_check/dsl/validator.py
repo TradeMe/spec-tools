@@ -380,10 +380,11 @@ class DSLValidator:
             if section_def.required:
                 found = doc_ctx.section_tree.find_section(section_def.heading)
                 if not found:
-                    heading_prefix = "#" * section_def.level
+                    heading_prefix = "#" * section_def.heading_level
                     heading_text = section_def.heading
                     suggestion = (
-                        f"Add a level-{section_def.level} heading: {heading_prefix} {heading_text}"
+                        f"Add a level-{section_def.heading_level} heading: "
+                        f"{heading_prefix} {heading_text}"
                     )
                     self.errors.append(
                         ValidationError(
