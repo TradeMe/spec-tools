@@ -48,6 +48,19 @@ class SpecLinter:
     DEFAULT_ALLOWLIST_FILE = ".specallowlist"
     DEFAULT_IGNORE_FILE = ".gitignore"
 
+    # VCS directories that are always ignored, regardless of .gitignore
+    # This matches behavior of standard tools like ripgrep, fd, and tree
+    VCS_IGNORE_PATTERNS = [
+        ".git",  # Git control files (submodules use .git as a file)
+        ".git/",  # Git directories
+        ".hg",  # Mercurial control files
+        ".hg/",  # Mercurial directories
+        ".svn",  # Subversion control files
+        ".svn/",  # Subversion directories
+        ".bzr",  # Bazaar control files
+        ".bzr/",  # Bazaar directories
+    ]
+
     def __init__(
         self,
         root_dir: Path | None = None,
@@ -118,9 +131,11 @@ class SpecLinter:
                         if line.strip() and not line.strip().startswith("#")
                     ]
 
-        # Always ignore .git directory
-        if ".git" not in ignore_patterns and ".git/" not in ignore_patterns:
-            ignore_patterns.append(".git/")
+        # Always ignore VCS directories (like ripgrep, fd, tree do)
+        # Add patterns that aren't already in ignore_patterns
+        for vcs_pattern in self.VCS_IGNORE_PATTERNS:
+            if vcs_pattern not in ignore_patterns:
+                ignore_patterns.append(vcs_pattern)
 
         return allowlist_patterns, ignore_patterns
 
