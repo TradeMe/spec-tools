@@ -123,8 +123,12 @@ class ReferenceResolver:
                 error=f"Could not extract module ID from target: {reference.link_target}",
             )
 
-        # Look up in registry
+        # Try to look up by module ID first
         target_module = self.registry.get_module(target_id)
+
+        # If not found by ID and target looks like a file path, try file path resolution
+        if not target_module and self._is_file_path(target_id):
+            target_module = self._resolve_by_file_path(reference.source_file, target_id)
 
         if not target_module:
             # Check if there are similar IDs (for helpful error messages)
@@ -268,6 +272,50 @@ class ReferenceResolver:
                 )
 
         return violations
+
+    def _is_file_path(self, target: str) -> bool:
+        """
+        Check if a target looks like a file path rather than a module ID.
+
+        File paths typically contain:
+        - Directory separators (/ or \\)
+        - Relative path indicators (./ or ../)
+        - File extensions before they're stripped
+
+        Args:
+            target: The target string (already processed by _extract_module_id)
+
+        Returns:
+            True if target looks like a file path
+        """
+        # Check for path separators or relative path indicators
+        return "/" in target or "\\" in target or target.startswith(".")
+
+    def _resolve_by_file_path(self, source_file: Path, target_path: str) -> ModuleInstance | None:
+        """
+        Resolve a module reference using a file path.
+
+        Converts a relative file path like './011-deployment-architecture'
+        to an absolute path and looks it up in the registry.
+
+        Args:
+            source_file: Path to the source file containing the reference
+            target_path: Relative or absolute file path to the target (without .md extension)
+
+        Returns:
+            ModuleInstance if found, None otherwise
+        """
+        # Add back the .md extension that was stripped by _extract_module_id
+        if not target_path.endswith(".md"):
+            target_path_with_ext = target_path + ".md"
+        else:
+            target_path_with_ext = target_path
+
+        # Resolve relative to source file's directory
+        target_file = source_file.parent / target_path_with_ext
+
+        # Look up by file path in registry
+        return self.registry.get_module_by_file(target_file)
 
     def _extract_module_id(self, link_target: str) -> str | None:
         """Extract module ID from link target."""
