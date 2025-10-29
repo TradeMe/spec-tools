@@ -4,7 +4,6 @@
 **Version**: 1.0
 **Date**: 2025-10-22
 **Status**: Draft
-**Jobs to be Done**: See [Jobs Document](jobs/markdown-link-validator.md)
 
 ## Overview
 
@@ -14,99 +13,99 @@ This specification defines the requirements for a markdown link validator tool t
 
 ### Link Discovery
 
-**REQ-001** [Related to [SPEC-001/JOB-001](jobs/markdown-link-validator.md#spec-001job-001-discover-and-parse-links-from-markdown-files)]: The system shall parse all markdown files in the specified directory to extract hyperlinks.
+**REQ-001**  The system shall parse all markdown files in the specified directory to extract hyperlinks.
 
-**REQ-002** [Related to [SPEC-001/JOB-001](jobs/markdown-link-validator.md#spec-001job-001-discover-and-parse-links-from-markdown-files)]: WHEN parsing markdown files, the system shall identify links in the format `[text](url)`.
+**REQ-002**  WHEN parsing markdown files, the system shall identify links in the format `[text](url)`.
 
-**REQ-003** [Related to [SPEC-001/JOB-001](jobs/markdown-link-validator.md#spec-001job-001-discover-and-parse-links-from-markdown-files)]: WHEN parsing markdown files, the system shall identify reference-style links in the format `[text][ref]` and `[ref]: url`.
+**REQ-003**  WHEN parsing markdown files, the system shall identify reference-style links in the format `[text][ref]` and `[ref]: url`.
 
-**REQ-004** [Related to [SPEC-001/JOB-001](jobs/markdown-link-validator.md#spec-001job-001-discover-and-parse-links-from-markdown-files)]: The system shall extract the following link components: link text, URL/path, and optional anchor fragment.
+**REQ-004**  The system shall extract the following link components: link text, URL/path, and optional anchor fragment.
 
 ### Internal Link Validation
 
-**REQ-005** [Related to [SPEC-001/JOB-002](jobs/markdown-link-validator.md#spec-001job-002-validate-internal-file-and-anchor-links)]: WHEN a link uses a relative path (e.g., `./file.md`, `../dir/file.md`, `file.md`), the system shall resolve the path relative to the markdown file containing the link.
+**REQ-005**  WHEN a link uses a relative path (e.g., `./file.md`, `../dir/file.md`, `file.md`), the system shall resolve the path relative to the markdown file containing the link.
 
-**REQ-006** [Related to [SPEC-001/JOB-002](jobs/markdown-link-validator.md#spec-001job-002-validate-internal-file-and-anchor-links)]: WHEN validating an internal link, the system shall check if the target file exists in the filesystem.
+**REQ-006**  WHEN validating an internal link, the system shall check if the target file exists in the filesystem.
 
-**REQ-007** [Related to [SPEC-001/JOB-002](jobs/markdown-link-validator.md#spec-001job-002-validate-internal-file-and-anchor-links)]: IF an internal link target does not exist, THEN the system shall report the link as invalid.
+**REQ-007**  IF an internal link target does not exist, THEN the system shall report the link as invalid.
 
-**REQ-008** [Related to [SPEC-001/JOB-002](jobs/markdown-link-validator.md#spec-001job-002-validate-internal-file-and-anchor-links)]: WHEN an internal link includes an anchor fragment (e.g., `file.md#heading`), the system shall validate both the file existence and the anchor target.
+**REQ-008**  WHEN an internal link includes an anchor fragment (e.g., `file.md#heading`), the system shall validate both the file existence and the anchor target.
 
-**REQ-009** [Related to [SPEC-001/JOB-002](jobs/markdown-link-validator.md#spec-001job-002-validate-internal-file-and-anchor-links)]: WHEN validating an anchor-only link (e.g., `#heading`), the system shall check if the anchor exists in the current markdown file.
+**REQ-009**  WHEN validating an anchor-only link (e.g., `#heading`), the system shall check if the anchor exists in the current markdown file.
 
-**REQ-010** [Related to [SPEC-001/JOB-002](jobs/markdown-link-validator.md#spec-001job-002-validate-internal-file-and-anchor-links)]: WHEN checking anchor targets, the system shall convert markdown headings to anchor IDs following the same rules as standard markdown renderers (lowercase, spaces to hyphens, special characters removed).
+**REQ-010**  WHEN checking anchor targets, the system shall convert markdown headings to anchor IDs following the same rules as standard markdown renderers (lowercase, spaces to hyphens, special characters removed).
 
 ### External URL Validation
 
-**REQ-011** [Related to [SPEC-001/JOB-003](jobs/markdown-link-validator.md#spec-001job-003-validate-external-url-accessibility)]: WHEN a link uses an HTTP or HTTPS scheme, the system shall classify it as an external URL.
+**REQ-011**  WHEN a link uses an HTTP or HTTPS scheme, the system shall classify it as an external URL.
 
-**REQ-012** [Related to [SPEC-001/JOB-003](jobs/markdown-link-validator.md#spec-001job-003-validate-external-url-accessibility)]: WHEN validating an external URL, the system shall send an HTTP request to verify the URL is accessible.
+**REQ-012**  WHEN validating an external URL, the system shall send an HTTP request to verify the URL is accessible.
 
-**REQ-013** [Related to [SPEC-001/JOB-003](jobs/markdown-link-validator.md#spec-001job-003-validate-external-url-accessibility)]: IF an external URL returns an HTTP status code in the 2xx or 3xx range, THEN the system shall consider the link valid.
+**REQ-013**  IF an external URL returns an HTTP status code in the 2xx or 3xx range, THEN the system shall consider the link valid.
 
-**REQ-014** [Related to [SPEC-001/JOB-003](jobs/markdown-link-validator.md#spec-001job-003-validate-external-url-accessibility)]: IF an external URL returns an HTTP status code in the 4xx or 5xx range, THEN the system shall report the link as invalid.
+**REQ-014**  IF an external URL returns an HTTP status code in the 4xx or 5xx range, THEN the system shall report the link as invalid.
 
-**REQ-015** [Related to [SPEC-001/JOB-003](jobs/markdown-link-validator.md#spec-001job-003-validate-external-url-accessibility)]: IF an external URL request times out or fails to connect, THEN the system shall report the link as invalid.
+**REQ-015**  IF an external URL request times out or fails to connect, THEN the system shall report the link as invalid.
 
 ### Private URL Handling
 
-**REQ-016** [Related to [SPEC-001/JOB-004](jobs/markdown-link-validator.md#spec-001job-004-handle-private-urls-and-configuration)]: The system shall support a configuration mechanism to specify private URI domains and prefixes.
+**REQ-016**  The system shall support a configuration mechanism to specify private URI domains and prefixes.
 
-**REQ-017** [Related to [SPEC-001/JOB-004](jobs/markdown-link-validator.md#spec-001job-004-handle-private-urls-and-configuration)]: WHEN a link matches a configured private domain or prefix, the system shall mark it as private and skip validation.
+**REQ-017**  WHEN a link matches a configured private domain or prefix, the system shall mark it as private and skip validation.
 
-**REQ-018** [Related to [SPEC-001/JOB-004](jobs/markdown-link-validator.md#spec-001job-004-handle-private-urls-and-configuration)]: WHEN reporting results, the system shall separately count private links that were not validated.
+**REQ-018**  WHEN reporting results, the system shall separately count private links that were not validated.
 
-**REQ-019** [Related to [SPEC-001/JOB-004](jobs/markdown-link-validator.md#spec-001job-004-handle-private-urls-and-configuration)]: The system shall read private domain/prefix configuration from a `.speclinkconfig` file in the root directory.
+**REQ-019**  The system shall read private domain/prefix configuration from a `.speclinkconfig` file in the root directory.
 
-**REQ-020** [Related to [SPEC-001/JOB-004](jobs/markdown-link-validator.md#spec-001job-004-handle-private-urls-and-configuration)]: WHERE a `.speclinkconfig` file is not present, the system shall proceed with no private domains configured.
+**REQ-020**  WHERE a `.speclinkconfig` file is not present, the system shall proceed with no private domains configured.
 
-**REQ-021** [Related to [SPEC-001/JOB-004](jobs/markdown-link-validator.md#spec-001job-004-handle-private-urls-and-configuration)]: The system shall support both domain patterns (e.g., `internal.company.com`) and URI prefixes (e.g., `https://internal.company.com/`, `http://localhost:`).
+**REQ-021**  The system shall support both domain patterns (e.g., `internal.company.com`) and URI prefixes (e.g., `https://internal.company.com/`, `http://localhost:`).
 
 ### Configuration
 
-**REQ-022** [Related to [SPEC-001/JOB-004](jobs/markdown-link-validator.md#spec-001job-004-handle-private-urls-and-configuration)]: The system shall accept a command-line option to specify a custom configuration file path.
+**REQ-022**  The system shall accept a command-line option to specify a custom configuration file path.
 
-**REQ-023** [Related to [SPEC-001/JOB-004](jobs/markdown-link-validator.md#spec-001job-004-handle-private-urls-and-configuration)]: The system shall accept a command-line option to set the timeout for external URL validation (in seconds).
+**REQ-023**  The system shall accept a command-line option to set the timeout for external URL validation (in seconds).
 
-**REQ-024** [Related to [SPEC-001/JOB-004](jobs/markdown-link-validator.md#spec-001job-004-handle-private-urls-and-configuration)]: The system shall accept a command-line option to disable external URL validation entirely.
+**REQ-024**  The system shall accept a command-line option to disable external URL validation entirely.
 
-**REQ-025** [Related to [SPEC-001/JOB-004](jobs/markdown-link-validator.md#spec-001job-004-handle-private-urls-and-configuration)]: The system shall accept a command-line option to specify the root directory to scan.
+**REQ-025**  The system shall accept a command-line option to specify the root directory to scan.
 
-**REQ-026** [Related to [SPEC-001/JOB-004](jobs/markdown-link-validator.md#spec-001job-004-handle-private-urls-and-configuration)]: WHERE the root directory is not specified, the system shall default to the current working directory.
+**REQ-026**  WHERE the root directory is not specified, the system shall default to the current working directory.
 
-**REQ-027** [Related to [SPEC-001/JOB-004](jobs/markdown-link-validator.md#spec-001job-004-handle-private-urls-and-configuration)]: The system shall respect `.gitignore` patterns when discovering markdown files.
+**REQ-027**  The system shall respect `.gitignore` patterns when discovering markdown files.
 
-**REQ-028** [Related to [SPEC-001/JOB-004](jobs/markdown-link-validator.md#spec-001job-004-handle-private-urls-and-configuration)]: The system shall accept a command-line option to disable `.gitignore` pattern matching.
+**REQ-028**  The system shall accept a command-line option to disable `.gitignore` pattern matching.
 
 ### Reporting
 
-**REQ-029** [Related to [SPEC-001/JOB-005](jobs/markdown-link-validator.md#spec-001job-005-report-validation-results)]: WHEN validation completes, the system shall report the total number of links checked.
+**REQ-029**  WHEN validation completes, the system shall report the total number of links checked.
 
-**REQ-030** [Related to [SPEC-001/JOB-005](jobs/markdown-link-validator.md#spec-001job-005-report-validation-results)]: WHEN validation completes, the system shall report the number of valid links, invalid links, and private links.
+**REQ-030**  WHEN validation completes, the system shall report the number of valid links, invalid links, and private links.
 
-**REQ-031** [Related to [SPEC-001/JOB-005](jobs/markdown-link-validator.md#spec-001job-005-report-validation-results)]: WHEN validation completes, the system shall list all invalid links with their source file and line number.
+**REQ-031**  WHEN validation completes, the system shall list all invalid links with their source file and line number.
 
-**REQ-032** [Related to [SPEC-001/JOB-005](jobs/markdown-link-validator.md#spec-001job-005-report-validation-results)]: WHEN the verbose option is enabled, the system shall report all links checked, including valid ones.
+**REQ-032**  WHEN the verbose option is enabled, the system shall report all links checked, including valid ones.
 
-**REQ-033** [Related to [SPEC-001/JOB-005](jobs/markdown-link-validator.md#spec-001job-005-report-validation-results)]: IF all links are valid or private, THEN the system shall exit with code 0.
+**REQ-033**  IF all links are valid or private, THEN the system shall exit with code 0.
 
-**REQ-034** [Related to [SPEC-001/JOB-005](jobs/markdown-link-validator.md#spec-001job-005-report-validation-results)]: IF any links are invalid, THEN the system shall exit with code 1.
+**REQ-034**  IF any links are invalid, THEN the system shall exit with code 1.
 
 ### Error Handling
 
-**REQ-035** [Related to [SPEC-001/JOB-005](jobs/markdown-link-validator.md#spec-001job-005-report-validation-results)]: IF a markdown file cannot be read, THEN the system shall report the error and continue processing other files.
+**REQ-035**  IF a markdown file cannot be read, THEN the system shall report the error and continue processing other files.
 
-**REQ-036** [Related to [SPEC-001/JOB-005](jobs/markdown-link-validator.md#spec-001job-005-report-validation-results)]: IF the configuration file cannot be parsed, THEN the system shall report the error and exit with code 1.
+**REQ-036**  IF the configuration file cannot be parsed, THEN the system shall report the error and exit with code 1.
 
-**REQ-037** [Related to [SPEC-001/JOB-003](jobs/markdown-link-validator.md#spec-001job-003-validate-external-url-accessibility)]: WHEN network errors occur during external URL validation, the system shall retry the request up to 2 additional times before marking the link as invalid.
+**REQ-037**  WHEN network errors occur during external URL validation, the system shall retry the request up to 2 additional times before marking the link as invalid.
 
 ### Performance
 
-**REQ-038** [Related to [SPEC-001/JOB-003](jobs/markdown-link-validator.md#spec-001job-003-validate-external-url-accessibility)]: The system shall validate external URLs concurrently to improve performance.
+**REQ-038**  The system shall validate external URLs concurrently to improve performance.
 
-**REQ-039** [Related to [SPEC-001/JOB-003](jobs/markdown-link-validator.md#spec-001job-003-validate-external-url-accessibility)]: The system shall limit concurrent external URL requests to prevent overwhelming network resources.
+**REQ-039**  The system shall limit concurrent external URL requests to prevent overwhelming network resources.
 
-**REQ-040** [Related to [SPEC-001/JOB-003](jobs/markdown-link-validator.md#spec-001job-003-validate-external-url-accessibility)]: The system shall use a default timeout of 10 seconds for external URL validation.
+**REQ-040**  The system shall use a default timeout of 10 seconds for external URL validation.
 
 ## Configuration File Format
 

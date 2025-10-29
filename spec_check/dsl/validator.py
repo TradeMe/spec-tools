@@ -11,10 +11,11 @@ Implements the multi-pass validation architecture:
 - Pass 7: Reference Resolution (reference_resolver.py)
 """
 
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from spec_check.ast_parser import parse_markdown_file
+from spec_check.ast_parser import MarkdownDocument, parse_markdown_file
 from spec_check.dsl.id_registry import IDRegistry
 from spec_check.dsl.models import SpecModule
 from spec_check.dsl.reference_extractor import (
@@ -144,6 +145,9 @@ class DocumentContext:
 
     content: str
     """Markdown content."""
+
+    parsed_doc: MarkdownDocument | None = None
+    """Parsed markdown document with metadata."""
 
     module_def: SpecModule | None = None
     """Matched module definition."""
@@ -283,6 +287,7 @@ class DSLValidator:
             self.documents[file_path] = DocumentContext(
                 file_path=file_path,
                 content=content,
+                parsed_doc=doc,
                 section_tree=section_tree,
             )
 
@@ -366,7 +371,15 @@ class DSLValidator:
             if root.subsections and root.subsections[0].section_id:
                 return root.subsections[0].section_id
 
-        # TODO: Support frontmatter and other locations
+        elif location == "metadata":
+            # Extract from document metadata (frontmatter or bold key-value pairs)
+            if doc_ctx.parsed_doc and doc_ctx.parsed_doc.metadata:
+                # Look for ID field in metadata
+                for key, value in doc_ctx.parsed_doc.metadata.items():
+                    if key.upper() == "ID" and re.match(module_def.identifier.pattern, value):
+                        return value
+
+        # TODO: Support heading and other locations
 
         return None
 

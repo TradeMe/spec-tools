@@ -4,7 +4,6 @@
 **Version**: 1.0
 **Date**: 2025-10-22
 **Status**: Draft
-**Jobs to be Done**: See [Jobs Document](jobs/markdown-schema-validator.md)
 
 ## Overview
 
@@ -14,139 +13,139 @@ This specification defines the requirements for a markdown schema validator tool
 
 ### File Discovery
 
-**REQ-001** [Related to [SPEC-002/JOB-001](jobs/markdown-schema-validator.md#spec-002job-001-discover-and-parse-markdown-files)]: The system shall scan the specified directory to find markdown files matching configured path patterns.
+**REQ-001**  The system shall scan the specified directory to find markdown files matching configured path patterns.
 
-**REQ-002** [Related to [SPEC-002/JOB-001](jobs/markdown-schema-validator.md#spec-002job-001-discover-and-parse-markdown-files)]: WHEN no configuration file is present, the system shall use a default schema that validates files matching the pattern `specs/*.md`.
+**REQ-002**  WHEN no configuration file is present, the system shall use a default schema that validates files matching the pattern `specs/*.md`.
 
-**REQ-003** [Related to [SPEC-002/JOB-001](jobs/markdown-schema-validator.md#spec-002job-001-discover-and-parse-markdown-files)]: The system shall support gitignore-style glob patterns for file matching (e.g., `specs/*.md`, `docs/**/*.md`).
+**REQ-003**  The system shall support gitignore-style glob patterns for file matching (e.g., `specs/*.md`, `docs/**/*.md`).
 
-**REQ-004** [Related to [SPEC-002/JOB-001](jobs/markdown-schema-validator.md#spec-002job-001-discover-and-parse-markdown-files)]: The system shall respect `.gitignore` patterns when discovering markdown files.
+**REQ-004**  The system shall respect `.gitignore` patterns when discovering markdown files.
 
-**REQ-005** [Related to [SPEC-002/JOB-001](jobs/markdown-schema-validator.md#spec-002job-001-discover-and-parse-markdown-files)]: The system shall accept a command-line option to disable `.gitignore` pattern matching.
+**REQ-005**  The system shall accept a command-line option to disable `.gitignore` pattern matching.
 
-**REQ-006** [Related to [SPEC-002/JOB-001](jobs/markdown-schema-validator.md#spec-002job-001-discover-and-parse-markdown-files)]: The system shall always exclude files within the `.git` directory from validation.
+**REQ-006**  The system shall always exclude files within the `.git` directory from validation.
 
 ### Markdown Parsing
 
-**REQ-007** [Related to [SPEC-002/JOB-001](jobs/markdown-schema-validator.md#spec-002job-001-discover-and-parse-markdown-files)]: The system shall parse markdown files to extract headings, metadata fields, and body content.
+**REQ-007**  The system shall parse markdown files to extract headings, metadata fields, and body content.
 
-**REQ-008** [Related to [SPEC-002/JOB-001](jobs/markdown-schema-validator.md#spec-002job-001-discover-and-parse-markdown-files)]: WHEN parsing headings, the system shall identify heading level (H1 through H6) and text content.
+**REQ-008**  WHEN parsing headings, the system shall identify heading level (H1 through H6) and text content.
 
-**REQ-009** [Related to [SPEC-002/JOB-001](jobs/markdown-schema-validator.md#spec-002job-001-discover-and-parse-markdown-files)]: The system shall construct a hierarchical tree of headings based on their levels.
+**REQ-009**  The system shall construct a hierarchical tree of headings based on their levels.
 
-**REQ-010** [Related to [SPEC-002/JOB-001](jobs/markdown-schema-validator.md#spec-002job-001-discover-and-parse-markdown-files)]: The system shall parse metadata fields in the format `**Key**: Value` appearing after the H1 heading.
+**REQ-010**  The system shall parse metadata fields in the format `**Key**: Value` appearing after the H1 heading.
 
-**REQ-011** [Related to [SPEC-002/JOB-001](jobs/markdown-schema-validator.md#spec-002job-001-discover-and-parse-markdown-files)]: The system shall also support metadata fields appearing before the first heading.
+**REQ-011**  The system shall also support metadata fields appearing before the first heading.
 
-**REQ-012** [Related to [SPEC-002/JOB-001](jobs/markdown-schema-validator.md#spec-002job-001-discover-and-parse-markdown-files)]: The system shall associate body content lines with their parent heading.
+**REQ-012**  The system shall associate body content lines with their parent heading.
 
-**REQ-013** [Related to [SPEC-002/JOB-001](jobs/markdown-schema-validator.md#spec-002job-001-discover-and-parse-markdown-files)]: The system shall preserve line numbers for all parsed elements to enable accurate error reporting.
+**REQ-013**  The system shall preserve line numbers for all parsed elements to enable accurate error reporting.
 
 ### Metadata Validation
 
-**REQ-014** [Related to [SPEC-002/JOB-002](jobs/markdown-schema-validator.md#spec-002job-002-validate-document-metadata)]: The system shall validate that all required metadata fields are present in markdown files.
+**REQ-014**  The system shall validate that all required metadata fields are present in markdown files.
 
-**REQ-015** [Related to [SPEC-002/JOB-002](jobs/markdown-schema-validator.md#spec-002job-002-validate-document-metadata)]: WHEN a required metadata field is missing, the system shall report a violation with severity "error".
+**REQ-015**  WHEN a required metadata field is missing, the system shall report a violation with severity "error".
 
-**REQ-016** [Related to [SPEC-002/JOB-002](jobs/markdown-schema-validator.md#spec-002job-002-validate-document-metadata)]: The system shall support configuration of required and optional metadata fields.
+**REQ-016**  The system shall support configuration of required and optional metadata fields.
 
-**REQ-017** [Related to [SPEC-002/JOB-002](jobs/markdown-schema-validator.md#spec-002job-002-validate-document-metadata)]: WHEN using the default schema, the system shall require the following metadata fields: ID, Version, Date, and Status.
+**REQ-017**  WHEN using the default schema, the system shall require the following metadata fields: ID, Version, Date, and Status.
 
 ### Heading Structure Validation
 
-**REQ-018** [Related to [SPEC-002/JOB-003](jobs/markdown-schema-validator.md#spec-002job-003-validate-heading-structure)]: The system shall validate that all required headings are present in markdown files.
+**REQ-018**  The system shall validate that all required headings are present in markdown files.
 
-**REQ-019** [Related to [SPEC-002/JOB-003](jobs/markdown-schema-validator.md#spec-002job-003-validate-heading-structure)]: The system shall support exact text matching for required headings (e.g., "Overview").
+**REQ-019**  The system shall support exact text matching for required headings (e.g., "Overview").
 
-**REQ-020** [Related to [SPEC-002/JOB-003](jobs/markdown-schema-validator.md#spec-002job-003-validate-heading-structure)]: The system shall support regex pattern matching for required headings (e.g., `^Specification:\s+.+$`).
+**REQ-020**  The system shall support regex pattern matching for required headings (e.g., `^Specification:\s+.+$`).
 
-**REQ-021** [Related to [SPEC-002/JOB-003](jobs/markdown-schema-validator.md#spec-002job-003-validate-heading-structure)]: WHEN a required heading is missing, the system shall report a violation with severity "error".
+**REQ-021**  WHEN a required heading is missing, the system shall report a violation with severity "error".
 
-**REQ-022** [Related to [SPEC-002/JOB-003](jobs/markdown-schema-validator.md#spec-002job-003-validate-heading-structure)]: WHEN using the default schema, the system shall require an H1 heading matching the pattern `^Specification:\s+.+$`.
+**REQ-022**  WHEN using the default schema, the system shall require an H1 heading matching the pattern `^Specification:\s+.+$`.
 
-**REQ-023** [Related to [SPEC-002/JOB-003](jobs/markdown-schema-validator.md#spec-002job-003-validate-heading-structure)]: WHEN using the default schema, the system shall require an H2 heading with text "Overview".
+**REQ-023**  WHEN using the default schema, the system shall require an H2 heading with text "Overview".
 
-**REQ-024** [Related to [SPEC-002/JOB-003](jobs/markdown-schema-validator.md#spec-002job-003-validate-heading-structure)]: WHEN using the default schema, the system shall require an H2 heading matching the pattern `^Requirements\s+\(EARS Format\)$`.
+**REQ-024**  WHEN using the default schema, the system shall require an H2 heading matching the pattern `^Requirements\s+\(EARS Format\)$`.
 
 ### EARS Format Validation
 
-**REQ-025** [Related to [SPEC-002/JOB-004](jobs/markdown-schema-validator.md#spec-002job-004-validate-ears-format-compliance)]: The system shall validate requirement statements follow EARS (Easy Approach to Requirements Syntax) format.
+**REQ-025**  The system shall validate requirement statements follow EARS (Easy Approach to Requirements Syntax) format.
 
-**REQ-026** [Related to [SPEC-002/JOB-004](jobs/markdown-schema-validator.md#spec-002job-004-validate-ears-format-compliance)]: The system shall identify requirement statements by the pattern `**REQ-XXX**:`, `**NFR-XXX**:`, or `**TEST-XXX**:` where XXX is a number.
+**REQ-026**  The system shall identify requirement statements by the pattern `**REQ-XXX**:`, `**NFR-XXX**:`, or `**TEST-XXX**:` where XXX is a number.
 
-**REQ-027** [Related to [SPEC-002/JOB-004](jobs/markdown-schema-validator.md#spec-002job-004-validate-ears-format-compliance)]: WHEN validating EARS compliance, the system shall accept unconditional requirements in the format "[Subject] shall [action]".
+**REQ-027**  WHEN validating EARS compliance, the system shall accept unconditional requirements in the format "[Subject] shall [action]".
 
-**REQ-028** [Related to [SPEC-002/JOB-004](jobs/markdown-schema-validator.md#spec-002job-004-validate-ears-format-compliance)]: WHEN validating EARS compliance, the system shall accept event-driven requirements in the format "WHEN [condition], [subject] shall [action]".
+**REQ-028**  WHEN validating EARS compliance, the system shall accept event-driven requirements in the format "WHEN [condition], [subject] shall [action]".
 
-**REQ-029** [Related to [SPEC-002/JOB-004](jobs/markdown-schema-validator.md#spec-002job-004-validate-ears-format-compliance)]: WHEN validating EARS compliance, the system shall accept conditional requirements in the format "IF [condition], THEN [subject] shall [action]".
+**REQ-029**  WHEN validating EARS compliance, the system shall accept conditional requirements in the format "IF [condition], THEN [subject] shall [action]".
 
-**REQ-030** [Related to [SPEC-002/JOB-004](jobs/markdown-schema-validator.md#spec-002job-004-validate-ears-format-compliance)]: WHEN validating EARS compliance, the system shall accept optional requirements in the format "WHERE [condition], [subject] shall [action]".
+**REQ-030**  WHEN validating EARS compliance, the system shall accept optional requirements in the format "WHERE [condition], [subject] shall [action]".
 
-**REQ-031** [Related to [SPEC-002/JOB-004](jobs/markdown-schema-validator.md#spec-002job-004-validate-ears-format-compliance)]: The system shall accept various subjects in EARS requirements including "The system", "The application", "Unit tests", "Integration tests", and similar patterns.
+**REQ-031**  The system shall accept various subjects in EARS requirements including "The system", "The application", "Unit tests", "Integration tests", and similar patterns.
 
-**REQ-032** [Related to [SPEC-002/JOB-004](jobs/markdown-schema-validator.md#spec-002job-004-validate-ears-format-compliance)]: WHEN a requirement statement does not follow EARS format, the system shall report a violation with severity "error".
+**REQ-032**  WHEN a requirement statement does not follow EARS format, the system shall report a violation with severity "error".
 
-**REQ-033** [Related to [SPEC-002/JOB-004](jobs/markdown-schema-validator.md#spec-002job-004-validate-ears-format-compliance)]: The system shall validate EARS format only within configured sections (e.g., "Requirements (EARS Format)", "Non-Functional Requirements", "Test Coverage").
+**REQ-033**  The system shall validate EARS format only within configured sections (e.g., "Requirements (EARS Format)", "Non-Functional Requirements", "Test Coverage").
 
-**REQ-034** [Related to [SPEC-002/JOB-004](jobs/markdown-schema-validator.md#spec-002job-004-validate-ears-format-compliance)]: WHEN EARS validation is enabled in the schema, the system shall check all requirement statements in relevant sections.
+**REQ-034**  WHEN EARS validation is enabled in the schema, the system shall check all requirement statements in relevant sections.
 
 ### Schema Configuration
 
-**REQ-035** [Related to [SPEC-002/JOB-005](jobs/markdown-schema-validator.md#spec-002job-005-configure-schema-validation)]: The system shall support loading schema configuration from a file.
+**REQ-035**  The system shall support loading schema configuration from a file.
 
-**REQ-036** [Related to [SPEC-002/JOB-005](jobs/markdown-schema-validator.md#spec-002job-005-configure-schema-validation)]: WHEN a configuration file path is specified via command-line option, the system shall use that file.
+**REQ-036**  WHEN a configuration file path is specified via command-line option, the system shall use that file.
 
-**REQ-037** [Related to [SPEC-002/JOB-005](jobs/markdown-schema-validator.md#spec-002job-005-configure-schema-validation)]: WHERE no configuration file is specified, the system shall look for a `.specschemaconfig` file in the root directory.
+**REQ-037**  WHERE no configuration file is specified, the system shall look for a `.specschemaconfig` file in the root directory.
 
-**REQ-038** [Related to [SPEC-002/JOB-005](jobs/markdown-schema-validator.md#spec-002job-005-configure-schema-validation)]: WHERE no configuration file exists, the system shall use a built-in default schema for EARS specification files.
+**REQ-038**  WHERE no configuration file exists, the system shall use a built-in default schema for EARS specification files.
 
-**REQ-039** [Related to [SPEC-002/JOB-005](jobs/markdown-schema-validator.md#spec-002job-005-configure-schema-validation)]: The schema configuration shall define file matching patterns.
+**REQ-039**  The schema configuration shall define file matching patterns.
 
-**REQ-040** [Related to [SPEC-002/JOB-005](jobs/markdown-schema-validator.md#spec-002job-005-configure-schema-validation)]: The schema configuration shall define required and optional metadata fields.
+**REQ-040**  The schema configuration shall define required and optional metadata fields.
 
-**REQ-041** [Related to [SPEC-002/JOB-005](jobs/markdown-schema-validator.md#spec-002job-005-configure-schema-validation)]: The schema configuration shall define required and optional headings with text or pattern matching.
+**REQ-041**  The schema configuration shall define required and optional headings with text or pattern matching.
 
-**REQ-042** [Related to [SPEC-002/JOB-005](jobs/markdown-schema-validator.md#spec-002job-005-configure-schema-validation)]: The schema configuration shall define EARS validation settings including enabled/disabled status and target sections.
+**REQ-042**  The schema configuration shall define EARS validation settings including enabled/disabled status and target sections.
 
 ### Command-Line Interface
 
-**REQ-043** [Related to [SPEC-002/JOB-006](jobs/markdown-schema-validator.md#spec-002job-006-provide-command-line-interface)]: The system shall accept a command-line option to specify the root directory to scan.
+**REQ-043**  The system shall accept a command-line option to specify the root directory to scan.
 
-**REQ-044** [Related to [SPEC-002/JOB-006](jobs/markdown-schema-validator.md#spec-002job-006-provide-command-line-interface)]: WHERE the root directory is not specified, the system shall default to the current working directory.
+**REQ-044**  WHERE the root directory is not specified, the system shall default to the current working directory.
 
-**REQ-045** [Related to [SPEC-002/JOB-006](jobs/markdown-schema-validator.md#spec-002job-006-provide-command-line-interface)]: The system shall accept a `--config` option to specify a custom schema configuration file.
+**REQ-045**  The system shall accept a `--config` option to specify a custom schema configuration file.
 
-**REQ-046** [Related to [SPEC-002/JOB-006](jobs/markdown-schema-validator.md#spec-002job-006-provide-command-line-interface)]: The system shall accept a `--verbose` option to enable detailed output.
+**REQ-046**  The system shall accept a `--verbose` option to enable detailed output.
 
-**REQ-047** [Related to [SPEC-002/JOB-006](jobs/markdown-schema-validator.md#spec-002job-006-provide-command-line-interface)]: The system shall accept a `--no-gitignore` option to disable `.gitignore` pattern matching.
+**REQ-047**  The system shall accept a `--no-gitignore` option to disable `.gitignore` pattern matching.
 
 ### Reporting
 
-**REQ-048** [Related to [SPEC-002/JOB-007](jobs/markdown-schema-validator.md#spec-002job-007-report-validation-results)]: WHEN validation completes, the system shall report the total number of files checked.
+**REQ-048**  WHEN validation completes, the system shall report the total number of files checked.
 
-**REQ-049** [Related to [SPEC-002/JOB-007](jobs/markdown-schema-validator.md#spec-002job-007-report-validation-results)]: WHEN validation completes, the system shall report the number of valid and invalid files.
+**REQ-049**  WHEN validation completes, the system shall report the number of valid and invalid files.
 
-**REQ-050** [Related to [SPEC-002/JOB-007](jobs/markdown-schema-validator.md#spec-002job-007-report-validation-results)]: WHEN validation completes, the system shall report the total number of violations found.
+**REQ-050**  WHEN validation completes, the system shall report the total number of violations found.
 
-**REQ-051** [Related to [SPEC-002/JOB-007](jobs/markdown-schema-validator.md#spec-002job-007-report-validation-results)]: WHEN violations are detected, the system shall list each violation with file path, line number, severity, and message.
+**REQ-051**  WHEN violations are detected, the system shall list each violation with file path, line number, severity, and message.
 
-**REQ-052** [Related to [SPEC-002/JOB-007](jobs/markdown-schema-validator.md#spec-002job-007-report-validation-results)]: WHEN verbose mode is enabled, the system shall display detailed validation results even if all files are valid.
+**REQ-052**  WHEN verbose mode is enabled, the system shall display detailed validation results even if all files are valid.
 
-**REQ-053** [Related to [SPEC-002/JOB-007](jobs/markdown-schema-validator.md#spec-002job-007-report-validation-results)]: WHEN verbose mode is disabled and all files are valid, the system shall display a summary message.
+**REQ-053**  WHEN verbose mode is disabled and all files are valid, the system shall display a summary message.
 
-**REQ-054** [Related to [SPEC-002/JOB-007](jobs/markdown-schema-validator.md#spec-002job-007-report-validation-results)]: IF all files conform to the schema, THEN the system shall exit with code 0.
+**REQ-054**  IF all files conform to the schema, THEN the system shall exit with code 0.
 
-**REQ-055** [Related to [SPEC-002/JOB-007](jobs/markdown-schema-validator.md#spec-002job-007-report-validation-results)]: IF any files have schema violations, THEN the system shall exit with code 1.
+**REQ-055**  IF any files have schema violations, THEN the system shall exit with code 1.
 
 ### Error Handling
 
-**REQ-056** [Related to [SPEC-002/JOB-007](jobs/markdown-schema-validator.md#spec-002job-007-report-validation-results)]: IF a markdown file cannot be read, THEN the system shall report a violation with severity "error" and continue processing other files.
+**REQ-056**  IF a markdown file cannot be read, THEN the system shall report a violation with severity "error" and continue processing other files.
 
-**REQ-057** [Related to [SPEC-002/JOB-007](jobs/markdown-schema-validator.md#spec-002job-007-report-validation-results)]: IF a configuration file cannot be loaded, THEN the system shall report the error and exit with code 1.
+**REQ-057**  IF a configuration file cannot be loaded, THEN the system shall report the error and exit with code 1.
 
-**REQ-058** [Related to [SPEC-002/JOB-007](jobs/markdown-schema-validator.md#spec-002job-007-report-validation-results)]: WHEN unexpected errors occur, the system shall report the error to stderr.
+**REQ-058**  WHEN unexpected errors occur, the system shall report the error to stderr.
 
-**REQ-059** [Related to [SPEC-002/JOB-007](jobs/markdown-schema-validator.md#spec-002job-007-report-validation-results)]: WHEN verbose mode is enabled and unexpected errors occur, the system shall include the full stack trace.
+**REQ-059**  WHEN verbose mode is enabled and unexpected errors occur, the system shall include the full stack trace.
 
 ## Default Schema Definition
 

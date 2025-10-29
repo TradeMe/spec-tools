@@ -16,7 +16,9 @@ from spec_check.dsl.layers import (
     AcceptanceCriterion,
     ArchitectureDecisionModule,
     JobModule,
+    PrinciplesModule,
     RequirementModule,
+    SpecificationModule,
 )
 
 # ============================================================================
@@ -28,6 +30,8 @@ BUILTIN_MODULES = {
     "Job": JobModule(),
     "Requirement": RequirementModule(),
     "ADR": ArchitectureDecisionModule(),
+    "Specification": SpecificationModule(),
+    "Principles": PrinciplesModule(),
 }
 
 # Export built-in class types
@@ -41,5 +45,7 @@ __all__ = [
     "JobModule",
     "RequirementModule",
     "ArchitectureDecisionModule",
+    "SpecificationModule",
+    "PrinciplesModule",
     "AcceptanceCriterion",
 ]
