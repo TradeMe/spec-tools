@@ -74,3 +74,6 @@ jobs:
 
     - name: Validate spec schema
       run: uv run spec-check check-schema --verbose
+
+    - name: Validate DSL structure
+      run: uv run spec-check validate-dsl --builtin-types specs/

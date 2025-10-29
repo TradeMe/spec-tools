@@ -143,10 +143,10 @@ class ReferenceResolver:
         warning = None
         if module_def and reference.relationship:
             ref_def = self._find_reference_definition(module_def, reference.relationship)
-            if ref_def and ref_def.target_module:
-                if target_module.module_type != ref_def.target_module:
+            if ref_def and ref_def.target_type:
+                if target_module.module_type != ref_def.target_type:
                     warning = (
-                        f"Type mismatch: expected {ref_def.target_module}, "
+                        f"Type mismatch: expected {ref_def.target_type}, "
                         f"found {target_module.module_type}"
                     )
 

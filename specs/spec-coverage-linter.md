@@ -4,7 +4,6 @@
 **Version**: 2.0
 **Date**: 2025-10-23
 **Status**: Draft
-**Jobs to be Done**: See [Jobs Document](jobs/spec-coverage-linter.md)
 
 ## Overview
 
@@ -16,107 +15,107 @@ This specification defines the requirements for a spec coverage linter tool that
 
 ### Requirement Extraction
 
-**REQ-001** [Related to [SPEC-003/JOB-001](jobs/spec-coverage-linter.md#spec-003job-001-extract-requirements-from-specification-files)]: The system shall scan the specs directory to find all markdown files containing requirement definitions.
+**REQ-001**  The system shall scan the specs directory to find all markdown files containing requirement definitions.
 
-**REQ-002** [Related to [SPEC-003/JOB-001](jobs/spec-coverage-linter.md#spec-003job-001-extract-requirements-from-specification-files)]: The system shall extract requirement IDs from spec files using the pattern `**REQ-XXX**:`, `**NFR-XXX**:`, or `**TEST-XXX**:` where XXX is a three-digit number.
+**REQ-002**  The system shall extract requirement IDs from spec files using the pattern `**REQ-XXX**:`, `**NFR-XXX**:`, or `**TEST-XXX**:` where XXX is a three-digit number.
 
-**REQ-003** [Related to [SPEC-003/JOB-001](jobs/spec-coverage-linter.md#spec-003job-001-extract-requirements-from-specification-files)]: The system shall support custom requirement ID prefixes beyond REQ, NFR, and TEST.
+**REQ-003**  The system shall support custom requirement ID prefixes beyond REQ, NFR, and TEST.
 
-**REQ-041** [Related to [SPEC-003/JOB-001](jobs/spec-coverage-linter.md#spec-003job-001-extract-requirements-from-specification-files)]: The system shall extract the spec ID from each spec file using the pattern `**ID**: SPEC-XXX` where XXX is a three-digit number.
+**REQ-041**  The system shall extract the spec ID from each spec file using the pattern `**ID**: SPEC-XXX` where XXX is a three-digit number.
 
-**REQ-042** [Related to [SPEC-003/JOB-001](jobs/spec-coverage-linter.md#spec-003job-001-extract-requirements-from-specification-files)]: The system shall associate each extracted requirement ID with its parent spec ID to form a fully qualified requirement ID in the format `SPEC-XXX/REQ-XXX`.
+**REQ-042**  The system shall associate each extracted requirement ID with its parent spec ID to form a fully qualified requirement ID in the format `SPEC-XXX/REQ-XXX`.
 
 ### Test Discovery
 
-**REQ-004** [Related to [SPEC-003/JOB-002](jobs/spec-coverage-linter.md#spec-003job-002-discover-and-analyze-test-coverage)]: The system shall scan the tests directory to find all Python test files matching the pattern `test_*.py`.
+**REQ-004**  The system shall scan the tests directory to find all Python test files matching the pattern `test_*.py`.
 
-**REQ-005** [Related to [SPEC-003/JOB-002](jobs/spec-coverage-linter.md#spec-003job-002-discover-and-analyze-test-coverage)]: The system shall parse test files using AST to extract test function definitions.
+**REQ-005**  The system shall parse test files using AST to extract test function definitions.
 
-**REQ-006** [Related to [SPEC-003/JOB-002](jobs/spec-coverage-linter.md#spec-003job-002-discover-and-analyze-test-coverage)]: The system shall identify test functions by the naming pattern starting with `test_`.
+**REQ-006**  The system shall identify test functions by the naming pattern starting with `test_`.
 
-**REQ-007** [Related to [SPEC-003/JOB-002](jobs/spec-coverage-linter.md#spec-003job-002-discover-and-analyze-test-coverage)]: The system shall extract requirement markers from test decorators in the format `@pytest.mark.req("SPEC-XXX/REQ-XXX")` where SPEC-XXX identifies the specification and REQ-XXX identifies the requirement within that specification.
+**REQ-007**  The system shall extract requirement markers from test decorators in the format `@pytest.mark.req("SPEC-XXX/REQ-XXX")` where SPEC-XXX identifies the specification and REQ-XXX identifies the requirement within that specification.
 
-**REQ-008** [Related to [SPEC-003/JOB-002](jobs/spec-coverage-linter.md#spec-003job-002-discover-and-analyze-test-coverage)]: The system shall support test functions with multiple requirement markers.
+**REQ-008**  The system shall support test functions with multiple requirement markers.
 
-**REQ-009** [Related to [SPEC-003/JOB-002](jobs/spec-coverage-linter.md#spec-003job-002-discover-and-analyze-test-coverage)]: WHEN a test function is defined within a class, the system shall construct the full test name as `ClassName::test_function_name`.
+**REQ-009**  WHEN a test function is defined within a class, the system shall construct the full test name as `ClassName::test_function_name`.
 
 ### Coverage Analysis
 
-**REQ-010** [Related to [SPEC-003/JOB-003](jobs/spec-coverage-linter.md#spec-003job-003-analyze-and-validate-coverage)]: The system shall create a mapping from fully qualified requirement IDs (SPEC-XXX/REQ-XXX) to test names that cover them.
+**REQ-010**  The system shall create a mapping from fully qualified requirement IDs (SPEC-XXX/REQ-XXX) to test names that cover them.
 
-**REQ-011** [Related to [SPEC-003/JOB-003](jobs/spec-coverage-linter.md#spec-003job-003-analyze-and-validate-coverage)]: The system shall identify all requirements that have no corresponding test coverage.
+**REQ-011**  The system shall identify all requirements that have no corresponding test coverage.
 
-**REQ-012** [Related to [SPEC-003/JOB-003](jobs/spec-coverage-linter.md#spec-003job-003-analyze-and-validate-coverage)]: The system shall calculate the coverage percentage as (covered requirements / total requirements) × 100.
+**REQ-012**  The system shall calculate the coverage percentage as (covered requirements / total requirements) × 100.
 
-**REQ-013** [Related to [SPEC-003/JOB-003](jobs/spec-coverage-linter.md#spec-003job-003-analyze-and-validate-coverage)]: The system shall identify all test functions that have no requirement markers.
+**REQ-013**  The system shall identify all test functions that have no requirement markers.
 
-**REQ-043** [Related to [SPEC-003/JOB-003](jobs/spec-coverage-linter.md#spec-003job-003-analyze-and-validate-coverage)]: WHEN a test references a requirement marker, the system shall validate that the spec ID (SPEC-XXX) exists in the specs directory.
+**REQ-043**  WHEN a test references a requirement marker, the system shall validate that the spec ID (SPEC-XXX) exists in the specs directory.
 
-**REQ-044** [Related to [SPEC-003/JOB-003](jobs/spec-coverage-linter.md#spec-003job-003-analyze-and-validate-coverage)]: WHEN a test references a requirement marker, the system shall validate that the requirement ID (REQ-XXX) exists within the referenced spec file.
+**REQ-044**  WHEN a test references a requirement marker, the system shall validate that the requirement ID (REQ-XXX) exists within the referenced spec file.
 
-**REQ-045** [Related to [SPEC-003/JOB-003](jobs/spec-coverage-linter.md#spec-003job-003-analyze-and-validate-coverage)]: IF a test references a non-existent spec ID or requirement ID, THEN the system shall report an error identifying the invalid reference.
+**REQ-045**  IF a test references a non-existent spec ID or requirement ID, THEN the system shall report an error identifying the invalid reference.
 
 ### Configuration
 
-**REQ-014** [Related to [SPEC-003/JOB-004](jobs/spec-coverage-linter.md#spec-003job-004-configure-coverage-thresholds)]: The system shall support loading configuration from `pyproject.toml` under the section `[tool.spec-check.check-coverage]`.
+**REQ-014**  The system shall support loading configuration from `pyproject.toml` under the section `[tool.spec-check.check-coverage]`.
 
-**REQ-015** [Related to [SPEC-003/JOB-004](jobs/spec-coverage-linter.md#spec-003job-004-configure-coverage-thresholds)]: The system shall accept a `min_coverage` configuration option to specify the minimum acceptable coverage percentage.
+**REQ-015**  The system shall accept a `min_coverage` configuration option to specify the minimum acceptable coverage percentage.
 
-**REQ-016** [Related to [SPEC-003/JOB-004](jobs/spec-coverage-linter.md#spec-003job-004-configure-coverage-thresholds)]: WHERE no `min_coverage` is configured, the system shall default to requiring 100% coverage.
+**REQ-016**  WHERE no `min_coverage` is configured, the system shall default to requiring 100% coverage.
 
-**REQ-017** [Related to [SPEC-003/JOB-004](jobs/spec-coverage-linter.md#spec-003job-004-configure-coverage-thresholds)]: The system shall accept `min_coverage` values from 0 to 100 representing the percentage threshold.
+**REQ-017**  The system shall accept `min_coverage` values from 0 to 100 representing the percentage threshold.
 
-**REQ-018** [Related to [SPEC-003/JOB-004](jobs/spec-coverage-linter.md#spec-003job-004-configure-coverage-thresholds)]: WHEN coverage percentage is greater than or equal to `min_coverage`, the system shall report validation as passed.
+**REQ-018**  WHEN coverage percentage is greater than or equal to `min_coverage`, the system shall report validation as passed.
 
-**REQ-019** [Related to [SPEC-003/JOB-004](jobs/spec-coverage-linter.md#spec-003job-004-configure-coverage-thresholds)]: WHEN coverage percentage is less than `min_coverage`, the system shall report validation as failed.
+**REQ-019**  WHEN coverage percentage is less than `min_coverage`, the system shall report validation as failed.
 
 ### Command-Line Interface
 
-**REQ-020** [Related to [SPEC-003/JOB-005](jobs/spec-coverage-linter.md#spec-003job-005-provide-command-line-interface)]: The system shall accept a command-line option to specify the root directory to scan.
+**REQ-020**  The system shall accept a command-line option to specify the root directory to scan.
 
-**REQ-021** [Related to [SPEC-003/JOB-005](jobs/spec-coverage-linter.md#spec-003job-005-provide-command-line-interface)]: WHERE the root directory is not specified, the system shall default to the current working directory.
+**REQ-021**  WHERE the root directory is not specified, the system shall default to the current working directory.
 
-**REQ-022** [Related to [SPEC-003/JOB-005](jobs/spec-coverage-linter.md#spec-003job-005-provide-command-line-interface)]: The system shall accept a `--specs-dir` option to specify a custom specs directory.
+**REQ-022**  The system shall accept a `--specs-dir` option to specify a custom specs directory.
 
-**REQ-023** [Related to [SPEC-003/JOB-005](jobs/spec-coverage-linter.md#spec-003job-005-provide-command-line-interface)]: WHERE specs directory is not specified, the system shall default to `<root-dir>/specs`.
+**REQ-023**  WHERE specs directory is not specified, the system shall default to `<root-dir>/specs`.
 
-**REQ-024** [Related to [SPEC-003/JOB-005](jobs/spec-coverage-linter.md#spec-003job-005-provide-command-line-interface)]: The system shall accept a `--tests-dir` option to specify a custom tests directory.
+**REQ-024**  The system shall accept a `--tests-dir` option to specify a custom tests directory.
 
-**REQ-025** [Related to [SPEC-003/JOB-005](jobs/spec-coverage-linter.md#spec-003job-005-provide-command-line-interface)]: WHERE tests directory is not specified, the system shall default to `<root-dir>/tests`.
+**REQ-025**  WHERE tests directory is not specified, the system shall default to `<root-dir>/tests`.
 
-**REQ-026** [Related to [SPEC-003/JOB-005](jobs/spec-coverage-linter.md#spec-003job-005-provide-command-line-interface)]: The system shall accept a `--verbose` option to enable detailed output.
+**REQ-026**  The system shall accept a `--verbose` option to enable detailed output.
 
-**REQ-027** [Related to [SPEC-003/JOB-005](jobs/spec-coverage-linter.md#spec-003job-005-provide-command-line-interface)]: The system shall accept a `--min-coverage` option to override the configured minimum coverage percentage.
+**REQ-027**  The system shall accept a `--min-coverage` option to override the configured minimum coverage percentage.
 
-**REQ-028** [Related to [SPEC-003/JOB-005](jobs/spec-coverage-linter.md#spec-003job-005-provide-command-line-interface)]: WHEN both pyproject.toml configuration and command-line option are provided, the system shall use the command-line option value.
+**REQ-028**  WHEN both pyproject.toml configuration and command-line option are provided, the system shall use the command-line option value.
 
 ### Reporting
 
-**REQ-029** [Related to [SPEC-003/JOB-006](jobs/spec-coverage-linter.md#spec-003job-006-report-coverage-results)]: The system shall display a coverage report showing the coverage percentage.
+**REQ-029**  The system shall display a coverage report showing the coverage percentage.
 
-**REQ-030** [Related to [SPEC-003/JOB-006](jobs/spec-coverage-linter.md#spec-003job-006-report-coverage-results)]: The system shall display the number of covered requirements out of total requirements.
+**REQ-030**  The system shall display the number of covered requirements out of total requirements.
 
-**REQ-031** [Related to [SPEC-003/JOB-006](jobs/spec-coverage-linter.md#spec-003job-006-report-coverage-results)]: The system shall display the number of tests linked to requirements out of total tests.
+**REQ-031**  The system shall display the number of tests linked to requirements out of total tests.
 
-**REQ-032** [Related to [SPEC-003/JOB-006](jobs/spec-coverage-linter.md#spec-003job-006-report-coverage-results)]: WHEN uncovered requirements exist, the system shall list each uncovered requirement ID.
+**REQ-032**  WHEN uncovered requirements exist, the system shall list each uncovered requirement ID.
 
-**REQ-033** [Related to [SPEC-003/JOB-006](jobs/spec-coverage-linter.md#spec-003job-006-report-coverage-results)]: WHEN tests without requirement markers exist, the system shall list each test name.
+**REQ-033**  WHEN tests without requirement markers exist, the system shall list each test name.
 
-**REQ-034** [Related to [SPEC-003/JOB-006](jobs/spec-coverage-linter.md#spec-003job-006-report-coverage-results)]: The system shall display a validation status indicating whether coverage meets the minimum threshold.
+**REQ-034**  The system shall display a validation status indicating whether coverage meets the minimum threshold.
 
-**REQ-035** [Related to [SPEC-003/JOB-006](jobs/spec-coverage-linter.md#spec-003job-006-report-coverage-results)]: IF coverage meets or exceeds the minimum threshold, THEN the system shall exit with code 0.
+**REQ-035**  IF coverage meets or exceeds the minimum threshold, THEN the system shall exit with code 0.
 
-**REQ-036** [Related to [SPEC-003/JOB-006](jobs/spec-coverage-linter.md#spec-003job-006-report-coverage-results)]: IF coverage is below the minimum threshold, THEN the system shall exit with code 1.
+**REQ-036**  IF coverage is below the minimum threshold, THEN the system shall exit with code 1.
 
 ### Error Handling
 
-**REQ-037** [Related to [SPEC-003/JOB-006](jobs/spec-coverage-linter.md#spec-003job-006-report-coverage-results)]: IF a spec file cannot be read, THEN the system shall print a warning and continue processing other files.
+**REQ-037**  IF a spec file cannot be read, THEN the system shall print a warning and continue processing other files.
 
-**REQ-038** [Related to [SPEC-003/JOB-006](jobs/spec-coverage-linter.md#spec-003job-006-report-coverage-results)]: IF a test file cannot be parsed, THEN the system shall print a warning and continue processing other files.
+**REQ-038**  IF a test file cannot be parsed, THEN the system shall print a warning and continue processing other files.
 
-**REQ-039** [Related to [SPEC-003/JOB-006](jobs/spec-coverage-linter.md#spec-003job-006-report-coverage-results)]: WHEN unexpected errors occur, the system shall report the error to stderr.
+**REQ-039**  WHEN unexpected errors occur, the system shall report the error to stderr.
 
-**REQ-040** [Related to [SPEC-003/JOB-006](jobs/spec-coverage-linter.md#spec-003job-006-report-coverage-results)]: WHEN verbose mode is enabled and unexpected errors occur, the system shall include the full stack trace.
+**REQ-040**  WHEN verbose mode is enabled and unexpected errors occur, the system shall include the full stack trace.
 
 ## Configuration File Format
 

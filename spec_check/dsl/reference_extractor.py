@@ -263,6 +263,8 @@ class ReferenceExtractor:
                 return "implements"
             if "dependencies" in section_lower or "prerequisites" in section_lower:
                 return "depends_on"
+            if "addresses" in section_lower:
+                return "addresses"
 
         # Check module definition for context
         if module_def and section:

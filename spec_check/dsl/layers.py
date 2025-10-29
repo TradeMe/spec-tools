@@ -213,6 +213,77 @@ class ArchitectureDecisionModule(SpecModule):
     ]
 
 
+class PrinciplesModule(SpecModule):
+    """
+    Principles Document.
+
+    Documents architectural principles, design philosophy, and guiding
+    tenets for the project. Typically one per project.
+
+    Example filename: principles.md
+    Location: specs/
+    """
+
+    name: str = "Principles"
+    version: str = "1.0"
+    description: str = "Principles Document"
+
+    # Match principles.md specifically
+    file_pattern: str = r"^principles\.md$"
+    location_pattern: str = r"^specs/[^/]+\.md$"
+
+    # No identifier required for principles
+    identifier: IdentifierSpec | None = None
+
+    sections: list[SectionSpec] = [
+        SectionSpec(heading="Overview", heading_level=2, required=False),
+    ]
+
+    references: list[Reference] = []
+
+
+class SpecificationModule(SpecModule):
+    """
+    Specification Document (SPEC).
+
+    Specifications document detailed requirements for a system or feature.
+    They typically contain multiple requirements organized into sections.
+
+    Example filename: SPEC-001.md (or named like markdown-link-validator.md)
+    Location: specs/
+    """
+
+    name: str = "Specification"
+    version: str = "1.0"
+    description: str = "Specification Document"
+
+    # Match files starting with SPEC- or specific spec names
+    file_pattern: str = r"^(SPEC-\d{3}|markdown-[\w-]+|spec-[\w-]+)\.md$"
+    # Match files directly in specs/ root, excluding subdirs
+    location_pattern: str = r"^specs/[^/]+\.md$"
+
+    identifier: IdentifierSpec = IdentifierSpec(
+        pattern=r"SPEC-\d{3}",
+        location="metadata",  # ID is in metadata section
+        scope="global",
+    )
+
+    sections: list[SectionSpec] = [
+        SectionSpec(heading="Overview", heading_level=2, required=False),
+        SectionSpec(heading="Requirements", heading_level=2, required=False),
+    ]
+
+    references: list[Reference] = [
+        Reference(
+            name="addresses",
+            source_type="Specification",
+            target_type="Job",
+            cardinality=Cardinality(min=0, max=None),
+            link_format="id_reference",
+        ),
+    ]
+
+
 # ============================================================================
 # Registry of Layer-Specific Types
 # ============================================================================
@@ -221,4 +292,6 @@ LAYER_MODULES = {
     "Job": JobModule(),
     "Requirement": RequirementModule(),
     "ADR": ArchitectureDecisionModule(),
+    "Specification": SpecificationModule(),
+    "Principles": PrinciplesModule(),
 }
