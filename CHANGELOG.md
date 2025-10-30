@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2025-10-30
+
+### Added
+- New builtin DSL types: `SpecificationModule` and `PrinciplesModule` for validating project specs (#39)
+- DSL validation step added to CI workflow (#39)
+
+### Fixed
+- Fixed `reference_resolver.py` using non-existent `target_module` attribute instead of `target_type` (#39)
+- Fixed missing "addresses" keyword detection in reference relationship inference (#39)
+- Fixed missing `MarkdownDocument` import in DSL validator (#39)
+- Added support for `location="metadata"` in identifier extraction (#39)
+
+### Changed
+- Restructured project specs to pass DSL validation (#39)
+- Removed duplicate job catalog files from `specs/jobs/` (#39)
+- Added "Addresses" sections to Requirements linking to Jobs (#39)
+
 ## [0.1.3] - 2025-10-29
 
 ### Fixed
@@ -75,7 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Development status updated to Alpha
 - Added flit as dev dependency for building distributions
 
-[Unreleased]: https://github.com/TradeMe/spec-check/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/TradeMe/spec-check/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/TradeMe/spec-check/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/TradeMe/spec-check/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/TradeMe/spec-check/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/TradeMe/spec-check/compare/v0.1.0...v0.1.1
