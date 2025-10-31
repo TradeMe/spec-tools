@@ -272,6 +272,23 @@ class SectionSpec(BaseModel):
     allowed_sections: list[str] | None = Field(
         default=None, description="Allowed subsection headings"
     )
+    allowed_classes: list[str] | None = Field(
+        default=None,
+        description=(
+            "Names of SpecClass instances allowed in this section. "
+            "When specified, only class instances matching these names can appear "
+            "in this section. Class names must match keys in the module's classes dict. "
+            "When None (default), no class restrictions apply (backward compatible)."
+        ),
+    )
+    require_classes: bool = Field(
+        default=False,
+        description=(
+            "Whether at least one class instance must exist in this section. "
+            "Only applies when allowed_classes is defined. When True, validation "
+            "errors if no class instances are found in the section."
+        ),
+    )
 
 
 class Reference(BaseModel):
