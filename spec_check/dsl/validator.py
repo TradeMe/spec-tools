@@ -137,6 +137,25 @@ class ValidationResult:
 
 
 @dataclass
+class UnmanagedFile:
+    """Represents an unmanaged markdown file.
+
+    Unmanaged files are in scope but don't have formal type definitions.
+    They can be referenced from other documents and can reference other documents,
+    but they don't receive structural validation.
+    """
+
+    file_path: Path
+    """Path to the markdown file."""
+
+    content: str
+    """Markdown content."""
+
+    references: list[Reference] = field(default_factory=list)
+    """Extracted references from this unmanaged file."""
+
+
+@dataclass
 class DocumentContext:
     """Context for a single document being validated."""
 
@@ -182,16 +201,28 @@ class DSLValidator:
         self.type_registry = type_registry
         self.id_registry = IDRegistry()
         self.documents: dict[Path, DocumentContext] = {}
+        self.unmanaged_files: dict[Path, UnmanagedFile] = {}
         self.errors: list[ValidationError] = []
         self.warnings: list[ValidationError] = []
         self.info: list[ValidationError] = []
 
-    def validate(self, root_path: Path) -> ValidationResult:
+    def validate(
+        self,
+        root_path: Path,
+        use_gitignore: bool = True,
+        use_specignore: bool = True,
+        specignore_file: str = ".specignore",
+        strict: bool = False,
+    ) -> ValidationResult:
         """
         Validate all markdown documents in a directory tree.
 
         Args:
             root_path: Root directory to search for markdown files
+            use_gitignore: Whether to respect .gitignore patterns (default: True)
+            use_specignore: Whether to use .specignore file (default: True)
+            specignore_file: Path to specignore file (default: .specignore)
+            strict: Whether to warn about unclassified files (default: False)
 
         Returns:
             Validation result
@@ -199,18 +230,39 @@ class DSLValidator:
         # Reset state
         self.id_registry = IDRegistry()
         self.documents = {}
+        self.unmanaged_files = {}
         self.errors = []
         self.warnings = []
         self.info = []
 
         # Find all markdown files
-        markdown_files = list(root_path.rglob("*.md"))
+        markdown_files = self._find_markdown_files(root_path, use_gitignore)
 
-        # Pass 1 & 2: Parse documents and build section trees
+        # Load .specignore patterns
+        specignore_spec = None
+        if use_specignore:
+            specignore_patterns = self._load_specignore_patterns(root_path / specignore_file)
+            if specignore_patterns:
+                try:
+                    from pathspec import PathSpec
+                    from pathspec.patterns import GitWildMatchPattern
+
+                    specignore_spec = PathSpec.from_lines(GitWildMatchPattern, specignore_patterns)
+                except ImportError:
+                    self.warnings.append(
+                        ValidationError(
+                            error_type="missing_dependency",
+                            severity="warning",
+                            message="pathspec library not available, .specignore will be ignored",
+                            suggestion="Install pathspec: pip install pathspec",
+                        )
+                    )
+
+        # Pass 1 & 2: Parse and classify documents
         for file_path in markdown_files:
-            self._process_document(file_path)
+            self._process_and_classify_document(file_path, root_path, specignore_spec, strict)
 
-        # Pass 3: Type assignment and ID registration
+        # Pass 3: Type assignment and ID registration (only for typed docs)
         for _file_path, doc_ctx in self.documents.items():
             self._assign_type_and_register(doc_ctx)
 
@@ -227,8 +279,10 @@ class DSLValidator:
         # Pass 5: Content validation
         # TODO: Implement content validation once content validators are ready
 
-        # Pass 6: Reference extraction
+        # Pass 6: Reference extraction (typed and unmanaged docs)
         ref_extractor = ReferenceExtractor(self.type_registry.config)
+
+        # Extract from typed documents
         for doc_ctx in self.documents.values():
             doc_ctx.references = ref_extractor.extract_references(
                 doc_ctx.file_path,
@@ -237,23 +291,40 @@ class DSLValidator:
                 doc_ctx.module_def,
             )
 
+        # Extract from unmanaged documents
+        for unmanaged in self.unmanaged_files.values():
+            unmanaged.references = ref_extractor.extract_references(
+                unmanaged.file_path,
+                unmanaged.content,
+                None,  # No module ID
+                None,  # No module definition
+            )
+
         # Pass 7: Reference resolution
-        ref_resolver = ReferenceResolver(self.id_registry)
+        ref_resolver = ReferenceResolver(self.id_registry, self.unmanaged_files)
         all_references: list[Reference] = []
 
+        # Resolve typed document references
         for doc_ctx in self.documents.values():
             for reference in doc_ctx.references:
                 all_references.append(reference)
                 result = ref_resolver.resolve_reference(reference, doc_ctx.module_def)
                 self._process_resolution_result(result)
 
-            # Validate cardinality
+            # Validate cardinality (only for typed documents)
             if doc_ctx.module_id and doc_ctx.module_def:
                 violations = ref_resolver.validate_cardinality(
                     doc_ctx.module_id, doc_ctx.module_def, doc_ctx.references
                 )
                 for violation in violations:
                     self._add_cardinality_error(violation)
+
+        # Resolve unmanaged document references
+        for unmanaged in self.unmanaged_files.values():
+            for reference in unmanaged.references:
+                all_references.append(reference)
+                result = ref_resolver.resolve_reference(reference, None)
+                self._process_resolution_result(result)
 
         # Detect circular references
         ref_graph = build_reference_graph(all_references)
@@ -262,12 +333,13 @@ class DSLValidator:
             self._add_circular_reference_error(cycle)
 
         # Build result
+        total_documents = len(self.documents) + len(self.unmanaged_files)
         return ValidationResult(
             success=len(self.errors) == 0,
             errors=self.errors,
             warnings=self.warnings,
             info=self.info,
-            documents_validated=len(self.documents),
+            documents_validated=total_documents,
             references_validated=len(all_references),
         )
 
@@ -475,3 +547,115 @@ class DSLValidator:
                 suggestion="Remove or restructure references to break the cycle",
             )
         )
+
+    def _process_and_classify_document(
+        self, file_path: Path, root_path: Path, specignore_spec, strict: bool
+    ) -> None:
+        """Process document and classify as Typed or Unmanaged."""
+        try:
+            # Read content
+            content = file_path.read_text()
+
+            # Parse document
+            doc = parse_markdown_file(file_path)
+            section_tree = build_section_tree(doc)
+
+            # Try to match against type definitions
+            module_def = self.type_registry.get_module_for_file(file_path)
+
+            if module_def:
+                # TYPED: Store for full validation
+                self.documents[file_path] = DocumentContext(
+                    file_path=file_path,
+                    content=content,
+                    parsed_doc=doc,
+                    section_tree=section_tree,
+                )
+            else:
+                # Check if matches .specignore patterns
+                rel_path = file_path.relative_to(root_path)
+                is_specignored = specignore_spec and specignore_spec.match_file(str(rel_path))
+
+                # UNMANAGED: Register but don't validate structure
+                self.unmanaged_files[file_path] = UnmanagedFile(
+                    file_path=file_path, content=content
+                )
+
+                # Warn in strict mode if not explicitly specignored
+                if strict and not is_specignored:
+                    self.warnings.append(
+                        ValidationError(
+                            error_type="unclassified_file",
+                            severity="warning",
+                            file_path=str(file_path),
+                            message="File doesn't match any type definition",
+                            suggestion=(
+                                "Add to .specignore or create a type definition for this file"
+                            ),
+                        )
+                    )
+
+        except Exception as e:
+            self.errors.append(
+                ValidationError(
+                    error_type="parse_error",
+                    severity="error",
+                    file_path=str(file_path),
+                    message=f"Failed to parse document: {e}",
+                )
+            )
+
+    def _find_markdown_files(self, root_path: Path, use_gitignore: bool) -> list[Path]:
+        """Find markdown files, respecting .gitignore if enabled."""
+        all_files = list(root_path.rglob("*.md"))
+
+        # Always auto-exclude VCS directories
+        filtered = [f for f in all_files if not self._is_vcs_directory(f)]
+
+        if use_gitignore:
+            gitignore_patterns = self._load_gitignore_patterns(root_path)
+            if gitignore_patterns:
+                try:
+                    from pathspec import PathSpec
+                    from pathspec.patterns import GitWildMatchPattern
+
+                    spec = PathSpec.from_lines(GitWildMatchPattern, gitignore_patterns)
+                    filtered = [
+                        f for f in filtered if not spec.match_file(str(f.relative_to(root_path)))
+                    ]
+                except ImportError:
+                    # pathspec not available, skip gitignore filtering
+                    pass
+
+        return filtered
+
+    def _is_vcs_directory(self, file_path: Path) -> bool:
+        """Check if file is in a VCS metadata directory.
+
+        Only excludes actual version control system directories, not build artifacts.
+        Build artifacts (.venv, node_modules, etc.) should be excluded via .gitignore.
+
+        Note: .claude is NOT in this list - users may want to validate it.
+        """
+        vcs_dirs = {".git", ".hg", ".svn", ".bzr"}
+        return any(part in vcs_dirs for part in file_path.parts)
+
+    def _load_gitignore_patterns(self, root_path: Path) -> list[str]:
+        """Load patterns from .gitignore file."""
+        return self._load_ignore_patterns(root_path / ".gitignore")
+
+    def _load_specignore_patterns(self, file_path: Path) -> list[str]:
+        """Load patterns from .specignore file."""
+        return self._load_ignore_patterns(file_path)
+
+    def _load_ignore_patterns(self, file_path: Path) -> list[str]:
+        """Load patterns from an ignore file."""
+        if not file_path.exists():
+            return []
+
+        patterns = []
+        for line in file_path.read_text().splitlines():
+            line = line.strip()
+            if line and not line.startswith("#"):
+                patterns.append(line)
+        return patterns

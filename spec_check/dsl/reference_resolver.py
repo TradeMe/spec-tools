@@ -70,14 +70,16 @@ class ReferenceResolver:
     This implements Pass 7 of the multi-pass validation architecture.
     """
 
-    def __init__(self, registry: IDRegistry):
+    def __init__(self, registry: IDRegistry, unmanaged_files: dict | None = None):
         """
         Initialize the reference resolver.
 
         Args:
             registry: ID registry built during Pass 3
+            unmanaged_files: Dictionary of unmanaged files (Path -> UnmanagedFile)
         """
         self.registry = registry
+        self.unmanaged_files = unmanaged_files or {}
 
     def resolve_reference(
         self, reference: Reference, module_def: SpecModule | None = None
@@ -130,32 +132,42 @@ class ReferenceResolver:
         if not target_module and self._is_file_path(target_id):
             target_module = self._resolve_by_file_path(reference.source_file, target_id)
 
-        if not target_module:
-            # Check if there are similar IDs (for helpful error messages)
-            suggestions = self._find_similar_module_ids(target_id)
-            error_msg = f"Module reference '{target_id}' not found"
-            if suggestions:
-                error_msg += f". Did you mean: {', '.join(suggestions)}?"
+        if target_module:
+            # TYPED: Full validation including type checking
+            warning = None
+            if module_def and reference.relationship:
+                ref_def = self._find_reference_definition(module_def, reference.relationship)
+                if ref_def and ref_def.target_type:
+                    if target_module.module_type != ref_def.target_type:
+                        warning = (
+                            f"Type mismatch: expected {ref_def.target_type}, "
+                            f"found {target_module.module_type}"
+                        )
 
-            return ResolutionResult(reference=reference, resolved=False, error=error_msg)
+            return ResolutionResult(
+                reference=reference,
+                resolved=True,
+                target_module=target_module,
+                warning=warning,
+            )
 
-        # Validate type if module definition specifies expected type
-        warning = None
-        if module_def and reference.relationship:
-            ref_def = self._find_reference_definition(module_def, reference.relationship)
-            if ref_def and ref_def.target_type:
-                if target_module.module_type != ref_def.target_type:
-                    warning = (
-                        f"Type mismatch: expected {ref_def.target_type}, "
-                        f"found {target_module.module_type}"
-                    )
+        # Fall back to unmanaged file resolution
+        if self._is_file_path(target_id):
+            unmanaged_file = self._resolve_unmanaged_file(reference.source_file, target_id)
+            if unmanaged_file:
+                # UNMANAGED: Only check existence, no type validation
+                return ResolutionResult(
+                    reference=reference,
+                    resolved=True,
+                )
 
-        return ResolutionResult(
-            reference=reference,
-            resolved=True,
-            target_module=target_module,
-            warning=warning,
-        )
+        # Not found in either registry
+        suggestions = self._find_similar_module_ids(target_id)
+        error_msg = f"Module reference '{target_id}' not found"
+        if suggestions:
+            error_msg += f". Did you mean: {', '.join(suggestions)}?"
+
+        return ResolutionResult(reference=reference, resolved=False, error=error_msg)
 
     def _resolve_class_reference(
         self, reference: Reference, module_def: SpecModule | None
@@ -272,6 +284,37 @@ class ReferenceResolver:
                 )
 
         return violations
+
+    def _resolve_unmanaged_file(self, source_file: Path, target_path: str):
+        """
+        Resolve reference to an unmanaged file.
+
+        Args:
+            source_file: Path to the source file containing the reference
+            target_path: Relative or absolute file path to the target
+
+        Returns:
+            UnmanagedFile if found, None otherwise
+        """
+        # Add back the .md extension that was stripped by _extract_module_id
+        if not target_path.endswith(".md"):
+            target_path_with_ext = target_path + ".md"
+        else:
+            target_path_with_ext = target_path
+
+        # Resolve relative to source file's directory
+        target_file = source_file.parent / target_path_with_ext
+
+        # Look up in unmanaged files registry
+        try:
+            resolved_target = target_file.resolve()
+            for unmanaged_path, unmanaged_file in self.unmanaged_files.items():
+                if unmanaged_path.resolve() == resolved_target:
+                    return unmanaged_file
+        except (OSError, RuntimeError):
+            pass
+
+        return None
 
     def _is_file_path(self, target: str) -> bool:
         """
