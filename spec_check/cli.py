@@ -279,7 +279,13 @@ def cmd_validate_dsl(args) -> int:
 
         # Run validation
         root_path = Path(args.directory)
-        result = validator.validate(root_path)
+        result = validator.validate(
+            root_path,
+            use_gitignore=args.use_gitignore,
+            use_specignore=args.use_specignore,
+            specignore_file=args.specignore_file,
+            strict=args.strict,
+        )
 
         # Print results
         print(result)
@@ -817,6 +823,46 @@ Reference validation:
         "-v",
         action="store_true",
         help="Verbose output",
+    )
+
+    validate_dsl_parser.add_argument(
+        "--strict",
+        action="store_true",
+        help="Warn about files that don't match any type definition",
+    )
+
+    validate_dsl_parser.add_argument(
+        "--use-gitignore",
+        action="store_true",
+        default=True,
+        help="Respect .gitignore patterns (default: enabled)",
+    )
+
+    validate_dsl_parser.add_argument(
+        "--no-gitignore",
+        action="store_false",
+        dest="use_gitignore",
+        help="Don't respect .gitignore patterns",
+    )
+
+    validate_dsl_parser.add_argument(
+        "--specignore-file",
+        default=".specignore",
+        help="Path to specignore file (default: .specignore)",
+    )
+
+    validate_dsl_parser.add_argument(
+        "--use-specignore",
+        action="store_true",
+        default=True,
+        help="Use .specignore file (default: enabled)",
+    )
+
+    validate_dsl_parser.add_argument(
+        "--no-specignore",
+        action="store_false",
+        dest="use_specignore",
+        help="Don't use .specignore file",
     )
 
     validate_dsl_parser.set_defaults(func=cmd_validate_dsl)
