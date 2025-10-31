@@ -630,22 +630,14 @@ class DSLValidator:
         return filtered
 
     def _is_vcs_directory(self, file_path: Path) -> bool:
-        """Check if file is in a VCS or tool directory.
+        """Check if file is in a VCS metadata directory.
+
+        Only excludes actual version control system directories, not build artifacts.
+        Build artifacts (.venv, node_modules, etc.) should be excluded via .gitignore.
 
         Note: .claude is NOT in this list - users may want to validate it.
         """
-        vcs_dirs = {
-            ".git",
-            ".hg",
-            ".svn",
-            ".bzr",
-            ".venv",
-            "venv",
-            "env",
-            "node_modules",
-            "__pycache__",
-            ".pytest_cache",
-        }
+        vcs_dirs = {".git", ".hg", ".svn", ".bzr"}
         return any(part in vcs_dirs for part in file_path.parts)
 
     def _load_gitignore_patterns(self, root_path: Path) -> list[str]:

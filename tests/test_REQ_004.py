@@ -178,14 +178,22 @@ class TestVCSDirectoryExclusion:
     """Test VCS directory auto-exclusion (AC-01)."""
 
     def test_vcs_directories_excluded(self, tmp_path):
-        """Test AC-01: VCS directories are automatically excluded."""
+        """Test AC-01: VCS metadata directories are automatically excluded."""
         from spec_check.dsl.registry import SpecTypeRegistry
         from spec_check.dsl.validator import DSLValidator
 
-        # Create VCS directories with markdown files
+        # Create VCS metadata directories with markdown files
         (tmp_path / ".git").mkdir()
         (tmp_path / ".git" / "README.md").write_text("# Git README")
 
+        (tmp_path / ".svn").mkdir()
+        (tmp_path / ".svn" / "info.md").write_text("# SVN info")
+
+        # Create .gitignore to exclude build artifacts
+        gitignore = tmp_path / ".gitignore"
+        gitignore.write_text(".venv/\nnode_modules/\n")
+
+        # Create build artifact directories (excluded via .gitignore, not auto-exclusion)
         (tmp_path / ".venv").mkdir()
         (tmp_path / ".venv" / "docs.md").write_text("# Venv docs")
 
@@ -202,6 +210,8 @@ class TestVCSDirectoryExclusion:
         _result = validator.validate(tmp_path)
 
         # Only the guide.md should be processed
+        # (.git and .svn excluded by VCS auto-exclusion)
+        # (.venv and node_modules excluded by .gitignore)
         total_files = len(validator.documents) + len(validator.unmanaged_files)
         assert total_files == 1
         assert (docs_dir / "guide.md") in validator.unmanaged_files
