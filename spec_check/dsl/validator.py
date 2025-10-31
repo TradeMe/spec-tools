@@ -277,7 +277,9 @@ class DSLValidator:
                 self._validate_structure(doc_ctx)
 
         # Pass 5: Content validation
-        # TODO: Implement content validation once content validators are ready
+        for doc_ctx in self.documents.values():
+            if doc_ctx.module_def:
+                self._validate_content(doc_ctx)
 
         # Pass 6: Reference extraction (typed and unmanaged docs)
         ref_extractor = ReferenceExtractor(self.type_registry.config)
@@ -480,6 +482,104 @@ class DSLValidator:
                             suggestion=suggestion,
                         )
                     )
+
+    def _validate_content(self, doc_ctx: DocumentContext) -> None:
+        """Pass 5: Validate section content using content validators."""
+        if not doc_ctx.module_def or not doc_ctx.section_tree:
+            return
+
+        # Validate section-level content (from SectionSpec)
+        for section_def in doc_ctx.module_def.sections:
+            if section_def.content_validator:
+                section_node = doc_ctx.section_tree.find_section(section_def.heading)
+                if section_node:
+                    # Extract raw content for this section
+                    raw_content = self._extract_section_content(
+                        doc_ctx.content, section_node, doc_ctx.section_tree
+                    )
+                    content_errors = section_def.content_validator.validate_content(
+                        section_node.content, doc_ctx.file_path, raw_content=raw_content
+                    )
+                    for error in content_errors:
+                        if error.severity == "error":
+                            self.errors.append(error)
+                        elif error.severity == "warning":
+                            self.warnings.append(error)
+                        else:
+                            self.info.append(error)
+
+        # Validate class-level content (from SpecClass instances)
+        # For each class defined in the module, find matching subsections and validate
+        if doc_ctx.module_def.classes:
+            import re
+
+            for _class_name, class_spec in doc_ctx.module_def.classes.items():
+                if class_spec.content_validator:
+                    # Find all sections matching the class pattern
+                    pattern = re.compile(class_spec.heading_pattern)
+                    all_sections = doc_ctx.section_tree.get_all_sections()
+
+                    for section_node in all_sections:
+                        if section_node.level == class_spec.heading_level and pattern.match(
+                            section_node.heading
+                        ):
+                            # Extract raw content for this section
+                            raw_content = self._extract_section_content(
+                                doc_ctx.content, section_node, doc_ctx.section_tree
+                            )
+                            # This section matches the class pattern, validate its content
+                            content_errors = class_spec.content_validator.validate_content(
+                                section_node.content, doc_ctx.file_path, raw_content=raw_content
+                            )
+                            for error in content_errors:
+                                # Add context about which AC this is
+                                section_info = f"In section: {section_node.heading}"
+                                if error.context:
+                                    error.context = f"{section_info}\n{error.context}"
+                                else:
+                                    error.context = section_info
+                                if error.severity == "error":
+                                    self.errors.append(error)
+                                elif error.severity == "warning":
+                                    self.warnings.append(error)
+                                else:
+                                    self.info.append(error)
+
+    def _extract_section_content(self, file_content: str, section_node, section_tree) -> str:
+        """
+        Extract the raw markdown content for a section.
+
+        Args:
+            file_content: Full file content
+            section_node: The section node to extract content for
+            section_tree: The section tree for context
+
+        Returns:
+            Raw content of the section (excluding the heading and subsections)
+        """
+        lines = file_content.split("\n")
+        start_line = section_node.position.line
+
+        # Find the end line (next section at same or higher level, or end of document)
+        end_line = len(lines)
+        all_sections = section_tree.get_all_sections()
+
+        for other_section in all_sections:
+            if other_section.position.line > start_line:
+                # Check if this is a sibling or higher level section
+                if other_section.level <= section_node.level:
+                    end_line = other_section.position.line - 1
+                    break
+                # Check if this is a direct subsection (we want to exclude subsections)
+                elif (
+                    other_section in section_node.subsections
+                    and other_section.position.line < end_line
+                ):
+                    end_line = other_section.position.line - 1
+
+        # Extract content (skip the heading line itself)
+        content_lines = lines[start_line:end_line]
+        return "\n".join(content_lines)
 
     def _process_resolution_result(self, result: ResolutionResult) -> None:
         """Process reference resolution result and add errors/warnings."""

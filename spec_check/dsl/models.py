@@ -140,6 +140,120 @@ class ContentValidator(BaseModel):
         return []  # Base implementation accepts all content
 
 
+class GherkinContentValidator(ContentValidator):
+    """
+    Validates that content follows Gherkin Given-When-Then format.
+
+    Expects acceptance criteria to contain at least one complete Gherkin
+    scenario with Given, When, Then keywords in bold format.
+
+    Example valid format:
+        **Given** a user with valid credentials
+        **When** they submit the login form
+        **Then** they receive an authentication token
+    """
+
+    def validate_content(
+        self, section_content: list, file_path: Path, raw_content: str | None = None
+    ) -> list[ValidationError]:
+        """
+        Validate that section content follows Gherkin format.
+
+        Args:
+            section_content: List of AST nodes representing section content (may be empty)
+            file_path: Path to the markdown file
+            raw_content: Optional raw markdown content for the section
+
+        Returns:
+            List of validation errors
+        """
+        errors: list[ValidationError] = []
+
+        # Try to get content from AST nodes first, then fall back to raw content
+        content_text = self._extract_text_from_ast(section_content)
+        if not content_text.strip() and raw_content:
+            content_text = raw_content
+
+        if not content_text.strip():
+            errors.append(
+                ValidationError(
+                    error_type="empty_content",
+                    severity="error",
+                    file_path=str(file_path),
+                    message="Acceptance criterion has no content",
+                    suggestion="Add Gherkin-style Given-When-Then format",
+                )
+            )
+            return errors
+
+        # Check for required Gherkin keywords in bold format
+        has_given = "**Given**" in content_text
+        has_when = "**When**" in content_text
+        has_then = "**Then**" in content_text
+
+        # Check for unbolded keywords (common mistake)
+        has_unbolded_given = "Given" in content_text and not has_given
+        has_unbolded_when = "When" in content_text and not has_when
+        has_unbolded_then = "Then" in content_text and not has_then
+
+        # Report missing or improperly formatted keywords
+        if not (has_given and has_when and has_then):
+            missing_keywords = []
+            if not has_given:
+                if has_unbolded_given:
+                    missing_keywords.append("Given (must be bold: **Given**)")
+                else:
+                    missing_keywords.append("Given")
+            if not has_when:
+                if has_unbolded_when:
+                    missing_keywords.append("When (must be bold: **When**)")
+                else:
+                    missing_keywords.append("When")
+            if not has_then:
+                if has_unbolded_then:
+                    missing_keywords.append("Then (must be bold: **Then**)")
+                else:
+                    missing_keywords.append("Then")
+
+            keywords_str = ", ".join(missing_keywords)
+            errors.append(
+                ValidationError(
+                    error_type="invalid_gherkin_format",
+                    severity="error",
+                    file_path=str(file_path),
+                    message=f"Missing or improperly formatted Gherkin keywords: {keywords_str}",
+                    suggestion="Use bold format: **Given** ... **When** ... **Then** ...",
+                    context=content_text[:200] if len(content_text) > 200 else content_text,
+                )
+            )
+
+        return errors
+
+    def _extract_text_from_ast(self, ast_nodes: list) -> str:
+        """
+        Extract text content from AST nodes.
+
+        Note: Currently the section tree doesn't populate content nodes,
+        so this returns an empty string. The actual validation happens
+        in the enhanced validate_content method below.
+
+        Args:
+            ast_nodes: List of AST nodes from markdown parser
+
+        Returns:
+            Extracted text content
+        """
+        text_parts = []
+
+        for node in ast_nodes:
+            if hasattr(node, "literal") and node.literal:
+                text_parts.append(node.literal)
+            elif hasattr(node, "children"):
+                text_parts.append(self._extract_text_from_ast(node.children))
+
+        return " ".join(text_parts)
+
+
 class SectionSpec(BaseModel):
     """
     Defines a section in a module.

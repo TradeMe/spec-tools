@@ -11,6 +11,7 @@ Each layer has specific structural requirements and validation rules.
 
 from spec_check.dsl.models import (
     Cardinality,
+    GherkinContentValidator,
     IdentifierSpec,
     Reference,
     SectionSpec,
@@ -76,9 +77,9 @@ class AcceptanceCriterion(SpecClass):
 
     Example:
         ### AC-01: Valid Login
-        Given a user with valid credentials
-        When they submit the login form
-        Then they receive an authentication token
+        **Given** a user with valid credentials
+        **When** they submit the login form
+        **Then** they receive an authentication token
     """
 
     heading_pattern: str = r"^AC-\d{2}:"
@@ -88,6 +89,7 @@ class AcceptanceCriterion(SpecClass):
         location="heading",
         scope="module_instance",
     )
+    content_validator: GherkinContentValidator = GherkinContentValidator()
 
 
 class RequirementModule(SpecModule):
