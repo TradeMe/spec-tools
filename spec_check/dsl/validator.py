@@ -488,7 +488,10 @@ class DSLValidator:
         if not doc_ctx.module_def or not doc_ctx.section_tree:
             return
 
-        # Validate section-level content (from SectionSpec)
+        # Track which class instances have been validated (to avoid double validation)
+        validated_class_instances: set[int] = set()
+
+        # Step 1: Validate section-level content (from SectionSpec.content_validator)
         for section_def in doc_ctx.module_def.sections:
             if section_def.content_validator:
                 section_node = doc_ctx.section_tree.find_section(section_def.heading)
@@ -508,42 +511,225 @@ class DSLValidator:
                         else:
                             self.info.append(error)
 
-        # Validate class-level content (from SpecClass instances)
-        # For each class defined in the module, find matching subsections and validate
-        if doc_ctx.module_def.classes:
-            import re
+        # Identify restricted classes (classes that are listed in any section's allowed_classes)
+        restricted_classes = set()
+        for section_def in doc_ctx.module_def.sections:
+            if section_def.allowed_classes:
+                restricted_classes.update(section_def.allowed_classes)
 
-            for _class_name, class_spec in doc_ctx.module_def.classes.items():
-                if class_spec.content_validator:
-                    # Find all sections matching the class pattern
-                    pattern = re.compile(class_spec.heading_pattern)
-                    all_sections = doc_ctx.section_tree.get_all_sections()
+        # Step 2: Validate section-scoped classes (AC-03, AC-05, AC-06, AC-08)
+        # For sections with allowed_classes, only validate classes within those sections
+        for section_def in doc_ctx.module_def.sections:
+            if section_def.allowed_classes:
+                section_node = doc_ctx.section_tree.find_section(section_def.heading)
+                if section_node:
+                    found_instances: list[tuple[str, object]] = []
 
-                    for section_node in all_sections:
-                        if section_node.level == class_spec.heading_level and pattern.match(
-                            section_node.heading
-                        ):
-                            # Extract raw content for this section
-                            raw_content = self._extract_section_content(
-                                doc_ctx.content, section_node, doc_ctx.section_tree
+                    # Find all descendants of this section (not just direct subsections)
+                    all_descendants = self._get_all_descendants(section_node)
+
+                    for subsection in all_descendants:
+                        # Check if this subsection matches any allowed class
+                        for class_name in section_def.allowed_classes:
+                            class_spec = doc_ctx.module_def.classes.get(class_name)
+                            if class_spec:
+                                pattern = re.compile(class_spec.heading_pattern)
+                                if pattern.match(subsection.heading):
+                                    # This subsection is a class instance - validate it
+                                    found_instances.append((class_name, subsection))
+                                    validated_class_instances.add(id(subsection))
+
+                                    # AC-08: Validate heading level
+                                    if subsection.level != class_spec.heading_level:
+                                        expected_level = class_spec.heading_level
+                                        self.warnings.append(
+                                            ValidationError(
+                                                error_type="incorrect_heading_level",
+                                                severity="warning",
+                                                file_path=str(doc_ctx.file_path),
+                                                line=subsection.position.line,
+                                                message=(
+                                                    f"Class instance '{subsection.heading}' has "
+                                                    f"heading level {subsection.level}, expected "
+                                                    f"level {expected_level}"
+                                                ),
+                                                suggestion=(
+                                                    f"Change heading to level {expected_level}: "
+                                                    f"{'#' * expected_level} {subsection.heading}"
+                                                ),
+                                                context=f"In section: {section_node.heading}",
+                                            )
+                                        )
+
+                                    # Validate content if validator exists
+                                    if class_spec.content_validator:
+                                        raw_content = self._extract_section_content(
+                                            doc_ctx.content, subsection, doc_ctx.section_tree
+                                        )
+                                        content_errors = (
+                                            class_spec.content_validator.validate_content(
+                                                subsection.content,
+                                                doc_ctx.file_path,
+                                                raw_content=raw_content,
+                                            )
+                                        )
+                                        for error in content_errors:
+                                            # Add context about which class instance this is
+                                            section_info = (
+                                                f"In section: {section_node.heading} > "
+                                                f"{subsection.heading}"
+                                            )
+                                            if error.context:
+                                                error.context = f"{section_info}\n{error.context}"
+                                            else:
+                                                error.context = section_info
+                                            if error.severity == "error":
+                                                self.errors.append(error)
+                                            elif error.severity == "warning":
+                                                self.warnings.append(error)
+                                            else:
+                                                self.info.append(error)
+
+                    # AC-05: Enforce require_classes constraint
+                    if section_def.require_classes and not found_instances:
+                        classes_str = ", ".join(section_def.allowed_classes)
+                        self.errors.append(
+                            ValidationError(
+                                error_type="missing_required_classes",
+                                severity="error",
+                                file_path=str(doc_ctx.file_path),
+                                message=(
+                                    f"Section '{section_def.heading}' requires at least one "
+                                    f"instance of: {classes_str}"
+                                ),
+                                suggestion=(
+                                    f"Add at least one subsection matching the pattern(s) for: "
+                                    f"{classes_str}"
+                                ),
                             )
-                            # This section matches the class pattern, validate its content
-                            content_errors = class_spec.content_validator.validate_content(
-                                section_node.content, doc_ctx.file_path, raw_content=raw_content
-                            )
-                            for error in content_errors:
-                                # Add context about which AC this is
-                                section_info = f"In section: {section_node.heading}"
-                                if error.context:
-                                    error.context = f"{section_info}\n{error.context}"
+                        )
+
+        # Step 3: Detect misplaced class instances (AC-04)
+        # Check ALL sections for restricted classes that aren't allowed there
+        for section_def in doc_ctx.module_def.sections:
+            section_node = doc_ctx.section_tree.find_section(section_def.heading)
+            if section_node:
+                # Get all descendants of this section
+                all_descendants = self._get_all_descendants(section_node)
+
+                for subsection in all_descendants:
+                    # Check if this subsection matches any restricted class pattern
+                    for class_name, class_spec in doc_ctx.module_def.classes.items():
+                        # Only check restricted classes
+                        if class_name not in restricted_classes:
+                            continue
+
+                        pattern = re.compile(class_spec.heading_pattern)
+                        if pattern.match(subsection.heading):
+                            # This is a restricted class instance
+                            # Is it allowed in this section?
+                            if (
+                                section_def.allowed_classes is None
+                                or class_name not in section_def.allowed_classes
+                            ):
+                                # Find which section should contain this class
+                                correct_sections = []
+                                for other_section in doc_ctx.module_def.sections:
+                                    if (
+                                        other_section.allowed_classes
+                                        and class_name in other_section.allowed_classes
+                                    ):
+                                        correct_sections.append(other_section.heading)
+
+                                if correct_sections:
+                                    suggestion = f"Move this to the '{correct_sections[0]}' section"
                                 else:
-                                    error.context = section_info
-                                if error.severity == "error":
-                                    self.errors.append(error)
-                                elif error.severity == "warning":
-                                    self.warnings.append(error)
-                                else:
-                                    self.info.append(error)
+                                    suggestion = (
+                                        f"Remove this class instance from '{section_def.heading}'"
+                                    )
+
+                                allowed_msg = (
+                                    f"Allowed classes in '{section_node.heading}': "
+                                    f"{', '.join(section_def.allowed_classes)}"
+                                    if section_def.allowed_classes
+                                    else f"Section '{section_node.heading}' does not allow "
+                                    f"restricted classes"
+                                )
+
+                                self.errors.append(
+                                    ValidationError(
+                                        error_type="misplaced_class_instance",
+                                        severity="error",
+                                        file_path=str(doc_ctx.file_path),
+                                        line=subsection.position.line,
+                                        message=(
+                                            f"Class '{class_name}' instance "
+                                            f"'{subsection.heading}' found in section "
+                                            f"'{section_node.heading}' but not allowed there"
+                                        ),
+                                        suggestion=suggestion,
+                                        context=allowed_msg,
+                                    )
+                                )
+
+        # Step 4: Global validation for unrestricted classes (AC-07: backward compatibility)
+        # For classes that are not in any section's allowed_classes, validate globally
+        unrestricted_classes = set(doc_ctx.module_def.classes.keys()) - restricted_classes
+
+        for class_name in unrestricted_classes:
+            class_spec = doc_ctx.module_def.classes[class_name]
+            if class_spec.content_validator:
+                # Find all sections matching the class pattern (global search)
+                pattern = re.compile(class_spec.heading_pattern)
+                all_sections = doc_ctx.section_tree.get_all_sections()
+
+                for section_node in all_sections:
+                    # Skip if already validated in section-scoped context
+                    if id(section_node) in validated_class_instances:
+                        continue
+
+                    if section_node.level == class_spec.heading_level and pattern.match(
+                        section_node.heading
+                    ):
+                        # Extract raw content for this section
+                        raw_content = self._extract_section_content(
+                            doc_ctx.content, section_node, doc_ctx.section_tree
+                        )
+                        # This section matches the class pattern, validate its content
+                        content_errors = class_spec.content_validator.validate_content(
+                            section_node.content, doc_ctx.file_path, raw_content=raw_content
+                        )
+                        for error in content_errors:
+                            # Add context about which class instance this is
+                            section_info = f"In section: {section_node.heading}"
+                            if error.context:
+                                error.context = f"{section_info}\n{error.context}"
+                            else:
+                                error.context = section_info
+                            if error.severity == "error":
+                                self.errors.append(error)
+                            elif error.severity == "warning":
+                                self.warnings.append(error)
+                            else:
+                                self.info.append(error)
+
+    def _get_all_descendants(self, section_node) -> list:
+        """
+        Get all descendants of a section node recursively.
+
+        Args:
+            section_node: The section node to get descendants from
+
+        Returns:
+            List of all descendant section nodes
+        """
+        descendants = []
+        if hasattr(section_node, "subsections"):
+            for subsection in section_node.subsections:
+                descendants.append(subsection)
+                # Recursively get descendants of subsections
+                descendants.extend(self._get_all_descendants(subsection))
+        return descendants
 
     def _extract_section_content(self, file_content: str, section_node, section_tree) -> str:
         """

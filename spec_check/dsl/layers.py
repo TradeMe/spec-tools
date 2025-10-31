@@ -132,6 +132,8 @@ class RequirementModule(SpecModule):
             heading="Acceptance Criteria",
             heading_level=2,
             required=True,
+            allowed_classes=["AcceptanceCriterion"],
+            require_classes=True,
         ),
         SectionSpec(heading="Dependencies", heading_level=2, required=False),
         SectionSpec(heading="Notes", heading_level=2, required=False),
