@@ -15,3 +15,6 @@ specs/architecture/solutions/SOL-001.md
 
 # Implementation Design examples
 specs/design/IMP-001.md
+
+# Technical notes (analysis and design documents)
+specs/notes/TN-001.md
