@@ -122,13 +122,14 @@ The path construction and resolution logic is sound.
 
 ## Proposed Solution (Revised)
 
-### Three-Tier File Classification System
+### Four-Tier Reference Classification System
 
-The solution introduces a three-tier classification for markdown files during validation:
+The solution introduces a four-tier classification for references during validation:
 
 1. **Excluded** - Files not scanned at all (via `.gitignore` and VCS auto-exclude)
-2. **Typed** - Files matching type definitions (Job, ADR, Requirement, etc.)
-3. **Unmanaged** - Files in scope but without strict validation (via `.specignore`)
+2. **Typed** - Files matching type definitions (Job, ADR, Requirement, etc.) - full validation
+3. **Unmanaged** - Files in scope but without strict validation (via `.specignore`) - existence check
+4. **External** - URLs outside the repository (public: checked, private: unchecked)
 
 This provides maximum flexibility while maintaining safety and clarity.
 
@@ -183,6 +184,36 @@ meetings/**/*.md
 guides/**/*.md
 ```
 
+### Part 4: External References (Public and Private)
+
+External references (URLs) are already classified in the system but need better integration.
+
+**External Public** - URLs that should be checked:
+- `https://docs.python.org/3/`
+- `https://github.com/TradeMe/spec-check`
+- Any public documentation or resources
+
+**External Private** - URLs that should NOT be checked:
+- `http://localhost:8080/`
+- `https://internal.company.com/wiki`
+- `https://jira.company.com/browse/PROJ-123`
+
+**Configuration via `.speclinkconfig`** (already exists, reuse for DSL validator):
+
+```
+# Private URL patterns (won't be checked)
+localhost
+127.0.0.1
+internal.company.com
+jira.company.com
+```
+
+**Alignment with existing system:**
+- The `reference_extractor.py` already classifies references as `external_reference`
+- The `reference_resolver.py` currently skips external references (line 95-97)
+- The `check-links` command already has `.speclinkconfig` for private URLs
+- Reuse the same private URL pattern matching logic
+
 ### Unmanaged Type Concept
 
 The "Unmanaged" type represents files that:
@@ -193,6 +224,15 @@ The "Unmanaged" type represents files that:
 - ❌ Don't have structural validation rules
 - ❌ Don't require specific sections or IDs
 - ❌ Don't participate in type checking
+
+### External Type Concept
+
+The "External" type represents URLs that:
+- ✅ Can be referenced from any document type
+- ✅ Public URLs are validated for accessibility (HTTP 200 OK)
+- ✅ Private URLs are skipped (trust they exist)
+- ❌ No structural validation
+- ❌ Not part of the document registry
 
 **Type Matching Precedence**:
 
@@ -213,35 +253,56 @@ Option B: Warning for unmatched files
 - Users must add to `.specignore` or create type definition
 - More explicit but higher friction
 
-### Reference Resolution with Unmanaged Types
+### Reference Resolution Logic
 
-When resolving a reference `[text](./other-doc.md)`:
+When resolving a reference, the resolver classifies it and validates accordingly:
 
-1. **Try typed resolution first**:
+1. **External reference** (starts with `http://`, `https://`, etc.):
+   - Check if matches private URL pattern → External Private (skip check)
+   - Otherwise → External Public (validate HTTP 200)
+
+2. **Typed resolution** (file path or module ID):
    - Look up in ID registry by module ID or file path
    - If found, validate type matching if relationship specifies target type
+   - Full structural validation
 
-2. **Fall back to unmanaged resolution**:
+3. **Unmanaged resolution** (fallback):
    - Check if file exists in unmanaged files registry
    - Validate file existence only
    - No type matching validation
 
-3. **Error if neither**:
+4. **Error if none match**:
    - File not found in any registry
    - Typical "Module reference not found" error
+
+**Reference Type Matrix**:
+
+| Source Type | Target Type | Validation |
+|-------------|-------------|------------|
+| Typed | Typed | Full (structure + type match) |
+| Typed | Unmanaged | Existence only |
+| Typed | External Public | HTTP 200 check |
+| Typed | External Private | Skipped (trust exists) |
+| Unmanaged | Typed | Reference succeeds |
+| Unmanaged | Unmanaged | Existence only |
+| Unmanaged | External Public | HTTP 200 check |
+| Unmanaged | External Private | Skipped (trust exists) |
 
 **Example scenarios**:
 
 ```markdown
 <!-- specs/architecture/ADR-011.md (Typed: ADR) -->
 ## Adheres To
-- [Deployment Guide](../../docs/deployment.md)  ← Unmanaged, just check exists
-- [ADR-010](./ADR-010.md)                        ← Typed, full validation
+- [Deployment Guide](../../docs/deployment.md)           ← Unmanaged, check exists
+- [ADR-010](./ADR-010.md)                                ← Typed, full validation
+- [Python Docs](https://docs.python.org/3/)              ← External Public, HTTP check
+- [Internal Wiki](https://internal.company.com/wiki/db)  ← External Private, skip
 
 <!-- docs/deployment.md (Unmanaged) -->
 ## See Also
 - [ADR-011](../specs/architecture/ADR-011.md)   ← Typed, full validation
-- [Runbook](./runbook.md)                        ← Unmanaged, just check exists
+- [Runbook](./runbook.md)                        ← Unmanaged, check exists
+- [Localhost App](http://localhost:8080)         ← External Private, skip
 ```
 
 #### Implementation Details
@@ -396,9 +457,90 @@ def _load_ignore_patterns(self, file_path: Path) -> list[str]:
 
 ```python
 class ReferenceResolver:
-    def __init__(self, registry: IDRegistry, unmanaged_files: dict[Path, UnmanagedFile] | None = None):
+    def __init__(
+        self,
+        registry: IDRegistry,
+        unmanaged_files: dict[Path, UnmanagedFile] | None = None,
+        private_url_patterns: list[str] | None = None,
+        check_external: bool = True
+    ):
         self.registry = registry
         self.unmanaged_files = unmanaged_files or {}
+        self.private_url_patterns = private_url_patterns or []
+        self.check_external = check_external
+
+    def resolve_reference(
+        self, reference: Reference, module_def: SpecModule | None = None
+    ) -> ResolutionResult:
+        """Resolve a single reference."""
+        # EXTERNAL: Handle external references (already classified)
+        if reference.reference_type == "external_reference":
+            return self._resolve_external_reference(reference)
+
+        # MODULE/CLASS: Existing logic
+        elif reference.reference_type == "module_reference":
+            return self._resolve_module_reference(reference, module_def)
+
+        elif reference.reference_type == "class_reference":
+            return self._resolve_class_reference(reference, module_def)
+
+        else:
+            return ResolutionResult(
+                reference=reference,
+                resolved=False,
+                error=f"Unknown reference type: {reference.reference_type}",
+            )
+
+    def _resolve_external_reference(self, reference: Reference) -> ResolutionResult:
+        """Resolve an external URL reference."""
+        url = reference.link_target
+
+        # Check if it's a private URL
+        is_private = self._is_private_url(url)
+
+        if is_private:
+            # EXTERNAL PRIVATE: Trust it exists, don't check
+            return ResolutionResult(
+                reference=reference,
+                resolved=True,
+                # Could add metadata: is_external=True, is_private=True
+            )
+
+        if not self.check_external:
+            # External checking disabled
+            return ResolutionResult(
+                reference=reference,
+                resolved=True,
+            )
+
+        # EXTERNAL PUBLIC: Validate HTTP accessibility
+        try:
+            import requests
+            response = requests.head(url, timeout=10, allow_redirects=True)
+            if response.status_code == 200:
+                return ResolutionResult(
+                    reference=reference,
+                    resolved=True,
+                )
+            else:
+                return ResolutionResult(
+                    reference=reference,
+                    resolved=False,
+                    error=f"External URL returned {response.status_code}: {url}",
+                )
+        except Exception as e:
+            return ResolutionResult(
+                reference=reference,
+                resolved=False,
+                error=f"Failed to check external URL: {e}",
+            )
+
+    def _is_private_url(self, url: str) -> bool:
+        """Check if URL matches private URL patterns."""
+        for pattern in self.private_url_patterns:
+            if pattern in url:
+                return True
+        return False
 
     def _resolve_module_reference(
         self, reference: Reference, module_def: SpecModule | None
@@ -438,7 +580,6 @@ class ReferenceResolver:
                 return ResolutionResult(
                     reference=reference,
                     resolved=True,
-                    # Note: Could add a flag to distinguish unmanaged resolution
                 )
 
         # Not found in either registry
@@ -470,6 +611,50 @@ class ReferenceResolver:
         return None
 ```
 
+**Validator changes to load private URL patterns** (`spec_check/dsl/validator.py`):
+
+```python
+def validate(
+    self,
+    root_path: Path,
+    use_gitignore: bool = True,
+    use_specignore: bool = True,
+    private_url_config: str = ".speclinkconfig",
+    check_external: bool = True,
+) -> ValidationResult:
+    """Validate all markdown documents in a directory tree."""
+    # ...
+
+    # Load private URL patterns (reuse from check-links)
+    private_url_patterns = self._load_private_url_patterns(
+        root_path / private_url_config
+    ) if private_url_config else []
+
+    # Pass 7: Reference resolution (with external URL checking)
+    ref_resolver = ReferenceResolver(
+        self.id_registry,
+        self.unmanaged_files,
+        private_url_patterns=private_url_patterns,
+        check_external=check_external,
+    )
+    # ...
+
+def _load_private_url_patterns(self, config_path: Path) -> list[str]:
+    """Load private URL patterns from .speclinkconfig."""
+    if not config_path.exists():
+        return []
+
+    patterns = []
+    for line in config_path.read_text().splitlines():
+        line = line.strip()
+        # Skip comments and empty lines
+        # Skip lines that look like section headers (end with : but aren't URLs)
+        if line and not line.startswith('#'):
+            if not (line.endswith(':') and not line.startswith(('http://', 'https://'))):
+                patterns.append(line)
+    return patterns
+```
+
 **CLI changes** (`spec_check/cli.py:248-294`):
 
 ```python
@@ -480,7 +665,9 @@ def cmd_validate_dsl(args) -> int:
     result = validator.validate(
         root_path,
         use_gitignore=args.use_gitignore,
-        use_specignore=args.use_specignore
+        use_specignore=args.use_specignore,
+        private_url_config=args.private_url_config if args.check_external else None,
+        check_external=args.check_external,
     )
     # ...
 
@@ -499,6 +686,7 @@ validate_dsl_parser.add_argument(
 )
 validate_dsl_parser.add_argument(
     "--specignore",
+    dest="specignore_file",
     default=".specignore",
     help="Path to specignore file (default: .specignore)"
 )
@@ -508,6 +696,23 @@ validate_dsl_parser.add_argument(
     dest="use_specignore",
     help="Don't use .specignore file"
 )
+validate_dsl_parser.add_argument(
+    "--check-external",
+    action="store_true",
+    default=True,
+    help="Check external URLs for accessibility (default: enabled)"
+)
+validate_dsl_parser.add_argument(
+    "--no-external",
+    action="store_false",
+    dest="check_external",
+    help="Don't check external URLs"
+)
+validate_dsl_parser.add_argument(
+    "--private-url-config",
+    default=".speclinkconfig",
+    help="Path to private URL config file (default: .speclinkconfig)"
+)
 ```
 
 ### Why This Solution is Best
@@ -515,13 +720,16 @@ validate_dsl_parser.add_argument(
 1. **Solves the immediate problem**: Files can be referenced without requiring full type definitions
 2. **Flexible and evolutionary**: Start with `.specignore`, gradually move to typed specs
 3. **Clear separation of concerns**:
-   - `.gitignore` = completely out of scope
-   - `.specignore` = in scope but unmanaged
-   - Type definitions = fully validated
+   - `.gitignore` = completely out of scope (not scanned)
+   - `.specignore` = in scope but unmanaged (existence only)
+   - Type definitions = fully validated (structure + types)
+   - `.speclinkconfig` = external URL classification (public vs private)
 4. **Everything in scope by default**: Low friction for getting started
 5. **Supports mixed documentation**: Formal specs alongside informal docs
-6. **Type safety where it matters**: Typed → Typed references still validated
-7. **Future-proof**: `.claude/` files can be validated when ready
+6. **Type safety where it matters**: Typed → Typed references still fully validated
+7. **External URL validation**: Public URLs checked, private URLs trusted
+8. **Reuses existing infrastructure**: `.speclinkconfig` already used by `check-links`
+9. **Future-proof**: `.claude/` files can be validated when ready
 
 ### Benefits Over Original Proposal
 
@@ -529,12 +737,15 @@ The original proposal (just `.gitignore` support) had limitations:
 - ❌ Binary choice: fully validate or completely ignore
 - ❌ Can't reference general docs from typed specs
 - ❌ All-or-nothing approach
+- ❌ External references not handled systematically
 
 The revised solution:
-- ✅ Three tiers provide nuanced control
-- ✅ Can reference any tracked file
+- ✅ Four tiers provide nuanced control
+- ✅ Can reference any tracked file (typed or unmanaged)
+- ✅ Can reference external URLs (public checked, private trusted)
 - ✅ Gradual adoption path from unmanaged → typed
 - ✅ Clear intent with separate `.specignore` file
+- ✅ Aligns external reference handling with existing system
 
 ## Testing Strategy
 
@@ -552,7 +763,10 @@ The revised solution:
 2. Test typed → unmanaged reference resolution (new)
 3. Test unmanaged → typed reference resolution (new)
 4. Test unmanaged → unmanaged reference resolution (new)
-5. Test type precedence: typed definition overrides specignore pattern
+5. Test external public URL resolution (HTTP check)
+6. Test external private URL resolution (skip check)
+7. Test private URL pattern matching
+8. Test type precedence: typed definition overrides specignore pattern
 
 **Data structures**:
 1. Test `UnmanagedFile` dataclass creation
@@ -620,6 +834,18 @@ project/
   specs/ADR-001.md        ← Typed (matches pattern)
   docs/guide.md           ← Unmanaged (no match, auto-treat as unmanaged)
   random/notes.md         ← Unmanaged (no match, auto-treat as unmanaged)
+```
+
+**Scenario 8: External URL validation**
+```
+project/
+  .speclinkconfig         # Contains: localhost, internal.company.com
+  specs/ADR-001.md:
+    - [Python Docs](https://docs.python.org/3/)          ← External Public, check HTTP
+    - [GitHub](https://github.com/TradeMe/spec-check)    ← External Public, check HTTP
+    - [Internal](https://internal.company.com/wiki)      ← External Private, skip
+    - [Localhost](http://localhost:8080)                 ← External Private, skip
+    - [Bad URL](https://nonexistent.example.com/404)     ← External Public, fails validation
 ```
 
 ### Regression Tests
@@ -732,23 +958,34 @@ Two options for files that match neither a type definition nor `.specignore`:
 
 **Recommendation**: Start with Option A for low friction. Can add a `--strict` flag later that enables Option B behavior.
 
-### Reporting Unmanaged File Statistics
+### Reporting File and Reference Statistics
 
-Should validation report include unmanaged file counts?
+Should validation report include detailed type breakdowns?
 
 ```
 Validation PASSED: 0 errors, 0 warnings, 3 info messages
-Documents validated: 13
-  - Typed: 10
-  - Unmanaged: 3
-References validated: 25
-  - Typed → Typed: 15
-  - Typed → Unmanaged: 5
-  - Unmanaged → Typed: 3
-  - Unmanaged → Unmanaged: 2
+
+Documents scanned: 18
+  - Typed: 10 (ADR: 5, Job: 3, Requirement: 2)
+  - Unmanaged: 8
+  - Excluded: 42 (via .gitignore + VCS)
+
+References validated: 35
+  Internal references:
+    - Typed → Typed: 15 (all valid)
+    - Typed → Unmanaged: 5 (all exist)
+    - Unmanaged → Typed: 3 (all valid)
+    - Unmanaged → Unmanaged: 2 (all exist)
+  External references:
+    - Public URLs: 7 (5 accessible, 2 failed)
+    - Private URLs: 3 (skipped)
 ```
 
-**Recommendation**: Yes, include statistics for visibility and debugging.
+**Recommendation**: Yes, include detailed statistics for:
+- Visibility into what's being validated
+- Debugging classification issues
+- Understanding reference patterns
+- Tracking external URL health
 
 ## References
 
