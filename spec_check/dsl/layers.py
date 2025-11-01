@@ -615,7 +615,17 @@ class TechnicalNoteModule(SpecModule):
         SectionSpec(heading="Table of Contents", heading_level=2, required=False),
         SectionSpec(heading="Background", heading_level=2, required=True),
         SectionSpec(heading="Conclusion", heading_level=2, required=True),
-        # Analysis, findings, recommendations, etc. are optional and flexible
+        # Common optional sections for analysis and findings
+        SectionSpec(heading="Document Types Evaluated", heading_level=2, required=False),
+        SectionSpec(heading="Validator Strengths", heading_level=2, required=False),
+        SectionSpec(heading="Identified Limitations", heading_level=2, required=False),
+        SectionSpec(heading="Proposed Improvements", heading_level=2, required=False),
+        SectionSpec(heading="Priority Recommendations", heading_level=2, required=False),
+        SectionSpec(heading="Analysis", heading_level=2, required=False),
+        SectionSpec(heading="Findings", heading_level=2, required=False),
+        SectionSpec(heading="Recommendations", heading_level=2, required=False),
+        SectionSpec(heading="References", heading_level=2, required=False),
+        SectionSpec(heading="Appendix", heading_level=2, required=False),
     ]
 
     references: list[Reference] = [

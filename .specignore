@@ -16,5 +16,4 @@ specs/architecture/solutions/SOL-001.md
 # Implementation Design examples
 specs/design/IMP-001.md
 
-# Technical Note examples (validated by schema but not required to have tests)
-specs/notes/TN-001.md
+# Note: TN-001 moved to docs/analysis/ as it's an analysis document rather than a specification

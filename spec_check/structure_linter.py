@@ -3,6 +3,14 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+try:
+    from pathspec import PathSpec
+    from pathspec.patterns import GitWildMatchPattern
+
+    HAS_PATHSPEC = True
+except ImportError:
+    HAS_PATHSPEC = False
+
 
 @dataclass
 class StructureValidationResult:
@@ -75,6 +83,25 @@ class StructureLinter:
         self.root_dir = Path(root_dir) if root_dir else Path.cwd()
         self.specs_dir = Path(specs_dir) if specs_dir else self.root_dir / "specs"
         self.tests_dir = Path(tests_dir) if tests_dir else self.root_dir / "tests"
+
+    def _load_specignore_patterns(self, file_path: Path) -> list[str]:
+        """Load patterns from .specignore file.
+
+        Args:
+            file_path: Path to .specignore file
+
+        Returns:
+            List of ignore patterns
+        """
+        if not file_path.exists():
+            return []
+
+        patterns = []
+        for line in file_path.read_text().splitlines():
+            line = line.strip()
+            if line and not line.startswith("#"):
+                patterns.append(line)
+        return patterns
 
     def get_expected_test_paths(self, spec_file: Path) -> list[Path]:
         """Get the expected test file/directory paths for a spec file.
@@ -183,15 +210,31 @@ class StructureLinter:
         Returns:
             StructureValidationResult with validation results
         """
+        # Load .specignore patterns
+        specignore_file = self.root_dir / ".specignore"
+        specignore_patterns = self._load_specignore_patterns(specignore_file)
+        specignore_spec = None
+
+        if specignore_patterns and HAS_PATHSPEC:
+            specignore_spec = PathSpec.from_lines(GitWildMatchPattern, specignore_patterns)
+
         # Get all spec files, excluding specs/future/ and specs/jobs/ directories
         # Also exclude principles.md as it's meta-documentation without requirements
-        spec_files = [
+        all_spec_files = [
             f
             for f in self.specs_dir.rglob("*.md")
             if "future" not in f.relative_to(self.specs_dir).parts
             and "jobs" not in f.relative_to(self.specs_dir).parts
             and f.name != "principles.md"
         ]
+
+        # Filter out specignored files
+        spec_files = []
+        for spec_file in all_spec_files:
+            rel_path = spec_file.relative_to(self.root_dir)
+            is_ignored = specignore_spec and specignore_spec.match_file(str(rel_path))
+            if not is_ignored:
+                spec_files.append(spec_file)
 
         # Check each spec has a corresponding test
         spec_to_test_mapping = {}
