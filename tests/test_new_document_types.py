@@ -18,6 +18,7 @@ from spec_check.dsl.layers import (
     ImplementationDesignModule,
     QualityAttribute,
     SolutionArchitectureModule,
+    TechnicalNoteModule,
     VisionModule,
 )
 from spec_check.dsl.models import Cardinality, IdentifierSpec, Reference, SectionSpec
@@ -304,6 +305,75 @@ class TestImplementationDesignModuleSchema:
         assert data_model.identifier.pattern == r"DM-\d{2}"
 
 
+class TestTechnicalNoteModuleSchema:
+    """Tests for Technical Note document schema definition."""
+
+    def test_technical_note_module_exists(self):
+        """Test that TechnicalNoteModule is defined."""
+        module = TechnicalNoteModule()
+        assert module is not None
+        assert module.name == "TechnicalNote"
+
+    def test_technical_note_file_pattern(self):
+        """Test that Technical Note module matches correct file pattern."""
+        module = TechnicalNoteModule()
+        assert module.file_pattern == r"^TN-\d{3}\.md$"
+
+        import re
+
+        pattern = re.compile(module.file_pattern)
+        assert pattern.match("TN-001.md")
+        assert pattern.match("TN-999.md")
+        assert not pattern.match("TN-1.md")
+        assert not pattern.match("NOTE-001.md")
+
+    def test_technical_note_location_pattern(self):
+        """Test that Technical Note module matches correct location."""
+        module = TechnicalNoteModule()
+        assert module.location_pattern == r"specs/notes/"
+
+        test_path = Path("specs/notes/TN-001.md")
+        assert module.matches_file(test_path)
+
+    def test_technical_note_identifier_spec(self):
+        """Test Technical Note identifier specification."""
+        module = TechnicalNoteModule()
+        assert module.identifier.pattern == r"TN-\d{3}"
+        assert module.identifier.location == "title"
+        assert module.identifier.scope == "global"
+
+    def test_technical_note_required_sections(self):
+        """Test required sections for Technical Note."""
+        module = TechnicalNoteModule()
+
+        required_sections = [s for s in module.sections if s.required]
+        required_headings = {s.heading for s in required_sections}
+
+        assert "Abstract" in required_headings
+        assert "Background" in required_headings
+        assert "Conclusion" in required_headings
+
+    def test_technical_note_optional_sections(self):
+        """Test optional sections for Technical Note."""
+        module = TechnicalNoteModule()
+
+        optional_sections = [s for s in module.sections if not s.required]
+        optional_headings = {s.heading for s in optional_sections}
+
+        assert "Table of Contents" in optional_headings
+
+    def test_technical_note_references(self):
+        """Test Technical Note reference requirements."""
+        module = TechnicalNoteModule()
+
+        # Should be able to reference various document types
+        assert len(module.references) >= 3
+
+        # All references should be optional (min=0)
+        for ref in module.references:
+            assert ref.cardinality.min == 0
+
+
 @pytest.mark.integration
 class TestDocumentValidation:
     """Integration tests validating actual documents against schemas."""
@@ -354,6 +424,20 @@ class TestDocumentValidation:
         assert "IMP-001" in content
         assert "Overview" in content
 
+    def test_technical_note_document_validates(self, tmp_path):
+        """Test that TN-001.md validates against Technical Note schema."""
+        tn_001 = Path("specs/notes/TN-001.md")
+        if not tn_001.exists():
+            pytest.skip("TN-001.md not found")
+
+        # Verify document exists and has required content
+        assert tn_001.exists()
+        content = tn_001.read_text()
+        assert "TN-001" in content
+        assert "Abstract" in content
+        assert "Background" in content
+        assert "Conclusion" in content
+
 
 @pytest.mark.parametrize(
     "doc_type,file_pattern,location,example_id",
@@ -366,6 +450,7 @@ class TestDocumentValidation:
             "SOL-001",
         ),
         ("ImplementationDesign", r"^IMP-\d{3}\.md$", "specs/design/", "IMP-001"),
+        ("TechnicalNote", r"^TN-\d{3}\.md$", "specs/notes/", "TN-001"),
     ],
 )
 class TestDocumentTypePatterns:
@@ -520,6 +605,7 @@ class TestBackwardCompatibility:
         assert "Vision" in LAYER_MODULES
         assert "SolutionArchitecture" in LAYER_MODULES
         assert "ImplementationDesign" in LAYER_MODULES
+        assert "TechnicalNote" in LAYER_MODULES
 
     def test_existing_documents_still_validate(self):
         """Test that existing documents still validate with new modules added."""
@@ -535,7 +621,7 @@ class TestBackwardCompatibility:
         from spec_check.dsl.layers import LAYER_MODULES
 
         # Should have all existing types plus new ones
-        assert len(LAYER_MODULES) >= 6  # At least Job, Req, ADR, Vision, Sol, Imp
+        assert len(LAYER_MODULES) >= 7  # Job, Req, ADR, Vision, Sol, Imp, TechNote
 
     def test_module_class_hierarchy(self):
         """Test that new modules follow the same class hierarchy."""
@@ -544,3 +630,4 @@ class TestBackwardCompatibility:
         assert issubclass(VisionModule, SpecModule)
         assert issubclass(SolutionArchitectureModule, SpecModule)
         assert issubclass(ImplementationDesignModule, SpecModule)
+        assert issubclass(TechnicalNoteModule, SpecModule)

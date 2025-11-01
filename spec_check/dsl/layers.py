@@ -573,6 +573,78 @@ class SpecificationModule(SpecModule):
 
 
 # ============================================================================
+# Technical Notes Layer
+# ============================================================================
+
+
+class TechnicalNoteModule(SpecModule):
+    """
+    Technical Note Document.
+
+    Technical notes are analysis documents, design explorations, or technical
+    investigations. They provide context, analysis, and recommendations but
+    are not themselves requirements or implementations.
+
+    Example filename: TN-001.md
+    Location: specs/notes/
+
+    Required sections:
+    - Abstract: Summary of the note
+    - Background: Context and motivation
+    - Conclusion: Summary of findings and recommendations
+
+    Common optional sections:
+    - Table of Contents, Analysis, Recommendations, References, Appendix
+    """
+
+    name: str = "TechnicalNote"
+    version: str = "1.0"
+    description: str = "Technical note or analysis document"
+
+    file_pattern: str = r"^TN-\d{3}\.md$"
+    location_pattern: str = r"specs/notes/"
+
+    identifier: IdentifierSpec = IdentifierSpec(
+        pattern=r"TN-\d{3}",
+        location="title",
+        scope="global",
+    )
+
+    sections: list[SectionSpec] = [
+        SectionSpec(heading="Abstract", heading_level=2, required=True),
+        SectionSpec(heading="Table of Contents", heading_level=2, required=False),
+        SectionSpec(heading="Background", heading_level=2, required=True),
+        SectionSpec(heading="Conclusion", heading_level=2, required=True),
+        # Analysis, findings, recommendations, etc. are optional and flexible
+    ]
+
+    references: list[Reference] = [
+        # Technical notes may reference any other document type
+        Reference(
+            name="references",
+            source_type="TechnicalNote",
+            target_type="Requirement",
+            cardinality=Cardinality(min=0, max=None),
+            link_format="id_reference",
+        ),
+        Reference(
+            name="references",
+            source_type="TechnicalNote",
+            target_type="Job",
+            cardinality=Cardinality(min=0, max=None),
+            link_format="id_reference",
+        ),
+        Reference(
+            name="references",
+            source_type="TechnicalNote",
+            target_type="ADR",
+            cardinality=Cardinality(min=0, max=None),
+            link_format="id_reference",
+        ),
+    ]
+
+
+# ============================================================================
 # Registry of Layer-Specific Types
 # ============================================================================
 
@@ -583,6 +655,7 @@ LAYER_MODULES = {
     "ADR": ArchitectureDecisionModule(),
     "SolutionArchitecture": SolutionArchitectureModule(),
     "ImplementationDesign": ImplementationDesignModule(),
+    "TechnicalNote": TechnicalNoteModule(),
     "Specification": SpecificationModule(),
     "Principles": PrinciplesModule(),
 }
