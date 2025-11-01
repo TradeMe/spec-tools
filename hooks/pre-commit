@@ -5,7 +5,8 @@
 # the same lint and test commands that run in CI.
 #
 # This hook is installed automatically by the Claude Code session-start hook
-# To bypass this hook (not recommended), use: git commit --no-verify
+# IMPORTANT: These checks mirror CI - if they fail here, the PR will fail CI.
+# Always fix the issues rather than bypassing this hook.
 #
 
 set -e
