@@ -330,9 +330,9 @@ class TestTechnicalNoteModuleSchema:
     def test_technical_note_location_pattern(self):
         """Test that Technical Note module matches correct location."""
         module = TechnicalNoteModule()
-        assert module.location_pattern == r"specs/notes/"
+        assert module.location_pattern == r"context/technical-notes/"
 
-        test_path = Path("specs/notes/TN-001.md")
+        test_path = Path("context/technical-notes/TN-001.md")
         assert module.matches_file(test_path)
 
     def test_technical_note_identifier_spec(self):
