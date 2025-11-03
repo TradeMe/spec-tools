@@ -586,7 +586,7 @@ class TechnicalNoteModule(SpecModule):
     are not themselves requirements or implementations.
 
     Example filename: TN-001.md
-    Location: specs/notes/
+    Location: context/technical-notes/
 
     Required sections:
     - Abstract: Summary of the note

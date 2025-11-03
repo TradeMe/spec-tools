@@ -426,7 +426,7 @@ class TestDocumentValidation:
 
     def test_technical_note_document_validates(self, tmp_path):
         """Test that TN-001.md validates against Technical Note schema."""
-        tn_001 = Path("specs/notes/TN-001.md")
+        tn_001 = Path("context/technical-notes/TN-001.md")
         if not tn_001.exists():
             pytest.skip("TN-001.md not found")
 
@@ -450,7 +450,7 @@ class TestDocumentValidation:
             "SOL-001",
         ),
         ("ImplementationDesign", r"^IMP-\d{3}\.md$", "specs/design/", "IMP-001"),
-        ("TechnicalNote", r"^TN-\d{3}\.md$", "specs/notes/", "TN-001"),
+        ("TechnicalNote", r"^TN-\d{3}\.md$", "context/technical-notes/", "TN-001"),
     ],
 )
 class TestDocumentTypePatterns:
