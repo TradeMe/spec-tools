@@ -1,5 +1,6 @@
 # Documentation
 *.md
+context/technical-notes/*.md
 LICENSE
 
 # Python package

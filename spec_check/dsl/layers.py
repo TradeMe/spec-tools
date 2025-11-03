@@ -586,7 +586,7 @@ class TechnicalNoteModule(SpecModule):
     are not themselves requirements or implementations.
 
     Example filename: TN-001.md
-    Location: specs/notes/
+    Location: context/technical-notes/
 
     Required sections:
     - Abstract: Summary of the note
@@ -602,7 +602,7 @@ class TechnicalNoteModule(SpecModule):
     description: str = "Technical note or analysis document"
 
     file_pattern: str = r"^TN-\d{3}\.md$"
-    location_pattern: str = r"specs/notes/"
+    location_pattern: str = r"context/technical-notes/"
 
     identifier: IdentifierSpec = IdentifierSpec(
         pattern=r"TN-\d{3}",

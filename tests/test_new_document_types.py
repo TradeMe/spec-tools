@@ -330,9 +330,9 @@ class TestTechnicalNoteModuleSchema:
     def test_technical_note_location_pattern(self):
         """Test that Technical Note module matches correct location."""
         module = TechnicalNoteModule()
-        assert module.location_pattern == r"specs/notes/"
+        assert module.location_pattern == r"context/technical-notes/"
 
-        test_path = Path("specs/notes/TN-001.md")
+        test_path = Path("context/technical-notes/TN-001.md")
         assert module.matches_file(test_path)
 
     def test_technical_note_identifier_spec(self):
@@ -426,7 +426,7 @@ class TestDocumentValidation:
 
     def test_technical_note_document_validates(self, tmp_path):
         """Test that TN-001.md validates against Technical Note schema."""
-        tn_001 = Path("specs/notes/TN-001.md")
+        tn_001 = Path("context/technical-notes/TN-001.md")
         if not tn_001.exists():
             pytest.skip("TN-001.md not found")
 
@@ -450,7 +450,7 @@ class TestDocumentValidation:
             "SOL-001",
         ),
         ("ImplementationDesign", r"^IMP-\d{3}\.md$", "specs/design/", "IMP-001"),
-        ("TechnicalNote", r"^TN-\d{3}\.md$", "specs/notes/", "TN-001"),
+        ("TechnicalNote", r"^TN-\d{3}\.md$", "context/technical-notes/", "TN-001"),
     ],
 )
 class TestDocumentTypePatterns:

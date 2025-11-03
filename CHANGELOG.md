@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implemented Issue #42: improved reference resolution and flexible file classification (typed / unmanaged / external / excluded), added `.specignore` support, and CLI flags for strict validation and external URL checking (#44)
 
 ### Docs
-- Investigation and solution notes for Issue #42 added to `technical-notes/issue-42-investigation.md` (#43)
+- Investigation and solution notes for Issue #42 added to `context/technical-notes/TN-004.md` (#43)
 
 ### Changed
 - Reference resolution flow updated to support the new classification system and fallbacks for unmanaged files; added tests and integration scenarios for mixed typed/unmanaged content (#44)

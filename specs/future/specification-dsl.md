@@ -291,4 +291,4 @@ This feature will be considered successful when:
 
 ## Related Documents
 
-See `technical-notes/specification-dsl-design.md` for detailed design discussion and implementation considerations.
+See `context/technical-notes/TN-005.md` for detailed design discussion and implementation considerations.
