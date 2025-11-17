@@ -50,11 +50,26 @@ This document tracks implemented features and planned milestones for the spec-ch
   - Reports specs without tests and orphaned test files
   - Configuration via `pyproject.toml`
 
-#### Markdown Schema Validation (`check-schema`)
+#### DSL Validator (`validate-dsl`)
+- **Command**: `spec-check validate-dsl`
+- **Specification**: SPEC-004 (45 requirements, 6 NFRs)
+- **Description**: Validates markdown documents against type definitions using multi-pass validation architecture
+- **Key Features**:
+  - Type system with module and class definitions in YAML
+  - Multi-pass validation (AST, section hierarchy, type assignment, structural, content, reference)
+  - Built-in content validators (EARS, Gherkin) with extensibility
+  - Type-checked cross-document link validation
+  - Cardinality constraint enforcement for references
+  - Precise error reporting with file/line/column information
+  - Built-in types (Job, Requirement, ADR)
+  - Configuration via `spec_types/` directory
+
+#### Markdown Schema Validation (Deprecated) (`check-schema`)
+> **Deprecated**: This feature is deprecated in favor of `validate-dsl`. It will be removed in version 2.0.0. See [MIGRATION-SCHEMA-TO-DSL.md](MIGRATION-SCHEMA-TO-DSL.md) for migration guide.
 - **Command**: `spec-check check-schema`
 - **Specification**: SPEC-002 (59 requirements)
-- **Description**: Validates markdown files against a defined structural schema
-- **Key Features**:
+- **Description**: Validates markdown files against a defined structural schema (legacy)
+- **Legacy Features**:
   - Metadata field validation (ID, Version, Date, Status)
   - Heading structure and hierarchy validation
   - EARS (Easy Approach to Requirements Syntax) format compliance
