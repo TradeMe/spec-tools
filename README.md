@@ -52,6 +52,33 @@ Key features:
 - Reports specs without tests
 - Ensures consistent project organization
 
+### DSL Validator
+
+The `validate-dsl` tool validates markdown documents against type definitions using a sophisticated multi-pass validation architecture. This is the recommended validator for structured specifications.
+
+Key features:
+- **Type system**: Define reusable module and class types in YAML
+- **Multi-pass validation**: AST parsing, section hierarchy, type assignment, structural validation, content validation, and reference resolution
+- **Content validators**: Built-in EARS (Easy Approach to Requirements Syntax) and Gherkin validators with extensibility for custom patterns
+- **Reference validation**: Type-checked cross-document links with cardinality constraints
+- **Precise error reporting**: File path, line number, column offset, and actionable guidance
+- **Built-in types**: Includes Job, Requirement, and ADR document types
+- **Flexible type composition**: Module types, class types, and content validators can be mixed and matched
+
+See [MIGRATION-SCHEMA-TO-DSL.md](MIGRATION-SCHEMA-TO-DSL.md) for migration from the deprecated `check-schema` command.
+
+### ⚠️ Deprecated: Markdown Schema Validator
+
+> **Note**: The `check-schema` command is deprecated and will be removed in version 2.0.0. Please migrate to `validate-dsl` for better validation capabilities. See [MIGRATION-SCHEMA-TO-DSL.md](MIGRATION-SCHEMA-TO-DSL.md) for the migration guide.
+
+The `check-schema` tool validates markdown files against a defined structural schema (deprecated in favor of `validate-dsl`).
+
+Legacy features:
+- Metadata field validation (ID, Version, Date, Status)
+- Heading structure and hierarchy validation
+- EARS format compliance for requirement statements
+- Configuration via `.specschemaconfig` file
+
 ## Installation
 
 ### Using uv (recommended)
@@ -98,6 +125,13 @@ max_concurrent = 5
 check_external = true
 use_gitignore = true
 
+[tool.spec-check.validate-dsl]
+type_dir = "spec_types"
+use_gitignore = true
+use_specignore = true
+strict = false
+
+# Deprecated: Use validate-dsl instead
 [tool.spec-check.check-schema]
 config = ".specschemaconfig"
 use_gitignore = true
@@ -116,7 +150,16 @@ use_gitignore = true
 - `check_external` (boolean): Validate external URLs (default: `true`)
 - `use_gitignore` (boolean): Respect .gitignore patterns (default: `true`)
 
-#### Check Schema Command (`[tool.spec-check.check-schema]`)
+#### Validate DSL Command (`[tool.spec-check.validate-dsl]`)
+- `type_dir` (string): Path to type definitions directory (default: `spec_types`)
+- `builtin_types` (boolean): Use built-in types instead of custom types (default: `false`)
+- `use_gitignore` (boolean): Respect .gitignore patterns (default: `true`)
+- `use_specignore` (boolean): Use .specignore file (default: `true`)
+- `specignore_file` (string): Path to specignore file (default: `.specignore`)
+- `strict` (boolean): Warn about files that don't match any type (default: `false`)
+
+#### Check Schema Command (Deprecated) (`[tool.spec-check.check-schema]`)
+> **Deprecated**: Use `validate-dsl` instead
 - `config` (string): Path to schema config file (default: `.specschemaconfig`)
 - `use_gitignore` (boolean): Respect .gitignore patterns (default: `true`)
 
@@ -320,6 +363,113 @@ This allows unit tests without corresponding specs while ensuring all specs have
   run: spec-check check-structure
 ```
 
+### Validate DSL Command
+
+Validate markdown documents against type definitions:
+
+```bash
+# Validate using custom type definitions in spec_types/
+spec-check validate-dsl
+
+# Validate specific directory
+spec-check validate-dsl specs/
+
+# Use built-in types (Job, Requirement, ADR)
+spec-check validate-dsl --builtin-types specs/
+
+# Use custom type definitions directory
+spec-check validate-dsl --type-dir my_types/
+
+# Enable strict mode (warn about untyped files)
+spec-check validate-dsl --strict
+
+# Verbose output with detailed validation results
+spec-check validate-dsl --verbose
+```
+
+#### Type Definitions
+
+Create type definitions in YAML format to describe document structure. The typical directory structure is:
+
+```
+spec_types/
+  config.yaml              # Global configuration
+  modules/
+    requirement.yaml       # Module type definitions
+    contract.yaml
+    architecture.yaml
+  classes/
+    acceptance-criteria.yaml  # Shared class definitions
+  content-validators/
+    custom-validator.yaml    # Custom content validators
+```
+
+Example module type definition:
+
+```yaml
+# spec_types/modules/requirement.yaml
+name: Requirement
+description: Technical requirement specification
+
+patterns:
+  - "specs/req-*.md"
+
+identifier:
+  pattern: "^REQ-[0-9]{3}$"
+  location: metadata
+  field: ID
+
+metadata:
+  required:
+    - name: ID
+      pattern: "^REQ-[0-9]{3}$"
+    - name: Version
+    - name: Date
+    - name: Status
+
+sections:
+  - level: 1
+    pattern: "^Specification:.+"
+    required: true
+  - level: 2
+    text: "Overview"
+    required: true
+  - level: 2
+    text: "Requirements"
+    required: true
+    content_validator: ears  # Built-in EARS validator
+
+references:
+  allowed_types: [Requirement, Contract]
+  max_outgoing: 50
+```
+
+#### Built-in Content Validators
+
+The DSL validator includes built-in content validators:
+
+- **EARS**: Easy Approach to Requirements Syntax
+  - Unconditional: "The system shall..."
+  - Event-driven: "WHEN [condition], the system shall..."
+  - Conditional: "IF [condition], THEN the system shall..."
+  - Optional: "WHERE [condition], the system shall..."
+
+- **Gherkin**: Given-When-Then format
+  - Scenario-based acceptance criteria
+  - Given-When-Then structure validation
+
+#### CI/CD Integration
+
+```yaml
+# .github/workflows/ci.yml
+- name: Validate DSL
+  run: spec-check validate-dsl
+```
+
+#### Migration from check-schema
+
+If you're currently using `check-schema`, see [MIGRATION-SCHEMA-TO-DSL.md](MIGRATION-SCHEMA-TO-DSL.md) for a complete migration guide.
+
 ## Pattern Syntax
 
 The allowlist uses gitignore-style glob patterns:
@@ -361,6 +511,8 @@ docs/design-*.md
 6. **Test-to-requirement traceability**: Guarantee 100% requirement coverage with automated validation
 7. **Spec-driven development**: Enforce consistent spec-to-test structure for better maintainability
 8. **Documentation quality**: Ensure all links in documentation are valid and up-to-date
+9. **Structured specifications**: Define and enforce document types with rich validation rules using the DSL validator
+10. **Cross-document validation**: Validate references between specifications with type checking and cardinality constraints
 
 ## Example: Research Paper Repository
 
