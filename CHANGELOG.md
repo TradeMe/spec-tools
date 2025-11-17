@@ -6,7 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
- 
+
+## [0.2.0] - 2025-11-17
+
+### Added
+- Implemented REQ-005: section-scoped class validation for DSL (#47, #48)
+- Added Gherkin validation for acceptance criteria (#46)
+- Added comprehensive DSL validator documentation and migration guide (MIGRATION-SCHEMA-TO-DSL.md) (#52)
+- Created realistic specification documents for Vision, Jobs, Requirements, Architecture, Design, and Implementation (#49)
+- New builtin document types: Vision, Job, Solution, and Implementation modules
+- Enhanced DSL validator with improved content validation and section-scoped class support
+
+### Changed
+- Consolidated and improved technical documentation in context/technical-notes/ (#50)
+- Deprecated check-schema command in favor of validate-dsl (#52)
+- Updated README with DSL validator as primary validation tool
+- Enhanced structure linter to support more flexible validation patterns
+
+### Docs
+- Added MIGRATION-SCHEMA-TO-DSL.md guide for migrating from check-schema to validate-dsl (#52)
+- Consolidated technical notes into comprehensive documentation (#50)
+- Added realistic example specifications across multiple document types (#49)
+
 ## [0.2.0-alpha.1] - 2025-10-31
 
 ### Added
@@ -102,7 +123,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Development status updated to Alpha
 - Added flit as dev dependency for building distributions
 
-[Unreleased]: https://github.com/TradeMe/spec-check/compare/v0.2.0-alpha.1...HEAD
+[Unreleased]: https://github.com/TradeMe/spec-check/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/TradeMe/spec-check/compare/v0.2.0-alpha.1...v0.2.0
 [0.2.0-alpha.1]: https://github.com/TradeMe/spec-check/compare/v0.1.4...v0.2.0-alpha.1
 [0.1.4]: https://github.com/TradeMe/spec-check/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/TradeMe/spec-check/compare/v0.1.2...v0.1.3
